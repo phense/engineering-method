@@ -255,6 +255,48 @@ def _validate_skill_frontmatter(root: Path, errors: list[str]) -> None:
                 errors.append(_error(relative, f"frontmatter {field} is required"))
 
 
+def _validate_project_backlog_contract(root: Path, errors: list[str]) -> None:
+    relative = "skills/project-backlog/SKILL.md"
+    path = root / relative
+    if not path.is_file():
+        return
+    try:
+        content = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeDecodeError):
+        return
+    description_match = re.search(r"^description:\s*(.+)$", content, re.MULTILINE)
+    description = (
+        _parse_supported_frontmatter_scalar("description", description_match.group(1).strip())
+        if description_match is not None
+        else None
+    )
+    lowered_description = description.lower() if description is not None else ""
+    if not (
+        "implementation methodology" in lowered_description
+        and ("never" in lowered_description or "not " in lowered_description)
+    ):
+        errors.append(
+            _error(relative, "description must exclude implementation methodology selection")
+        )
+    lowered_content = content.lower()
+    has_target_relative_command = re.search(
+        r"(?m)^\s*scripts/(?:project-state|backlog-to-issues|refresh-issue-cache|continuity-state)\b",
+        content,
+    )
+    if (
+        "<plugin-root>/scripts/" not in content
+        or "target repository" not in lowered_content
+        or "cwd" not in lowered_content
+        or has_target_relative_command is not None
+    ):
+        errors.append(
+            _error(
+                relative,
+                "commands must resolve from the plugin root and run with the target repository cwd",
+            )
+        )
+
+
 def _is_excluded_scan_path(relative: Path) -> bool:
     return any(part in EXCLUDED_SCAN_PARTS for part in relative.parts) or relative.parts[:2] == (
         "tests",
@@ -313,6 +355,7 @@ def validate_repository(root: Path) -> list[str]:
         ):
             errors.append(_error(claude_relative, "author.name must match .codex-plugin/plugin.json"))
     _validate_skill_frontmatter(root, errors)
+    _validate_project_backlog_contract(root, errors)
     _validate_unfinished_markers(root, errors)
     return sorted(errors)
 

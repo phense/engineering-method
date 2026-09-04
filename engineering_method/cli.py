@@ -8,9 +8,16 @@ from pathlib import Path
 import sys
 from typing import TextIO
 
-from .backlog import BacklogDocument, load_backlog, render_backlog, write_backlog
+from .backlog import (
+    BacklogDocument,
+    load_backlog,
+    load_backlog_history,
+    render_backlog,
+    write_backlog,
+)
 from .continuity import (
     BacklogCanonicalProbe,
+    GitHubCanonicalProbe,
     SubprocessGitProbe,
     append_event,
     checkpoint,
@@ -24,6 +31,7 @@ from .files import atomic_write_bundle, atomic_write_text, require_repo_relative
 from .gh import GitHubIssuesGateway, RepositoryRef
 from .issues import (
     IssueGateway,
+    overlay_pending_queue,
     queue_mutation,
     refresh_issue_cache,
     replay_pending_queue,
@@ -187,6 +195,8 @@ def _backlog_command(
         return workflow_state_check(path, gateway).reason
 
     document = _load_mutable_backlog(root)
+    if document.mode == "github-cache":
+        document = overlay_pending_queue(root, document)
     if action == "add":
         positionals, options, _ = _parse(
             rest,
@@ -197,6 +207,10 @@ def _backlog_command(
         if positionals:
             raise ValueError("backlog add accepts options only")
         identifier = _required(options, "--id")
+        if document.mode == "local" and any(
+            item.id == identifier for item in load_backlog_history(path).items
+        ):
+            raise ValueError("backlog ID already exists in active or archived history")
         title = _required(options, "--title")
         priority = Priority(_required(options, "--priority"))
         parent = options.get("--parent")
@@ -441,7 +455,7 @@ def _github_command(
 
 
 def _continuity_command(
-    arguments: list[str], *, root: Path, stream: TextIO
+    arguments: list[str], *, root: Path, stream: TextIO, gateway: IssueGateway
 ) -> str:
     if not arguments:
         raise ValueError("continuity action required")
@@ -507,11 +521,19 @@ def _continuity_command(
         if unknown:
             raise ValueError("recover received unsupported options")
         live_agents = _csv(options.get("--live-agents"), option="--live-agents")
+        backlog = load_backlog(root / "BACKLOG.md")
+        canonical_probe = (
+            GitHubCanonicalProbe(
+                gateway, _repository(gateway), project_key=backlog.project_key
+            )
+            if backlog.mode == "github-cache"
+            else BacklogCanonicalProbe()
+        )
         recovered = recover_run(
             root,
             work_id,
             git_probe=SubprocessGitProbe(),
-            canonical_probe=BacklogCanonicalProbe(),
+            canonical_probe=canonical_probe,
             live_agent_ids=live_agents,
         )
         return recovered.next_action
@@ -538,7 +560,9 @@ def main(
         elif command == "feature":
             output = _feature_command(remaining, root=project_root)
         elif command == "continuity-state":
-            output = _continuity_command(remaining, root=project_root, stream=stream)
+            output = _continuity_command(
+                remaining, root=project_root, stream=stream, gateway=issue_gateway
+            )
         elif command in {"backlog-to-issues", "refresh-issue-cache"}:
             output = _github_command(
                 command, remaining, root=project_root, gateway=issue_gateway

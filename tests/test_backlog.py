@@ -180,6 +180,18 @@ class BacklogRenderingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "marker"):
                 load_backlog(path)
 
+    def test_rejects_a_malformed_backlog_document_marker(self) -> None:
+        rendered = render_backlog(BacklogDocument("EM", "local", (item("EM-001"),)))
+        malformed = rendered.replace(
+            '<!-- engineering-method:backlog-document {"schema_version":1,"project_key":"EM","mode":"local"} -->',
+            "<!-- engineering-method:backlog-document [broken] -->",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            path.write_text(malformed, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "document marker"):
+                load_backlog(path)
+
 
 class BacklogValidationTests(unittest.TestCase):
     def test_rejects_missing_dependencies(self) -> None:
@@ -427,6 +439,31 @@ class BacklogArchiveTests(unittest.TestCase):
                     )
             self.assertEqual(path.read_text(encoding="utf-8"), "original active\n")
             self.assertFalse(path.with_name("BACKLOG-ARCHIVE.md").exists())
+
+    def test_archives_a_complete_dependency_closure_as_one_unit(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                item(
+                    "EM-001",
+                    status=TaskStatus.COMPLETE,
+                    depends_on=("EM-002",),
+                    updated_at="2021-02-01T00:00:00Z",
+                ),
+                item(
+                    "EM-002",
+                    status=TaskStatus.COMPLETE,
+                    updated_at="2021-01-01T00:00:00Z",
+                ),
+                item("EM-999"),
+            ),
+        )
+        active, archived = archive_completed_groups(
+            document, active_line_limit=20, target_line_limit=20
+        )
+        self.assertEqual({entry.id for entry in archived}, {"EM-001", "EM-002"})
+        self.assertEqual([entry.id for entry in active.items], ["EM-999"])
 
 
 if __name__ == "__main__":

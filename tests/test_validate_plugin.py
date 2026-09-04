@@ -338,6 +338,35 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertIn("ERROR skills/example/SKILL.md: YAML frontmatter is required", errors)
 
+    def test_project_backlog_requires_negative_boundary_and_plugin_root_commands(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            skill = root / "skills" / "project-backlog" / "SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text(
+                "---\n"
+                "name: project-backlog\n"
+                "description: Use when durable task state is needed.\n"
+                "---\n\n"
+                "# Project Backlog\n\n"
+                "```sh\n"
+                "scripts/project-state backlog state-check\n"
+                "```\n",
+                encoding="utf-8",
+            )
+
+            errors = validate_repository(root)
+
+        self.assertIn(
+            "ERROR skills/project-backlog/SKILL.md: description must exclude implementation methodology selection",
+            errors,
+        )
+        self.assertIn(
+            "ERROR skills/project-backlog/SKILL.md: commands must resolve from the plugin root and run with the target repository cwd",
+            errors,
+        )
+
     def test_enforces_safe_skill_frontmatter_scalars(self) -> None:
         """Only non-empty plain or balanced quoted name and description scalars are valid."""
         valid_frontmatter = (

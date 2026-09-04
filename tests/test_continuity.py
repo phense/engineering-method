@@ -199,6 +199,40 @@ class ContinuityStateTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "future"):
                 continuity.load_run_state(root, "EM-002")
 
+    def test_replacement_is_fully_staged_and_fresh_failure_leaves_no_partial_run(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            run = continuity.create_run(root, state(), "Original resume.")
+            report = continuity.write_agent_report(
+                root, "EM-002", "agent-a", "Original report."
+            )
+            original_state = (run / "state.json").read_bytes()
+            with patch(
+                "engineering_method.continuity.atomic_write_bundle",
+                side_effect=OSError("staging failed"),
+            ):
+                with self.assertRaisesRegex(OSError, "staging failed"):
+                    continuity.create_run(
+                        root,
+                        replace(state(), phase="replacement"),
+                        "Replacement resume.",
+                        replace_existing=True,
+                    )
+            self.assertEqual((run / "state.json").read_bytes(), original_state)
+            self.assertEqual(report.read_text(encoding="utf-8"), "Original report.")
+
+            fresh = replace(state(), work_id="EM-003", backlog_id="EM-003")
+            with patch(
+                "engineering_method.continuity.atomic_write_bundle",
+                side_effect=OSError("fresh staging failed"),
+            ):
+                with self.assertRaisesRegex(OSError, "fresh staging failed"):
+                    continuity.create_run(root, fresh, "Fresh resume.")
+            fresh_run = root / ".engineering-method" / "runs" / "EM-003"
+            self.assertFalse(fresh_run.exists())
+            continuity.create_run(root, fresh, "Fresh resume.")
+            self.assertTrue(fresh_run.is_dir())
+
 
 class ContinuitySafetyTests(unittest.TestCase):
     def test_rejects_unsafe_work_ids_and_sensitive_content_in_every_artifact(self) -> None:
@@ -278,6 +312,27 @@ class ContinuitySafetyTests(unittest.TestCase):
                 continuity.append_event(root, "EM-002", {"kind": kind})
             with self.assertRaisesRegex(ValueError, "kind"):
                 continuity.append_event(root, "EM-002", {"kind": "invented"})
+
+    def test_state_and_report_writes_reject_symlink_escapes(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            root = base / "repo"
+            outside = base / "outside"
+            root.mkdir()
+            outside.mkdir()
+            (root / ".engineering-method").symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                continuity.create_run(root, state(), "Resume.")
+            self.assertEqual(list(outside.iterdir()), [])
+
+            (root / ".engineering-method").unlink()
+            run = continuity.create_run(root, state(), "Resume.")
+            reports = run / "agent-reports"
+            reports.rmdir()
+            reports.symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                continuity.write_agent_report(root, "EM-002", "agent-a", "Report.")
+            self.assertEqual(list(outside.iterdir()), [])
 
 
 class RecoveryTests(unittest.TestCase):
@@ -542,6 +597,102 @@ class RecoveryTests(unittest.TestCase):
                     "EM-002",
                     git_probe=GitProbe(),
                     canonical_probe=CanonicalProbe(),
+                    live_agent_ids=(),
+                )
+
+    def test_recovery_validates_decisions_and_events_even_when_state_needs_no_rewrite(self) -> None:
+        class GitProbe:
+            def inspect(self, root: Path, saved: continuity.RunState):
+                return continuity.GitSnapshot(str(root), True, saved.last_observed_head)
+
+        class CanonicalProbe:
+            def status(self, root: Path, saved: continuity.RunState):
+                return TaskStatus.OPEN
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            saved = state(
+                worktree_path=str(root),
+                active_agent_ids=(),
+                spec_path=None,
+                plan_path=None,
+                tasks_path=None,
+                uml_paths=(),
+                report_paths=(),
+                artifact_paths=(),
+            )
+            run = continuity.create_run(root, saved, "Resume.")
+            for filename in ("decisions.md", "events.jsonl"):
+                path = run / filename
+                original = path.read_bytes()
+                path.unlink()
+                with self.subTest(filename=filename), self.assertRaisesRegex(
+                    ValueError, "run.*incomplete"
+                ):
+                    continuity.recover_run(
+                        root,
+                        "EM-002",
+                        git_probe=GitProbe(),
+                        canonical_probe=CanonicalProbe(),
+                        live_agent_ids=(),
+                    )
+                path.write_bytes(original)
+            (run / "events.jsonl").write_text("{broken\n", encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "event stream"):
+                continuity.recover_run(
+                    root,
+                    "EM-002",
+                    git_probe=GitProbe(),
+                    canonical_probe=CanonicalProbe(),
+                    live_agent_ids=(),
+                )
+
+    def test_local_canonical_probe_refuses_a_generated_github_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            cached = BacklogItem(
+                "EM-002",
+                "Remote canonical work",
+                TaskStatus.COMPLETE,
+                Priority.P1,
+                None,
+                (),
+                "",
+                "2026-09-04T10:20:30Z",
+            )
+            (root / "BACKLOG.md").write_text(
+                render_backlog(BacklogDocument("EM", "github-cache", (cached,))),
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "remote canonical probe"):
+                continuity.BacklogCanonicalProbe().status(root, state())
+
+            saved = state(
+                worktree_path=str(root),
+                active_agent_ids=(),
+                spec_path=None,
+                plan_path=None,
+                tasks_path=None,
+                uml_paths=(),
+                report_paths=(),
+                artifact_paths=(),
+            )
+            continuity.create_run(root, saved, "Resume.")
+
+            class GitProbe:
+                def inspect(self, root: Path, saved: continuity.RunState):
+                    return continuity.GitSnapshot(str(root), True, saved.last_observed_head)
+
+            class DummyCanonicalProbe:
+                def status(self, root: Path, saved: continuity.RunState):
+                    return TaskStatus.OPEN
+
+            with self.assertRaisesRegex(ValueError, "remote canonical probe"):
+                continuity.recover_run(
+                    root,
+                    "EM-002",
+                    git_probe=GitProbe(),
+                    canonical_probe=DummyCanonicalProbe(),
                     live_agent_ids=(),
                 )
 

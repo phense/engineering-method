@@ -4,17 +4,21 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass, fields, replace
 import json
+import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
-from typing import Collection, Mapping, Protocol
+import tempfile
+from typing import Any, Collection, Mapping, Protocol
 
-from .backlog import load_backlog_history
+from .backlog import load_backlog, load_backlog_history
 from .files import (
     append_jsonl,
     atomic_write_bundle,
     atomic_write_json,
     atomic_write_text,
+    require_contained_path,
     require_repo_relative,
     require_safe_component,
 )
@@ -233,7 +237,28 @@ class BacklogCanonicalProbe:
         backlog_path = root / "BACKLOG.md"
         if not backlog_path.is_file():
             return None
+        if load_backlog(backlog_path).mode == "github-cache":
+            raise ValueError("GitHub mode recovery requires a remote canonical probe")
         document = load_backlog_history(backlog_path)
+        entry = next((item for item in document.items if item.id == identifier), None)
+        return entry.status if entry is not None else None
+
+
+class GitHubCanonicalProbe:
+    """Read canonical completion directly from GitHub rather than its generated cache."""
+
+    def __init__(self, gateway: Any, repository: Any, *, project_key: str) -> None:
+        self._gateway = gateway
+        self._repository = repository
+        self._project_key = project_key
+
+    def status(self, root: Path, state: RunState) -> TaskStatus | None:
+        from .issues import remote_backlog
+
+        identifier = state.backlog_id or state.work_id
+        document = remote_backlog(
+            self._gateway, self._repository, project_key=self._project_key
+        )
         entry = next((item for item in document.items if item.id == identifier), None)
         return entry.status if entry is not None else None
 
@@ -252,7 +277,11 @@ class RecoveryResult:
 
 def _run(root: Path, work_id: str) -> Path:
     require_safe_component(work_id, field="work ID")
-    return root / ".engineering-method" / "runs" / work_id
+    return require_contained_path(
+        root,
+        root / ".engineering-method" / "runs" / work_id,
+        field="continuity run path",
+    )
 
 
 def _state_payload(state: RunState) -> dict[str, object]:
@@ -278,22 +307,47 @@ def create_run(
     run = _run(root, state.work_id)
     if run.exists() and not replace_existing:
         raise ValueError(f"run already exists: {state.work_id}")
-    run.mkdir(parents=True, exist_ok=True)
-    reports = run / "agent-reports"
-    reports.mkdir(exist_ok=True)
-    if replace_existing:
-        for report in reports.iterdir():
-            if not report.is_file():
-                raise ValueError("agent report directory contains an unsafe entry")
-            report.unlink()
-    atomic_write_bundle(
-        {
-            run / "state.json": _state_bytes(state),
-            run / "resume.md": resume_markdown.encode("utf-8"),
-            run / "decisions.md": decisions_markdown.encode("utf-8"),
-            run / "events.jsonl": b"",
-        }
+    runs_root = require_contained_path(
+        root, root / ".engineering-method" / "runs", field="continuity runs path"
     )
+    runs_root.mkdir(parents=True, exist_ok=True)
+    require_contained_path(root, runs_root, field="continuity runs path")
+    staging = Path(tempfile.mkdtemp(prefix=f".{state.work_id}.new.", dir=runs_root))
+    backup: Path | None = None
+    try:
+        (staging / "agent-reports").mkdir()
+        atomic_write_bundle(
+            {
+                staging / "state.json": _state_bytes(state),
+                staging / "resume.md": resume_markdown.encode("utf-8"),
+                staging / "decisions.md": decisions_markdown.encode("utf-8"),
+                staging / "events.jsonl": b"",
+            }
+        )
+        if run.exists():
+            backup = Path(
+                tempfile.mkdtemp(prefix=f".{state.work_id}.old.", dir=runs_root)
+            )
+            backup.rmdir()
+            os.replace(run, backup)
+        try:
+            os.replace(staging, run)
+        except OSError:
+            if backup is not None and backup.exists() and not run.exists():
+                os.replace(backup, run)
+                backup = None
+            raise
+        if backup is not None:
+            shutil.rmtree(backup)
+            backup = None
+    finally:
+        if staging.exists():
+            shutil.rmtree(staging)
+        if backup is not None and backup.exists():
+            if not run.exists():
+                os.replace(backup, run)
+            else:
+                shutil.rmtree(backup)
     return run
 
 
@@ -321,7 +375,9 @@ def load_run_state(
     root: Path, work_id: str, *, persist_upgrade: bool = False
 ) -> RunState:
     run = _run(root, work_id)
-    path = run / "state.json"
+    path = require_contained_path(
+        root, run / "state.json", field="continuity state path"
+    )
     if not run.is_dir() or not path.is_file():
         raise ValueError("run does not exist or has no valid state")
     try:
@@ -375,8 +431,10 @@ def checkpoint(
         raise ValueError("checkpoint work ID does not match state")
     run = _run(root, work_id)
     load_run_state(root, work_id)
-    _require_complete_run_tree(run)
-    resume_path = run / "resume.md"
+    _require_complete_run_tree(root, run)
+    resume_path = require_contained_path(
+        root, run / "resume.md", field="continuity resume path"
+    )
     if resume_markdown is None:
         if not resume_path.is_file():
             raise ValueError("run resume does not exist")
@@ -390,25 +448,46 @@ def checkpoint(
     )
 
 
-def _require_complete_run_tree(run: Path) -> None:
+def _require_complete_run_tree(root: Path, run: Path) -> None:
     required_files = ("state.json", "resume.md", "decisions.md", "events.jsonl")
-    if any(not (run / name).is_file() for name in required_files) or not (
-        run / "agent-reports"
-    ).is_dir():
-        raise ValueError("run is incomplete")
+    paths = [
+        require_contained_path(root, run / name, field=f"continuity {name} path")
+        for name in required_files
+    ]
+    reports = require_contained_path(
+        root, run / "agent-reports", field="continuity agent reports path"
+    )
+    missing = [name for name, path in zip(required_files, paths) if not path.is_file()]
+    if not reports.is_dir():
+        missing.append("agent-reports/")
+    if missing:
+        raise ValueError(f"run is incomplete: missing {', '.join(missing)}")
 
 
-def _event_sequence(path: Path) -> int:
+def _event_sequence(path: Path, *, work_id: str) -> int:
     if not path.exists():
         return 1
     count = 0
-    for line in path.read_text(encoding="utf-8").splitlines():
+    for expected_sequence, line in enumerate(
+        path.read_text(encoding="utf-8").splitlines(), 1
+    ):
         try:
             payload = json.loads(line)
         except json.JSONDecodeError as error:
             raise ValueError("event stream contains malformed JSON") from error
         if not isinstance(payload, dict):
             raise ValueError("event stream contains an invalid record")
+        if (
+            payload.get("schema_version") != SCHEMA_VERSION
+            or payload.get("work_id") != work_id
+            or payload.get("kind") not in EVENT_KINDS
+            or payload.get("sequence") != expected_sequence
+            or not isinstance(payload.get("timestamp"), str)
+            or RFC_3339_UTC_PATTERN.fullmatch(payload["timestamp"]) is None
+        ):
+            raise ValueError("event stream contains an invalid record")
+        reject_sensitive_content(payload, artifact="event stream")
+        _validate_event_paths(payload)
         count += 1
     return count + 1
 
@@ -432,7 +511,7 @@ def append_event(
     root: Path, work_id: str, event: Mapping[str, object]
 ) -> dict[str, object]:
     load_run_state(root, work_id)
-    _require_complete_run_tree(_run(root, work_id))
+    _require_complete_run_tree(root, _run(root, work_id))
     if not isinstance(event, Mapping):
         raise ValueError("event must be an object")
     if PRODUCER_EVENT_FIELDS & set(event):
@@ -452,13 +531,17 @@ def append_event(
         "failed",
     }:
         raise ValueError("event status is invalid")
-    path = _run(root, work_id) / "events.jsonl"
+    path = require_contained_path(
+        root,
+        _run(root, work_id) / "events.jsonl",
+        field="continuity event stream path",
+    )
     payload = {
         **event,
         "schema_version": SCHEMA_VERSION,
         "work_id": work_id,
         "timestamp": utc_timestamp(),
-        "sequence": _event_sequence(path),
+        "sequence": _event_sequence(path, work_id=work_id),
     }
     append_jsonl(path, payload)
     return payload
@@ -466,10 +549,14 @@ def append_event(
 
 def write_agent_report(root: Path, work_id: str, agent_id: str, markdown: str) -> Path:
     load_run_state(root, work_id)
-    _require_complete_run_tree(_run(root, work_id))
+    _require_complete_run_tree(root, _run(root, work_id))
     require_safe_component(agent_id, field="agent ID")
     reject_sensitive_content(markdown, artifact="agent report")
-    path = _run(root, work_id) / "agent-reports" / f"{agent_id}.md"
+    path = require_contained_path(
+        root,
+        _run(root, work_id) / "agent-reports" / f"{agent_id}.md",
+        field="continuity agent report path",
+    )
     atomic_write_text(path, markdown)
     return path
 
@@ -512,16 +599,31 @@ def recover_run(
 ) -> RecoveryResult:
     run = _run(root, work_id)
     state = load_run_state(root, work_id, persist_upgrade=True)
+    _require_complete_run_tree(root, run)
     resume = _read_recovery_text(run, "resume.md", required=True)
     _read_recovery_text(run, "decisions.md", required=False)
-    reports = run / "agent-reports"
-    if not reports.is_dir():
-        raise ValueError("run agent reports directory does not exist")
+    _event_sequence(
+        require_contained_path(
+            root, run / "events.jsonl", field="continuity event stream path"
+        ),
+        work_id=work_id,
+    )
+    reports = require_contained_path(
+        root, run / "agent-reports", field="continuity agent reports path"
+    )
     for report in reports.iterdir():
         if not report.is_file():
             raise ValueError("run agent reports contain an unsafe entry")
         reject_sensitive_content(report.read_text(encoding="utf-8"), artifact="agent report")
     _validate_recovery_artifacts(root, state)
+
+    backlog_path = root / "BACKLOG.md"
+    if (
+        backlog_path.is_file()
+        and load_backlog(backlog_path).mode == "github-cache"
+        and not isinstance(canonical_probe, GitHubCanonicalProbe)
+    ):
+        raise ValueError("GitHub mode recovery requires a remote canonical probe")
 
     snapshot = git_probe.inspect(root, state)
     expected_worktree = (

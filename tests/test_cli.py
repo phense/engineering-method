@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+from dataclasses import replace
 import io
 import json
 import os
@@ -12,9 +13,14 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from engineering_method.backlog import BacklogDocument, load_backlog, render_backlog
+from engineering_method.backlog import (
+    BacklogDocument,
+    load_backlog,
+    render_backlog,
+    render_backlog_archive,
+)
 from engineering_method.cli import main
-from engineering_method.continuity import load_run_state
+from engineering_method.continuity import RunState, create_run, load_run_state
 from engineering_method.features import load_features
 from engineering_method.gh import GitHubIssuesGateway, RepositoryDetection
 from engineering_method.issues import pending_queue
@@ -296,6 +302,40 @@ class LocalCommandSurfaceTests(unittest.TestCase):
             )
             self.assertLessEqual(max(len(line) for line in errors.getvalue().splitlines()), 120)
 
+    def test_add_rejects_an_id_already_retained_in_the_archive(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary, quiet_cli():
+            root = Path(temporary)
+            (root / "BACKLOG.md").write_text(
+                render_backlog(BacklogDocument("EM", "local", (item("EM-002"),))),
+                encoding="utf-8",
+            )
+            (root / "BACKLOG-ARCHIVE.md").write_text(
+                render_backlog_archive(
+                    BacklogDocument(
+                        "EM", "local", (item("EM-001", status=TaskStatus.COMPLETE),)
+                    )
+                ),
+                encoding="utf-8",
+            )
+            before = (root / "BACKLOG.md").read_bytes()
+            self.assertEqual(
+                main(
+                    [
+                        "backlog",
+                        "add",
+                        "--id",
+                        "EM-001",
+                        "--title",
+                        "Reused",
+                        "--priority",
+                        "P1",
+                    ],
+                    root=root,
+                ),
+                2,
+            )
+            self.assertEqual((root / "BACKLOG.md").read_bytes(), before)
+
 
 class GitHubCommandSurfaceTests(unittest.TestCase):
     def test_migrate_refresh_and_reconcile_have_distinct_remote_behavior(self) -> None:
@@ -366,6 +406,91 @@ class GitHubCommandSurfaceTests(unittest.TestCase):
             )
             self.assertIn("not writable", output.getvalue())
             self.assertEqual(load_backlog(root / "BACKLOG.md").mode, "local")
+
+    def test_pending_overlay_allows_offline_parent_child_and_dependency_mutations(self) -> None:
+        class OfflineGateway:
+            def detect_repository(self):
+                return RepositoryDetection(None, "GitHub repository unavailable")
+
+        with tempfile.TemporaryDirectory() as temporary, quiet_cli():
+            root = Path(temporary)
+            (root / "BACKLOG.md").write_text(
+                render_backlog(BacklogDocument("EM", "local", (item("EM-001"),))),
+                encoding="utf-8",
+            )
+            runner = MutableGitHubRunner()
+            gateway = GitHubIssuesGateway(runner)
+            self.assertEqual(
+                main(["backlog-to-issues", "migrate"], root=root, gateway=gateway), 0
+            )
+            offline = OfflineGateway()
+            self.assertEqual(
+                main(
+                    [
+                        "backlog",
+                        "add",
+                        "--id",
+                        "EM-002",
+                        "--title",
+                        "Queued parent",
+                        "--priority",
+                        "P1",
+                    ],
+                    root=root,
+                    gateway=offline,
+                ),
+                0,
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "backlog",
+                        "add",
+                        "--id",
+                        "EM-002.1",
+                        "--title",
+                        "Queued child",
+                        "--priority",
+                        "P1",
+                        "--parent",
+                        "EM-002",
+                    ],
+                    root=root,
+                    gateway=offline,
+                ),
+                0,
+            )
+            self.assertEqual(
+                main(
+                    [
+                        "backlog",
+                        "dependencies",
+                        "EM-002.1",
+                        "--depends-on",
+                        "EM-001",
+                    ],
+                    root=root,
+                    gateway=offline,
+                ),
+                0,
+            )
+            self.assertEqual(len(pending_queue(root)), 3)
+
+            self.assertEqual(
+                main(["backlog-to-issues", "reconcile"], root=root, gateway=gateway), 0
+            )
+            by_marker = {
+                str(entry["body"]).split('"backlog_id":"', 1)[1].split('"', 1)[0]: entry
+                for entry in runner.issues
+                if '"backlog_id":"' in str(entry["body"])
+            }
+            parent = by_marker["EM-002"]
+            child = by_marker["EM-002.1"]
+            blocker = by_marker["EM-001"]
+            self.assertEqual(runner.sub_issues[int(parent["number"])], {int(child["id"])})
+            self.assertEqual(
+                runner.blocked_by[int(child["number"])], {int(blocker["id"])}
+            )
 
 
 class ContinuityCommandSurfaceTests(unittest.TestCase):
@@ -444,6 +569,53 @@ class ContinuityCommandSurfaceTests(unittest.TestCase):
             self.assertEqual(main(["continuity-state", "status", "EM-001"], root=root), 0)
             self.assertEqual(main(["continuity-state", "recover", "EM-001"], root=root), 0)
             self.assertEqual(load_run_state(root, "EM-001").phase, "verify")
+
+    def test_github_mode_recovery_reads_remote_canonical_status_not_the_cache(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary, quiet_cli():
+            root = Path(temporary)
+            head = self._git_repository(root)
+            local = BacklogDocument("EM", "local", (item("EM-001"),))
+            (root / "BACKLOG.md").write_text(render_backlog(local), encoding="utf-8")
+            runner = MutableGitHubRunner()
+            gateway = GitHubIssuesGateway(runner)
+            self.assertEqual(
+                main(["backlog-to-issues", "migrate"], root=root, gateway=gateway), 0
+            )
+            cache = load_backlog(root / "BACKLOG.md")
+            stale_complete = BacklogDocument(
+                "EM",
+                "github-cache",
+                (replace(cache.items[0], status=TaskStatus.COMPLETE),),
+            )
+            (root / "BACKLOG.md").write_text(render_backlog(stale_complete), encoding="utf-8")
+            create_run(
+                root,
+                RunState(
+                    work_id="EM-001",
+                    backlog_id="EM-001",
+                    lifecycle="implementation",
+                    phase="build",
+                    current_slice="slice-1",
+                    active_work=("slice-1",),
+                    worktree_path=str(root),
+                    base_commit=head,
+                    last_observed_head=head,
+                    next_action="continue slice-1",
+                ),
+                "Resume remote work.",
+            )
+
+            self.assertEqual(
+                main(
+                    ["continuity-state", "recover", "EM-001"],
+                    root=root,
+                    gateway=gateway,
+                ),
+                0,
+            )
+            recovered = load_run_state(root, "EM-001")
+            self.assertEqual(recovered.active_work, ("slice-1",))
+            self.assertNotIn("slice-1", recovered.completed_work)
 
 
 class WrapperPortabilityTests(unittest.TestCase):

@@ -452,6 +452,13 @@ def load_backlog(path: Path) -> BacklogDocument:
         for line in lines
     ):
         raise ValueError("backlog contains a malformed task marker")
+    document_marker_lines = [
+        line for line in lines if "engineering-method:backlog-document" in line
+    ]
+    if any(DOCUMENT_MARKER_PATTERN.fullmatch(line) is None for line in document_marker_lines):
+        raise ValueError("backlog contains a malformed document marker")
+    if len(document_marker_lines) > 1:
+        raise ValueError("backlog contains duplicate document markers")
     project_key, metadata_mode = _load_document_metadata(lines)
     has_markers = any(MARKER_PATTERN.fullmatch(line) for line in lines) or any(
         DOCUMENT_MARKER_PATTERN.fullmatch(line) for line in lines
@@ -486,33 +493,80 @@ def archive_completed_groups(
         root_id: _render_order_for_group(root_id, by_id)
         for root_id in {_root_id(entry, by_id) for entry in document.items}
     }
+    complete_group_ids = {
+        root_id
+        for root_id, entries in groups.items()
+        if all(entry.status is TaskStatus.COMPLETE for entry in entries)
+    }
+    complete_adjacency = {root_id: set() for root_id in complete_group_ids}
     protected_group_ids: set[str] = set()
     for entry in document.items:
         source_group = _root_id(entry, by_id)
         for dependency in entry.depends_on:
             dependency_group = _root_id(by_id[dependency], by_id)
-            if source_group != dependency_group:
-                protected_group_ids.update((source_group, dependency_group))
+            if source_group == dependency_group:
+                continue
+            if source_group in complete_group_ids and dependency_group in complete_group_ids:
+                complete_adjacency[source_group].add(dependency_group)
+                complete_adjacency[dependency_group].add(source_group)
+            else:
+                if source_group in complete_group_ids:
+                    protected_group_ids.add(source_group)
+                if dependency_group in complete_group_ids:
+                    protected_group_ids.add(dependency_group)
+
+    components: list[set[str]] = []
+    unseen = set(complete_group_ids)
+    while unseen:
+        start = min(unseen, key=_task_sort_key)
+        component: set[str] = set()
+        pending = [start]
+        while pending:
+            group_id = pending.pop()
+            if group_id in component:
+                continue
+            component.add(group_id)
+            pending.extend(complete_adjacency[group_id] - component)
+        unseen.difference_update(component)
+        components.append(component)
+
     eligible = sorted(
         (
-            (max(entry.updated_at for entry in entries), root_id)
-            for root_id, entries in groups.items()
-            if all(entry.status is TaskStatus.COMPLETE for entry in entries)
-            and root_id not in protected_group_ids
+            (
+                max(
+                    entry.updated_at
+                    for root_id in component
+                    for entry in groups[root_id]
+                ),
+                component,
+            )
+            for component in components
+            if component.isdisjoint(protected_group_ids)
         ),
-        key=lambda pair: (pair[0], _task_sort_key(pair[1])),
+        key=lambda pair: (
+            pair[0],
+            min((_task_sort_key(root_id) for root_id in pair[1])),
+        ),
     )
     remaining_ids = set(by_id)
     archived: list[BacklogItem] = []
-    for _, root_id in eligible:
+    for _, component in eligible:
         if len(render_backlog(BacklogDocument(
             project_key=document.project_key,
             mode=document.mode,
             items=tuple(entry for entry in document.items if entry.id in remaining_ids),
         )).splitlines()) <= target_line_limit:
             break
-        archived.extend(groups[root_id])
-        remaining_ids.difference_update(entry.id for entry in groups[root_id])
+        ordered_roots = sorted(
+            component,
+            key=lambda root_id: (
+                max(entry.updated_at for entry in groups[root_id]),
+                _task_sort_key(root_id),
+            ),
+        )
+        for root_id in ordered_roots:
+            archived.extend(groups[root_id])
+            remaining_ids.difference_update(entry.id for entry in groups[root_id])
     active = BacklogDocument(
         project_key=document.project_key,
         mode=document.mode,
