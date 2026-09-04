@@ -1,0 +1,13 @@
+%% Purpose: <Which runtime or trust boundary changes behavior?>
+%% Source evidence: <plan and repository paths>
+%% Requirement IDs: <stable requirement IDs>
+%% Notation: Mermaid deployment view using flowchart
+%% Verified on: <YYYY-MM-DD>
+flowchart TB
+    subgraph trusted["Trusted runtime"]
+        service["Service process"]
+        store[("Owned data store")]
+        service --> store
+    end
+    external["External system"]
+    external -->|"authenticated request"| service

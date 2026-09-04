@@ -1,0 +1,18 @@
+%% Purpose: <What is the ordered success or recovery interaction?>
+%% Source evidence: <plan and repository paths>
+%% Requirement IDs: <stable requirement IDs>
+%% Notation: Mermaid sequence diagram
+%% Verified on: <YYYY-MM-DD>
+sequenceDiagram
+    participant Caller
+    participant Owner
+    participant Dependency
+    Caller->>Owner: request
+    Owner->>Dependency: dependency operation
+    alt operation succeeds
+        Dependency-->>Owner: result
+        Owner-->>Caller: success
+    else operation fails
+        Dependency-->>Owner: failure
+        Owner-->>Caller: recovered failure
+    end

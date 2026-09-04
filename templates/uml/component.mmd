@@ -1,0 +1,11 @@
+%% Purpose: <Which components own the named responsibilities and interfaces?>
+%% Source evidence: <plan and repository paths>
+%% Requirement IDs: <stable requirement IDs>
+%% Notation: Mermaid component view using flowchart
+%% Verified on: <YYYY-MM-DD>
+flowchart LR
+    caller["Calling component"]
+    owner["Interface owner"]
+    dependency["External dependency"]
+    caller -->|"request contract"| owner
+    owner -->|"dependency contract"| dependency

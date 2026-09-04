@@ -1,0 +1,12 @@
+%% Purpose: <Which lifecycle states and transitions are valid and recoverable?>
+%% Source evidence: <plan and repository paths>
+%% Requirement IDs: <stable requirement IDs>
+%% Notation: Mermaid state diagram
+%% Verified on: <YYYY-MM-DD>
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Active: begin
+    Active --> Complete: succeed
+    Active --> Recovering: fail
+    Recovering --> Complete: compensate
+    Complete --> [*]

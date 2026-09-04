@@ -1,0 +1,13 @@
+%% Purpose: <How do branches or parallel steps converge safely?>
+%% Source evidence: <plan and repository paths>
+%% Requirement IDs: <stable requirement IDs>
+%% Notation: Mermaid activity view using flowchart
+%% Verified on: <YYYY-MM-DD>
+flowchart TD
+    start(["Start"]) --> validate["Validate preconditions"]
+    validate --> decision{"Valid?"}
+    decision -->|"yes"| apply["Apply change"]
+    decision -->|"no"| reject["Reject safely"]
+    apply --> verify["Verify result"]
+    reject --> finish(["Finish"])
+    verify --> finish
