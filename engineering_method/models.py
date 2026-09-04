@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import StrEnum
 import re
+import sys
 from typing import Iterable, Literal
 
 
@@ -14,6 +15,24 @@ TASK_ID_PATTERN = re.compile(
     r"^([A-Z][A-Z0-9]*)-((?:000|0*[1-9][0-9]*)(?:\.0*[1-9][0-9]*)*)$"
 )
 RFC_3339_UTC_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+
+
+def require_supported_python(version_info: tuple[int, ...] | object = sys.version_info) -> None:
+    """Fail clearly before unsupported interpreters parse or run project-state data."""
+    major, minor = version_info[:2]  # type: ignore[index]
+    if (major, minor) < (3, 11):
+        raise RuntimeError("engineering-method requires Python 3.11 or newer")
+
+
+require_supported_python()
+
+
+def _require_single_line(value: str, *, field: str, non_empty: bool = False) -> None:
+    if not isinstance(value, str) or (non_empty and not value.strip()):
+        suffix = "non-empty text" if non_empty else "text"
+        raise ValueError(f"{field} must be {suffix}")
+    if "\n" in value or "\r" in value:
+        raise ValueError(f"{field} must not contain a newline")
 
 
 class TaskStatus(StrEnum):
@@ -108,8 +127,7 @@ class BacklogItem:
 
     def __post_init__(self) -> None:
         _, components = parse_task_id(self.id)
-        if not isinstance(self.title, str) or not self.title.strip():
-            raise ValueError("backlog title must be a non-empty string")
+        _require_single_line(self.title, field="backlog title", non_empty=True)
         if not isinstance(self.status, TaskStatus):
             raise ValueError("backlog status must be a TaskStatus")
         if not isinstance(self.priority, Priority):
@@ -132,8 +150,7 @@ class BacklogItem:
             parse_task_id(dependency)
         if self.id in self.depends_on:
             raise ValueError("backlog item cannot depend on itself")
-        if not isinstance(self.notes, str):
-            raise ValueError("backlog notes must be a string")
+        _require_single_line(self.notes, field="backlog notes")
         _validate_utc_timestamp(self.updated_at)
 
 
@@ -151,10 +168,8 @@ class Feature:
     def __post_init__(self) -> None:
         if re.fullmatch(r"F-0*[1-9][0-9]*", self.id) is None:
             raise ValueError("feature ID must use the F-NNN form")
-        if not isinstance(self.name, str) or not self.name.strip():
-            raise ValueError("feature name must be a non-empty string")
-        if not isinstance(self.summary, str) or not self.summary.strip():
-            raise ValueError("feature summary must be a non-empty string")
+        _require_single_line(self.name, field="feature name", non_empty=True)
+        _require_single_line(self.summary, field="feature summary", non_empty=True)
         if self.status not in {"available", "changed", "removed"}:
             raise ValueError("feature status is invalid")
         if not isinstance(self.related_backlog_ids, tuple):

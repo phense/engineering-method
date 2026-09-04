@@ -8,7 +8,13 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 
-from engineering_method.files import append_jsonl, atomic_write_json, require_repo_relative
+from engineering_method import models
+from engineering_method.files import (
+    append_jsonl,
+    atomic_write_json,
+    require_repo_relative,
+    require_safe_component,
+)
 from engineering_method.models import (
     BacklogItem,
     Priority,
@@ -90,10 +96,37 @@ class BacklogModelTests(unittest.TestCase):
     def test_timestamp_is_utc_rfc_3339(self) -> None:
         self.assertRegex(utc_timestamp(), r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
+    def test_rejects_newlines_in_canonical_text_fields_and_unsafe_status_values(self) -> None:
+        for field, value in (("title", "line one\nline two"), ("notes", "safe\runsafe")):
+            values = {
+                "id": "EM-002",
+                "title": "Safe title",
+                "status": TaskStatus.OPEN,
+                "priority": Priority.P1,
+                "parent_id": None,
+                "depends_on": (),
+                "notes": "Safe notes",
+                "updated_at": "2026-09-04T10:20:30Z",
+            }
+            values[field] = value
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, "newline"):
+                BacklogItem(**values)
+        with self.assertRaisesRegex(ValueError, "status"):
+            BacklogItem(
+                "EM-002",
+                "Safe title",
+                "open\nclosed",  # type: ignore[arg-type]
+                Priority.P1,
+                None,
+                (),
+                "",
+                "2026-09-04T10:20:30Z",
+            )
+
 
 class FilesystemSafetyTests(unittest.TestCase):
-    def test_normalizes_a_nested_repository_relative_path(self) -> None:
-        self.assertEqual(require_repo_relative("state//runs/item.json"), "state/runs/item.json")
+    def test_accepts_a_clean_nested_repository_relative_path(self) -> None:
+        self.assertEqual(require_repo_relative("state/runs/item.json"), "state/runs/item.json")
 
     def test_rejects_absolute_and_traversing_repository_paths(self) -> None:
         for value in (
@@ -102,9 +135,19 @@ class FilesystemSafetyTests(unittest.TestCase):
             "runs/../../state.json",
             "C:\\state.json",
             "C:/state.json",
+            "C:state.json",
+            ".",
+            "./state.json",
+            "state/./item.json",
+            "state//item.json",
         ):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 require_repo_relative(value)
+
+    def test_rejects_unsafe_single_path_components_on_posix_and_windows(self) -> None:
+        for value in ("", ".", "..", "EM/002", "EM\\002", "C:EM-002", "EM-002\nnext"):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                require_safe_component(value, field="work ID")
 
     def test_atomic_write_replaces_json_at_the_destination(self) -> None:
         with tempfile.TemporaryDirectory() as temporary:
@@ -144,6 +187,13 @@ class FilesystemSafetyTests(unittest.TestCase):
                     {"event": "completed", "sequence": 2},
                 ],
             )
+
+
+class PythonVersionTests(unittest.TestCase):
+    def test_runtime_guard_rejects_python_3_10_and_accepts_python_3_11(self) -> None:
+        with self.assertRaisesRegex(RuntimeError, "Python 3.11"):
+            models.require_supported_python((3, 10))
+        models.require_supported_python((3, 11))
 
 
 if __name__ == "__main__":

@@ -78,7 +78,49 @@ class FeatureInventoryTests(unittest.TestCase):
         self.assertEqual(removed.features[0].id, "F-001")
         self.assertEqual(removed.features[0].status, "removed")
         self.assertEqual(removed.features[0].related_backlog_ids, ("EM-002",))
+        self.assertNotEqual(removed.features[0].updated_at, "2026-09-04T10:20:30Z")
         self.assertIn("Superseded by a smaller local capability.", rendered)
+
+    def test_rejects_removed_feature_without_a_rationale(self) -> None:
+        with self.assertRaisesRegex(ValueError, "rationale"):
+            FeatureDocument(features=(feature(status="removed"),))
+
+    def test_rejects_newlines_in_feature_fields(self) -> None:
+        for field in ("name", "summary"):
+            values = {"name": "Safe", "summary": "Safe summary."}
+            values[field] = "line one\nline two"
+            with self.subTest(field=field), self.assertRaisesRegex(ValueError, "newline"):
+                feature(name=values["name"], summary=values["summary"])
+
+    def test_rejects_visible_status_summary_links_and_rationale_that_diverge_from_marker(self) -> None:
+        removed = remove_feature(
+            FeatureDocument(features=(feature(),)),
+            "F-001",
+            rationale="No longer offered.",
+        )
+        rendered = render_features(removed)
+        mutations = (
+            rendered.replace("- Status: removed", "- Status: available"),
+            rendered.replace("- Summary: Keeps durable local workflow state.", "- Summary: Other."),
+            rendered.replace("- Related backlog: `EM-002`", "- Related backlog: `EM-999`"),
+            rendered.replace("- Removal rationale: No longer offered.", "- Removal rationale: Hidden."),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "FEATURES.md"
+            for content in mutations:
+                with self.subTest(content=content[-80:]):
+                    path.write_text(content, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "marker and visible"):
+                        load_features(path)
+
+    def test_rejects_unmarked_visible_features_when_markers_are_present(self) -> None:
+        rendered = render_features(FeatureDocument(features=(feature(),)))
+        rendered += "\n## `F-999` Unmarked\n\n- Status: available\n- Summary: Hidden.\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "FEATURES.md"
+            path.write_text(rendered, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "visible feature.*marker"):
+                load_features(path)
 
     def test_rejects_backlog_only_fields_in_a_feature_marker(self) -> None:
         content = """# Features

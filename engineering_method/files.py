@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from pathlib import Path, PurePosixPath
+import re
 import tempfile
 from typing import Any, Mapping
 
@@ -15,16 +16,37 @@ def require_repo_relative(path: str) -> str:
         not isinstance(path, str)
         or not path
         or "\\" in path
-        or (len(path) >= 3 and path[0].isalpha() and path[1:3] == ":/")
+        or "\n" in path
+        or "\r" in path
+        or re.match(r"^[A-Za-z]:", path)
     ):
         raise ValueError("path must be a non-empty repository-relative POSIX path")
+    raw_parts = path.split("/")
+    if any(part in {"", ".", ".."} for part in raw_parts):
+        raise ValueError("path must remain within the repository without dot segments")
     candidate = PurePosixPath(path)
-    if candidate.is_absolute() or any(part == ".." for part in candidate.parts):
+    if candidate.is_absolute():
         raise ValueError("path must remain within the repository")
     normalized = str(candidate)
     if normalized in {"", "."}:
         raise ValueError("path must name a repository artifact")
     return normalized
+
+
+def require_safe_component(value: str, *, field: str = "path component") -> str:
+    """Validate an identifier that will become exactly one filesystem component."""
+    if (
+        not isinstance(value, str)
+        or not value
+        or value in {".", ".."}
+        or "/" in value
+        or "\\" in value
+        or ":" in value
+        or "\n" in value
+        or "\r" in value
+    ):
+        raise ValueError(f"invalid {field}")
+    return value
 
 
 def _json_bytes(payload: Mapping[str, Any]) -> bytes:

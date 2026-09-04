@@ -7,6 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import engineering_method.backlog as backlog
 from engineering_method.backlog import (
     BacklogDocument,
     archive_completed_groups,
@@ -115,6 +116,39 @@ class BacklogRenderingTests(unittest.TestCase):
             <= original_meanings.keys()
         )
 
+    def test_rejects_unmarked_visible_rows_when_the_document_uses_markers(self) -> None:
+        document = BacklogDocument("EM", "local", (item("EM-001"),))
+        rendered = render_backlog(document)
+        rendered += "- ⭕ `EM-999` **P1** Invisible to the parser\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            path.write_text(rendered, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "visible task.*marker"):
+                load_backlog(path)
+
+    def test_rejects_marker_divergence_in_indentation_dependencies_and_notes(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                item("EM-001"),
+                item("EM-001.1", parent_id="EM-001", depends_on=("EM-001",)),
+            ),
+        )
+        rendered = render_backlog(document)
+        mutations = (
+            rendered.replace("  <!-- engineering-method:backlog", "    <!-- engineering-method:backlog", 1),
+            rendered.replace("Depends on: `EM-001`", "Depends on: `EM-999`"),
+            rendered.replace("Notes: Operator context", "Notes: Different context", 1),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            for content in mutations:
+                with self.subTest(content=content[-100:]):
+                    path.write_text(content, encoding="utf-8")
+                    with self.assertRaisesRegex(ValueError, "marker and visible"):
+                        load_backlog(path)
+
 
 class BacklogValidationTests(unittest.TestCase):
     def test_rejects_missing_dependencies(self) -> None:
@@ -131,6 +165,31 @@ class BacklogValidationTests(unittest.TestCase):
             ),
         )
         with self.assertRaisesRegex(ValueError, "cycle"):
+            ordered_items(document.items)
+
+    def test_rejects_dependency_cycles_nested_inside_one_top_level_group(self) -> None:
+        document = BacklogDocument(
+            project_key="EM",
+            mode="local",
+            items=(
+                item("EM-001"),
+                item("EM-001.1", parent_id="EM-001", depends_on=("EM-001.2",)),
+                item("EM-001.2", parent_id="EM-001", depends_on=("EM-001.1",)),
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "cycle"):
+            ordered_items(document.items)
+
+    def test_rejects_a_parent_that_depends_on_its_descendant(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                item("EM-001", depends_on=("EM-001.1",)),
+                item("EM-001.1", parent_id="EM-001"),
+            ),
+        )
+        with self.assertRaisesRegex(ValueError, "hierarchy"):
             ordered_items(document.items)
 
     def test_rejects_a_project_key_that_does_not_match_item_ids(self) -> None:
@@ -165,6 +224,24 @@ class BacklogOrderingTests(unittest.TestCase):
         self.assertEqual(
             [entry.id for entry in ordered_items(items)],
             ["EM-002", "EM-002.1", "EM-001", "EM-001.1"],
+        )
+
+    def test_orders_unblockers_before_blocked_tasks_within_nested_siblings(self) -> None:
+        items = (
+            item("EM-001"),
+            item(
+                "EM-001.1",
+                parent_id="EM-001",
+                status=TaskStatus.BLOCKED,
+                priority=Priority.P0,
+                depends_on=("EM-001.2",),
+            ),
+            item("EM-001.2", parent_id="EM-001", priority=Priority.P3),
+            item("EM-001.3", parent_id="EM-001", priority=Priority.P1),
+        )
+        self.assertEqual(
+            [entry.id for entry in ordered_items(items)],
+            ["EM-001", "EM-001.2", "EM-001.1", "EM-001.3"],
         )
 
 
@@ -203,6 +280,70 @@ class BacklogArchiveTests(unittest.TestCase):
         )
         with self.assertRaisesRegex(ValueError, "github-cache"):
             archive_completed_groups(document, active_line_limit=1, target_line_limit=1)
+
+    def test_normal_write_persists_and_merges_archive_using_group_completion_time(self) -> None:
+        old_child_new_root = (
+            item("EM-001", status=TaskStatus.COMPLETE, updated_at="2026-03-01T00:00:00Z"),
+            item(
+                "EM-001.1",
+                parent_id="EM-001",
+                status=TaskStatus.COMPLETE,
+                updated_at="2026-01-01T00:00:00Z",
+            ),
+        )
+        newer_child_old_root = (
+            item("EM-002", status=TaskStatus.COMPLETE, updated_at="2026-01-01T00:00:00Z"),
+            item(
+                "EM-002.1",
+                parent_id="EM-002",
+                status=TaskStatus.COMPLETE,
+                updated_at="2026-02-01T00:00:00Z",
+            ),
+        )
+        active_group = (item("EM-003", status=TaskStatus.OPEN),)
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            document = BacklogDocument(
+                "EM", "local", old_child_new_root + newer_child_old_root + active_group
+            )
+            active, archived = backlog.write_backlog(
+                path, document, active_line_limit=20, target_line_limit=20
+            )
+            archive_path = path.with_name("BACKLOG-ARCHIVE.md")
+            self.assertTrue(archive_path.is_file())
+            self.assertEqual(archived[0].id, "EM-002")
+            self.assertIn("EM-003", {entry.id for entry in active.items})
+
+            more = BacklogDocument(
+                "EM",
+                "local",
+                active.items
+                + (item("EM-004", status=TaskStatus.COMPLETE, updated_at="2025-01-01T00:00:00Z"),),
+            )
+            backlog.write_backlog(path, more, active_line_limit=20, target_line_limit=20)
+            history = backlog.load_backlog_history(path)
+            archive_text = archive_path.read_text(encoding="utf-8")
+            self.assertLess(archive_text.index("`EM-004`"), archive_text.index("`EM-002`"))
+            self.assertEqual(
+                {entry.id for entry in history.items},
+                {"EM-001", "EM-001.1", "EM-002", "EM-002.1", "EM-003", "EM-004"},
+            )
+
+    def test_archive_preserves_completed_groups_referenced_by_active_work(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                item("EM-001", status=TaskStatus.COMPLETE, updated_at="2020-01-01T00:00:00Z"),
+                item("EM-002", depends_on=("EM-001",)),
+                item("EM-003", status=TaskStatus.COMPLETE, updated_at="2021-01-01T00:00:00Z"),
+            ),
+        )
+        active, archived = archive_completed_groups(
+            document, active_line_limit=22, target_line_limit=22
+        )
+        self.assertIn("EM-001", {entry.id for entry in active.items})
+        self.assertNotIn("EM-001", {entry.id for entry in archived})
 
 
 if __name__ == "__main__":

@@ -8,6 +8,7 @@ from pathlib import Path
 import re
 from typing import Iterable, Literal
 
+from .files import atomic_write_text
 from .models import (
     BacklogItem,
     PROJECT_KEY_PATTERN,
@@ -72,79 +73,142 @@ def _root_id(entry: BacklogItem, by_id: dict[str, BacklogItem]) -> str:
     return current.id
 
 
-def _render_order_for_group(root_id: str, by_id: dict[str, BacklogItem]) -> list[BacklogItem]:
+def _children_by_parent(by_id: dict[str, BacklogItem]) -> dict[str | None, list[BacklogItem]]:
     children: dict[str | None, list[BacklogItem]] = {}
     for entry in by_id.values():
-        if _root_id(entry, by_id) == root_id:
-            children.setdefault(entry.parent_id, []).append(entry)
-    for siblings in children.values():
-        siblings.sort(key=lambda entry: _task_sort_key(entry.id))
+        children.setdefault(entry.parent_id, []).append(entry)
+    return children
 
+
+def _subtree_ids(
+    identifier: str, children: dict[str | None, list[BacklogItem]]
+) -> set[str]:
+    result = {identifier}
+    for child in children.get(identifier, ()):
+        result.update(_subtree_ids(child.id, children))
+    return result
+
+
+def _validate_dependency_graph(by_id: dict[str, BacklogItem]) -> None:
+    visiting: set[str] = set()
+    visited: set[str] = set()
+
+    def visit(identifier: str) -> None:
+        if identifier in visiting:
+            raise ValueError("backlog dependency cycle detected")
+        if identifier in visited:
+            return
+        visiting.add(identifier)
+        for dependency in by_id[identifier].depends_on:
+            visit(dependency)
+        visiting.remove(identifier)
+        visited.add(identifier)
+
+    for identifier in by_id:
+        visit(identifier)
+
+
+def _is_descendant(identifier: str, ancestor: str, by_id: dict[str, BacklogItem]) -> bool:
+    current = by_id[identifier]
+    while current.parent_id is not None:
+        if current.parent_id == ancestor:
+            return True
+        current = by_id[current.parent_id]
+    return False
+
+
+def _ordered_siblings(
+    parent_id: str | None,
+    *,
+    children: dict[str | None, list[BacklogItem]],
+    by_id: dict[str, BacklogItem],
+) -> list[BacklogItem]:
+    siblings = children.get(parent_id, [])
+    if not siblings:
+        return []
+    subtree_by_sibling = {entry.id: _subtree_ids(entry.id, children) for entry in siblings}
+    branch_by_id = {
+        identifier: sibling_id
+        for sibling_id, identifiers in subtree_by_sibling.items()
+        for identifier in identifiers
+    }
+    dependencies: dict[str, set[str]] = {entry.id: set() for entry in siblings}
+    blocked: set[str] = set()
+    unblockers: set[str] = set()
+    for sibling in siblings:
+        subtree = subtree_by_sibling[sibling.id]
+        if any(by_id[identifier].status is TaskStatus.BLOCKED for identifier in subtree):
+            blocked.add(sibling.id)
+        for identifier in subtree:
+            for dependency in by_id[identifier].depends_on:
+                dependency_branch = branch_by_id.get(dependency)
+                if dependency_branch is not None and dependency_branch != sibling.id:
+                    dependencies[sibling.id].add(dependency_branch)
+                    if sibling.id in blocked:
+                        unblockers.add(dependency_branch)
+
+    def sort_key(identifier: str) -> tuple[int, int, tuple[int, ...], str]:
+        subtree = subtree_by_sibling[identifier]
+        rank = 0 if identifier in unblockers else 1 if identifier in blocked else 2
+        priority = min(PRIORITY_RANK[by_id[item_id].priority] for item_id in subtree)
+        components, stable_id = _task_sort_key(identifier)
+        return rank, priority, components, stable_id
+
+    pending = {entry.id for entry in siblings}
+    placed: set[str] = set()
+    result: list[BacklogItem] = []
+    while pending:
+        ready = sorted(
+            (identifier for identifier in pending if dependencies[identifier] <= placed),
+            key=sort_key,
+        )
+        if not ready:
+            raise ValueError("backlog dependency cycle detected")
+        identifier = ready[0]
+        pending.remove(identifier)
+        placed.add(identifier)
+        result.append(by_id[identifier])
+    return result
+
+
+def _render_order_for_group(root_id: str, by_id: dict[str, BacklogItem]) -> list[BacklogItem]:
+    children = _children_by_parent(by_id)
+    roots = [entry for entry in children.get(None, ()) if entry.id == root_id]
+    if len(roots) != 1:
+        raise ValueError("backlog hierarchy must have one top-level group root")
     ordered: list[BacklogItem] = []
 
     def visit(entry: BacklogItem) -> None:
         ordered.append(entry)
-        for child in children.get(entry.id, []):
+        for child in _ordered_siblings(entry.id, children=children, by_id=by_id):
             visit(child)
 
-    roots = children.get(None, [])
-    if len(roots) != 1 or roots[0].id != root_id:
-        raise ValueError("backlog hierarchy must have one top-level group root")
     visit(roots[0])
     return ordered
 
 
 def ordered_items(items: Iterable[BacklogItem]) -> list[BacklogItem]:
-    """Order top-level groups unblocker-first without separating children."""
+    """Order every sibling level dependency-first without separating subtrees."""
     materialized = validate_backlog_items(items)
     by_id = {entry.id: entry for entry in materialized}
     if not by_id:
         return []
-    group_ids = {_root_id(entry, by_id) for entry in by_id.values()}
-    group_dependencies: dict[str, set[str]] = {identifier: set() for identifier in group_ids}
-    blocked_groups: set[str] = set()
-    unblocker_groups: set[str] = set()
+    _validate_dependency_graph(by_id)
     for entry in by_id.values():
-        group_id = _root_id(entry, by_id)
-        if entry.status is TaskStatus.BLOCKED:
-            blocked_groups.add(group_id)
         for dependency in entry.depends_on:
-            dependency_group = _root_id(by_id[dependency], by_id)
-            if dependency_group != group_id:
-                group_dependencies[group_id].add(dependency_group)
-                if entry.status is TaskStatus.BLOCKED:
-                    unblocker_groups.add(dependency_group)
+            if _is_descendant(dependency, entry.id, by_id):
+                raise ValueError("backlog dependency conflicts with hierarchy order")
+    children = _children_by_parent(by_id)
+    ordered: list[BacklogItem] = []
 
-    group_priorities = {
-        group_id: min(
-            PRIORITY_RANK[entry.priority]
-            for entry in by_id.values()
-            if _root_id(entry, by_id) == group_id
-        )
-        for group_id in group_ids
-    }
+    def visit(entry: BacklogItem) -> None:
+        ordered.append(entry)
+        for child in _ordered_siblings(entry.id, children=children, by_id=by_id):
+            visit(child)
 
-    def group_sort_key(group_id: str) -> tuple[int, int, tuple[int, ...], str]:
-        rank = 0 if group_id in unblocker_groups else 1 if group_id in blocked_groups else 2
-        components, identifier = _task_sort_key(group_id)
-        return rank, group_priorities[group_id], components, identifier
-
-    pending = set(group_ids)
-    placed: set[str] = set()
-    group_order: list[str] = []
-    while pending:
-        ready = sorted(
-            (group_id for group_id in pending if group_dependencies[group_id] <= placed),
-            key=group_sort_key,
-        )
-        if not ready:
-            raise ValueError("backlog dependency cycle detected")
-        next_group = ready[0]
-        pending.remove(next_group)
-        placed.add(next_group)
-        group_order.append(next_group)
-
-    return [entry for group_id in group_order for entry in _render_order_for_group(group_id, by_id)]
+    for root in _ordered_siblings(None, children=children, by_id=by_id):
+        visit(root)
+    return ordered
 
 
 def _marker_payload(entry: BacklogItem) -> str:
@@ -171,7 +235,9 @@ def _document_marker(document: BacklogDocument) -> str:
     return json.dumps(payload, separators=(",", ":"))
 
 
-def render_backlog(document: BacklogDocument) -> str:
+def render_backlog(
+    document: BacklogDocument, *, preserve_item_order: bool = False
+) -> str:
     """Render a readable, marker-backed canonical local document or cache."""
     header = ["# Backlog", f"<!-- engineering-method:backlog-document {_document_marker(document)} -->"]
     if document.mode == "github-cache":
@@ -209,7 +275,8 @@ def render_backlog(document: BacklogDocument) -> str:
         ]
     )
     lines = header
-    for entry in ordered_items(document.items):
+    entries = document.items if preserve_item_order else tuple(ordered_items(document.items))
+    for entry in entries:
         _, components = parse_task_id(entry.id)
         indent = "  " * (len(components) - 1)
         lines.append(f"{indent}<!-- engineering-method:backlog {_marker_payload(entry)} -->")
@@ -255,6 +322,15 @@ def _parse_marker_item(payload: object, display: re.Match[str]) -> BacklogItem:
 
 def _load_marked_items(lines: list[str]) -> list[BacklogItem]:
     items: list[BacklogItem] = []
+    marker_indices = {index for index, line in enumerate(lines) if MARKER_PATTERN.fullmatch(line)}
+    visible_indices = {index for index, line in enumerate(lines) if DISPLAY_PATTERN.fullmatch(line)}
+    marked_document = bool(marker_indices) or any(
+        DOCUMENT_MARKER_PATTERN.fullmatch(line) for line in lines
+    )
+    if marked_document:
+        for index in visible_indices:
+            if index == 0 or index - 1 not in marker_indices:
+                raise ValueError("visible task has no immediately preceding marker")
     for index, line in enumerate(lines):
         marker = MARKER_PATTERN.fullmatch(line)
         if marker is None:
@@ -268,7 +344,34 @@ def _load_marked_items(lines: list[str]) -> list[BacklogItem]:
             payload = json.loads(marker.group("payload"))
         except json.JSONDecodeError as error:
             raise ValueError("backlog marker contains invalid JSON") from error
-        items.append(_parse_marker_item(payload, display))
+        entry = _parse_marker_item(payload, display)
+        _, components = parse_task_id(entry.id)
+        expected_indent = "  " * (len(components) - 1)
+        marker_indent = line[: len(line) - len(line.lstrip())]
+        if marker_indent != expected_indent or display.group("indent") != expected_indent:
+            raise ValueError("backlog marker and visible indentation disagree")
+        detail_index = index + 2
+        if entry.depends_on:
+            expected = f"{expected_indent}  - Depends on: " + ", ".join(
+                f"`{identifier}`" for identifier in entry.depends_on
+            )
+            if detail_index >= len(lines) or lines[detail_index] != expected:
+                raise ValueError("backlog marker and visible dependencies disagree")
+            detail_index += 1
+        if entry.notes:
+            expected = f"{expected_indent}  - Notes: {entry.notes}"
+            if detail_index >= len(lines) or lines[detail_index] != expected:
+                raise ValueError("backlog marker and visible notes disagree")
+            detail_index += 1
+        if detail_index < len(lines) and lines[detail_index].startswith(
+            f"{expected_indent}  - Depends on:"
+        ):
+            raise ValueError("backlog marker and visible dependencies disagree")
+        if detail_index < len(lines) and lines[detail_index].startswith(
+            f"{expected_indent}  - Notes:"
+        ):
+            raise ValueError("backlog marker and visible notes disagree")
+        items.append(entry)
     return items
 
 
@@ -331,8 +434,11 @@ def load_backlog(path: Path) -> BacklogDocument:
     except OSError as error:
         raise ValueError(f"cannot read backlog: {path}") from error
     project_key, metadata_mode = _load_document_metadata(lines)
+    has_markers = any(MARKER_PATTERN.fullmatch(line) for line in lines) or any(
+        DOCUMENT_MARKER_PATTERN.fullmatch(line) for line in lines
+    )
     items = _load_marked_items(lines)
-    if not items:
+    if not has_markers:
         items = _load_legacy_items(lines)
     if project_key is None:
         if not items:
@@ -361,11 +467,18 @@ def archive_completed_groups(
         root_id: _render_order_for_group(root_id, by_id)
         for root_id in {_root_id(entry, by_id) for entry in document.items}
     }
+    protected_group_ids = {
+        _root_id(by_id[dependency], by_id)
+        for entry in document.items
+        for dependency in entry.depends_on
+        if _root_id(entry, by_id) != _root_id(by_id[dependency], by_id)
+    }
     eligible = sorted(
         (
-            (min(entry.updated_at for entry in entries), root_id)
+            (max(entry.updated_at for entry in entries), root_id)
             for root_id, entries in groups.items()
             if all(entry.status is TaskStatus.COMPLETE for entry in entries)
+            and root_id not in protected_group_ids
         ),
         key=lambda pair: (pair[0], _task_sort_key(pair[1])),
     )
@@ -388,3 +501,77 @@ def archive_completed_groups(
     if len(render_backlog(active).splitlines()) > target_line_limit:
         raise ValueError("cannot reduce backlog to archive target without archiving active work")
     return active, tuple(archived)
+
+
+def _archive_order(items: Iterable[BacklogItem]) -> tuple[BacklogItem, ...]:
+    materialized = validate_backlog_items(items)
+    by_id = {entry.id: entry for entry in materialized}
+    groups = {
+        root_id: _render_order_for_group(root_id, by_id)
+        for root_id in {_root_id(entry, by_id) for entry in materialized}
+    }
+    group_order = sorted(
+        groups,
+        key=lambda identifier: (
+            max(entry.updated_at for entry in groups[identifier]),
+            _task_sort_key(identifier),
+        ),
+    )
+    return tuple(entry for root_id in group_order for entry in groups[root_id])
+
+
+def render_backlog_archive(document: BacklogDocument) -> str:
+    """Render complete historical groups in completion order, oldest first."""
+    ordered = _archive_order(document.items)
+    rendered = render_backlog(
+        BacklogDocument(document.project_key, "local", ordered), preserve_item_order=True
+    )
+    return rendered.replace("# Backlog\n", "# Backlog Archive\n", 1).replace(
+        "This is the canonical local task register until GitHub Issues become writable and canonical.\n"
+        "Keep stable IDs unchanged. Order groups unblocker-first, then priority and dependency order.\n",
+        "Completed local groups retained for history and later GitHub migration.\n",
+        1,
+    )
+
+
+def load_backlog_history(path: Path) -> BacklogDocument:
+    """Load active and archived local items for lossless later migration."""
+    active = load_backlog(path)
+    archive_path = path.with_name("BACKLOG-ARCHIVE.md")
+    if not archive_path.exists():
+        return active
+    archived = load_backlog(archive_path)
+    if archived.project_key != active.project_key:
+        raise ValueError("backlog archive project key does not match active backlog")
+    return BacklogDocument(active.project_key, active.mode, active.items + archived.items)
+
+
+def write_backlog(
+    path: Path,
+    document: BacklogDocument,
+    *,
+    active_line_limit: int = 500,
+    target_line_limit: int = 350,
+) -> tuple[BacklogDocument, tuple[BacklogItem, ...]]:
+    """Persist a normal backlog write and apply the local archive threshold policy."""
+    active, newly_archived = archive_completed_groups(
+        document,
+        active_line_limit=active_line_limit,
+        target_line_limit=target_line_limit,
+    )
+    if newly_archived:
+        archive_path = path.with_name("BACKLOG-ARCHIVE.md")
+        existing: tuple[BacklogItem, ...] = ()
+        if archive_path.exists():
+            archived_document = load_backlog(archive_path)
+            if archived_document.project_key != document.project_key:
+                raise ValueError("backlog archive project key does not match active backlog")
+            existing = archived_document.items
+        combined = BacklogDocument(
+            document.project_key,
+            "local",
+            existing + newly_archived,
+        )
+        atomic_write_text(archive_path, render_backlog_archive(combined))
+    atomic_write_text(path, render_backlog(active))
+    return active, newly_archived

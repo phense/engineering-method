@@ -7,7 +7,7 @@ import json
 from pathlib import Path
 import re
 
-from .models import Feature
+from .models import Feature, utc_timestamp
 
 
 SCHEMA_VERSION = 1
@@ -65,6 +65,9 @@ class FeatureDocument:
             if feature_by_id[entry[0]].status != "removed":
                 raise ValueError("only removed features may have a removal rationale")
             rationale_ids.add(entry[0])
+        removed_ids = {entry.id for entry in self.features if entry.status == "removed"}
+        if removed_ids != rationale_ids:
+            raise ValueError("every removed feature requires exactly one removal rationale")
 
 
 def _feature_sort_key(entry: Feature) -> tuple[int, str]:
@@ -170,6 +173,14 @@ def load_features(path: Path) -> FeatureDocument:
         raise ValueError(f"cannot read features inventory: {path}") from error
     features: list[Feature] = []
     rationales: list[tuple[str, str]] = []
+    marker_indices = {index for index, line in enumerate(lines) if MARKER_PATTERN.fullmatch(line)}
+    visible_indices = {
+        index for index, line in enumerate(lines) if VISIBLE_FEATURE_PATTERN.fullmatch(line)
+    }
+    if marker_indices:
+        for index in visible_indices:
+            if index == 0 or index - 1 not in marker_indices:
+                raise ValueError("visible feature has no immediately preceding marker")
     for index, line in enumerate(lines):
         marker = MARKER_PATTERN.fullmatch(line)
         if marker is None:
@@ -184,6 +195,32 @@ def load_features(path: Path) -> FeatureDocument:
         except json.JSONDecodeError as error:
             raise ValueError("feature marker contains invalid JSON") from error
         entry, rationale = _parse_marker(payload, visible)
+        expected_lines = [
+            "",
+            f"- Status: {entry.status}",
+            f"- Summary: {entry.summary}",
+        ]
+        if entry.related_backlog_ids:
+            expected_lines.append(
+                "- Related backlog: "
+                + ", ".join(f"`{identifier}`" for identifier in entry.related_backlog_ids)
+            )
+        if rationale is not None:
+            expected_lines.append(f"- Removal rationale: {rationale}")
+        actual_lines = lines[index + 2 : index + 2 + len(expected_lines)]
+        if actual_lines != expected_lines:
+            raise ValueError("feature marker and visible fields disagree")
+        following = index + 2 + len(expected_lines)
+        if following < len(lines) and any(
+            lines[following].startswith(prefix)
+            for prefix in (
+                "- Status:",
+                "- Summary:",
+                "- Related backlog:",
+                "- Removal rationale:",
+            )
+        ):
+            raise ValueError("feature marker and visible fields disagree")
         features.append(entry)
         if rationale is not None:
             rationales.append((entry.id, rationale))
@@ -209,14 +246,27 @@ def upsert_feature(document: FeatureDocument, feature: Feature) -> FeatureDocume
     )
 
 
-def remove_feature(document: FeatureDocument, feature_id: str, *, rationale: str) -> FeatureDocument:
+def remove_feature(
+    document: FeatureDocument,
+    feature_id: str,
+    *,
+    rationale: str,
+    updated_at: str | None = None,
+) -> FeatureDocument:
     """Record a removed capability while preserving its stable identity and task links."""
-    if not isinstance(rationale, str) or not rationale.strip():
+    if (
+        not isinstance(rationale, str)
+        or not rationale.strip()
+        or "\n" in rationale
+        or "\r" in rationale
+    ):
         raise ValueError("feature removal rationale must be non-empty")
     features = {entry.id: entry for entry in document.features}
     if feature_id not in features:
         raise ValueError(f"feature does not exist: {feature_id}")
-    features[feature_id] = replace(features[feature_id], status="removed")
+    features[feature_id] = replace(
+        features[feature_id], status="removed", updated_at=updated_at or utc_timestamp()
+    )
     rationales = _rationale_by_id(document)
     rationales[feature_id] = rationale
     return FeatureDocument(
