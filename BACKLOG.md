@@ -28,16 +28,16 @@ When an item becomes blocked, move it into the blocker-first section with the it
 
 ## P1 — Core capabilities
 
-- ⭕ `EM-002` **P1** Implement durable project state and compact continuity. Depends on `EM-001`.
-  - ⭕ `EM-002.1` Add state models and safe filesystem primitives.
+- 🔄 `EM-002` **P1** Implement durable project state and compact continuity. Depends on `EM-001`.
+  - 🔄 `EM-002.1` Add state models and safe filesystem primitives.
   - ⭕ `EM-002.2` Implement stable local backlog parsing, sorting, and archiving.
   - ⭕ `EM-002.3` Maintain the non-duplicative `FEATURES.md` capability inventory.
   - ⭕ `EM-002.4` Add the testable GitHub boundary.
   - ⭕ `EM-002.5` Implement idempotent issue migration, relationships, cache, and offline reconciliation.
   - ⭕ `EM-002.6` Implement versioned compact-continuity checkpoints and events.
   - ⭕ `EM-002.7` Wire project-state commands and the `project-backlog` skill.
-- ⭕ `EM-003` **P1** Build the curated, non-overlapping lifecycle and quality skills. Depends on `EM-001`.
-  - ⭕ `EM-003.1` Define exclusive lifecycle contracts and artifact templates.
+- 🔄 `EM-003` **P1** Build the curated, non-overlapping lifecycle and quality skills. Depends on `EM-001`.
+  - 🔄 `EM-003.1` Define exclusive lifecycle contracts and artifact templates.
   - ⭕ `EM-003.2` Adapt Spec Kit `specify`, `plan`, `tasks`, and `converge`.
   - ⭕ `EM-003.3` Adapt OpenSpec `propose`, `apply`, and `archive`.
   - ⭕ `EM-003.4` Port Superpowers debugging, TDD, and verification.
