@@ -1,8 +1,10 @@
 # Third-Party Notices
 
-EM-001 contains no copied workflow text. The following upstream MIT licenses
-are recorded for provenance only. Each `LICENSE -> THIRD_PARTY_NOTICES.md`
-mapping is `notice-only`.
+EM-001 contains no copied workflow text. Later milestones adapt only the files
+listed below from the pinned upstream revisions. Each
+`LICENSE -> THIRD_PARTY_NOTICES.md` mapping is `notice-only`; adapted mappings
+record both immutable source and current destination SHA-256 hashes in
+`third-party/sources.lock.json`.
 
 ## Spec Kit
 
@@ -12,6 +14,12 @@ mapping is `notice-only`.
 - License SHA-256: `2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7`
 - Copyright holder: GitHub, Inc.
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Adapted in EM-003:
+
+- `templates/spec-template.md` -> `templates/spec-kit/spec.md`: adapted
+- `templates/plan-template.md` -> `templates/spec-kit/plan.md`: adapted
+- `templates/tasks-template.md` -> `templates/spec-kit/tasks.md`: adapted
 
 MIT License
 
@@ -43,6 +51,12 @@ SOFTWARE.
 - License SHA-256: `c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64`
 - Copyright holder: 2024 OpenSpec Contributors
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Adapted in EM-003:
+
+- `skills/openspec-propose/SKILL.md` -> `templates/openspec/proposal.md`: adapted
+- `skills/openspec-propose/SKILL.md` -> `templates/openspec/design.md`: adapted
+- `skills/openspec-propose/SKILL.md` -> `templates/openspec/tasks.md`: adapted
 
 MIT License
 

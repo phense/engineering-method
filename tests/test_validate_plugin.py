@@ -172,16 +172,18 @@ class ValidatePluginTests(unittest.TestCase):
             self.assertEqual("LICENSE", actual["license"]["source_path"])
             self.assertEqual(expected["license_sha256"], actual["license"]["sha256"])
             self.assertEqual(
-                [
-                    {
-                        "source_path": "LICENSE",
-                        "destination_path": "THIRD_PARTY_NOTICES.md",
-                        "source_sha256": expected["license_sha256"],
-                        "modification_status": "notice-only",
-                    }
-                ],
-                actual["files"],
+                {
+                    "source_path": "LICENSE",
+                    "destination_path": "THIRD_PARTY_NOTICES.md",
+                    "source_sha256": expected["license_sha256"],
+                    "modification_status": "notice-only",
+                },
+                actual["files"][0],
             )
+            for mapping in actual["files"][1:]:
+                self.assertEqual("adapted", mapping["modification_status"])
+                self.assertRegex(mapping["source_sha256"], r"^[0-9a-f]{64}$")
+                self.assertRegex(mapping["destination_sha256"], r"^[0-9a-f]{64}$")
 
     def test_real_repository_notices_agree_with_the_source_lock(self) -> None:
         """Every locked MIT license must be recorded as a notice-only source."""

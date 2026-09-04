@@ -17,6 +17,27 @@
           "destination_path": "THIRD_PARTY_NOTICES.md",
           "source_sha256": "2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7",
           "modification_status": "notice-only"
+        },
+        {
+          "source_path": "templates/spec-template.md",
+          "destination_path": "templates/spec-kit/spec.md",
+          "source_sha256": "3945437fc35cd30a5b2bf7beea680337c3516826d3efa5a6b92c4a7eca1ba28e",
+          "destination_sha256": "36744c24acb903c8db1582b120e79d5f14ced5b9c54b0e7291a601e8c25a5a85",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "templates/plan-template.md",
+          "destination_path": "templates/spec-kit/plan.md",
+          "source_sha256": "dfba43da2b2a207ff8c177a0fba03af074fd45e261696b4b64172041fad2e992",
+          "destination_sha256": "65020d97be41931bd11506f82ed29345ae592020c99bf3c9e0577121d0e86002",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "templates/tasks-template.md",
+          "destination_path": "templates/spec-kit/tasks.md",
+          "source_sha256": "1e448e9153462e8c5b5a55231a54c756d870a82950d4dd9425a2bf5b7008a0d9",
+          "destination_sha256": "fc4d17d93ea5cffe99d37980c9aafa14ec3146a479af8f8fcfe63bd7d6288f8f",
+          "modification_status": "adapted"
         }
       ]
     },
@@ -36,6 +57,27 @@
           "destination_path": "THIRD_PARTY_NOTICES.md",
           "source_sha256": "c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64",
           "modification_status": "notice-only"
+        },
+        {
+          "source_path": "skills/openspec-propose/SKILL.md",
+          "destination_path": "templates/openspec/proposal.md",
+          "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
+          "destination_sha256": "5661332f9fd980de8f355031491af3c2915b2bdfdd8d1e5ad4757759a8ebcabc",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/openspec-propose/SKILL.md",
+          "destination_path": "templates/openspec/design.md",
+          "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
+          "destination_sha256": "e2984d3dfb91547ae9b6c456fef6afe273aa3706f24dadce14c6e241cc06ee06",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/openspec-propose/SKILL.md",
+          "destination_path": "templates/openspec/tasks.md",
+          "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
+          "destination_sha256": "74d64036a28ead4fcc3299ca3ad3561648bcfa8f0ae14116346743971781794e",
+          "modification_status": "adapted"
         }
       ]
     },

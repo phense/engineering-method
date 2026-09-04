@@ -1,0 +1,65 @@
+[
+  {
+    "id": "trivial-edit",
+    "request": "Correct a typo in one documentation sentence.",
+    "primary": "native-focused-edit",
+    "supporting": ["verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"]
+  },
+  {
+    "id": "reproducible-defect",
+    "request": "A regression test reproduces an unexplained failure.",
+    "primary": "systematic-debugging",
+    "supporting": ["test-driven-development", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose"]
+  },
+  {
+    "id": "bounded-behavior-delta",
+    "request": "Change one existing capability's intentional behavior without redesigning its boundaries.",
+    "primary": "openspec-propose",
+    "supporting": ["test-driven-development", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "systematic-debugging"]
+  },
+  {
+    "id": "multi-component-feature",
+    "request": "Add a new capability spanning several tightly coupled components.",
+    "primary": "speckit-specify",
+    "supporting": ["architecture-modeling", "verification-before-completion"],
+    "prohibited": ["openspec-propose", "systematic-debugging"]
+  },
+  {
+    "id": "architecture-migration",
+    "request": "Plan and implement a risky migration that changes system boundaries.",
+    "primary": "speckit-specify",
+    "supporting": ["architecture-modeling", "verification-before-completion"],
+    "prohibited": ["openspec-propose", "systematic-debugging"]
+  },
+  {
+    "id": "existing-artifacts",
+    "request": "Continue an existing Spec Kit feature whose spec is complete and plan is absent.",
+    "primary": "speckit-plan",
+    "supporting": [],
+    "prohibited": ["speckit-specify", "openspec-propose"]
+  },
+  {
+    "id": "received-review",
+    "request": "Evaluate received review feedback on a focused implementation slice.",
+    "primary": "native-focused-edit",
+    "supporting": ["receiving-code-review", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose"]
+  },
+  {
+    "id": "independent-failures",
+    "request": "Investigate two observed failures after evidence establishes independent root-cause domains.",
+    "primary": "systematic-debugging",
+    "supporting": ["dispatching-parallel-agents", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose"]
+  },
+  {
+    "id": "completion-without-evidence",
+    "request": "Claim a focused edit is complete without fresh command output.",
+    "primary": "native-focused-edit",
+    "supporting": ["verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose"]
+  }
+]
