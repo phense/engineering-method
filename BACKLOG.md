@@ -20,11 +20,11 @@ When an item becomes blocked, move it into the blocker-first section with the it
 
 ## P0 — Foundation
 
-- 🔄 `EM-001` **P0** Establish the dual-host plugin foundation and provenance controls. Blocks `EM-002` through `EM-005`.
-  - 🔄 `EM-001.1` Create compatible Codex and Claude plugin manifests.
-  - ⭕ `EM-001.2` Add the dependency-free Python validation and test scaffold.
-  - ⭕ `EM-001.3` Pin upstream revisions and implement MIT attribution controls.
-  - ⭕ `EM-001.4` Add baseline structural validation for both hosts.
+- ✅ `EM-001` **P0** Establish the dual-host plugin foundation and provenance controls. Blocks `EM-002` through `EM-005`.
+  - ✅ `EM-001.1` Create compatible Codex and Claude plugin manifests.
+  - ✅ `EM-001.2` Add the dependency-free Python validation and test scaffold.
+  - ✅ `EM-001.3` Pin upstream revisions and implement MIT attribution controls.
+  - ✅ `EM-001.4` Add baseline structural validation for both hosts.
 
 ## P1 — Core capabilities
 

@@ -84,17 +84,47 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertIn("ERROR .codex-plugin/plugin.json: file is required", errors)
 
-    def test_real_repository_has_only_deferred_foundation_files_missing(self) -> None:
-        """The real checkout should become valid except for later foundation artifacts."""
+    def test_real_repository_is_valid_after_the_foundation_artifacts_exist(self) -> None:
+        """The foundation checkout must satisfy the portable repository validator."""
         root = Path(__file__).resolve().parents[1]
 
         errors = validate_repository(root)
 
-        self.assertEqual(
-            [
-                "ERROR README.md: file is required",
-            ],
-            errors,
+        self.assertEqual([], errors)
+
+    def test_readme_describes_only_the_verified_foundation(self) -> None:
+        """A missing disclosure or premature capability claim must fail the README contract."""
+        root = Path(__file__).resolve().parents[1]
+        readme_path = root / "README.md"
+
+        self.assertTrue(readme_path.is_file(), "README.md must exist")
+        if not readme_path.is_file():
+            return
+        readme = readme_path.read_text(encoding="utf-8")
+
+        for expected in (
+            "risk-proportionate engineering workflows",
+            "0.1.0",
+            "pre-release",
+            "docs/specs/2026-09-04-engineering-method-design.md",
+            "Codex",
+            "Claude",
+            "python3 -m unittest discover -s tests -t . -v",
+            "python3 scripts/validate-plugin",
+            "claude plugin validate --strict .",
+            "[MIT License](LICENSE)",
+            "[third-party notices](THIRD_PARTY_NOTICES.md)",
+        ):
+            self.assertIn(expected, readme)
+
+        self.assertRegex(readme, r"do not imply affiliation with\s+or endorsement by")
+        self.assertNotRegex(
+            readme.lower(),
+            r"\blifecycle skills?\s+(?:are|is)\s+(?:currently )?(?:available|implemented|working)\b",
+        )
+        self.assertNotRegex(
+            readme.lower(),
+            r"\bmarketplace installation\s+(?:is|are)\s+(?:currently )?(?:available|working)\b",
         )
 
     def test_real_repository_pins_the_required_upstream_provenance(self) -> None:
