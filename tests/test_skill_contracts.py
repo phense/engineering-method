@@ -1,6 +1,8 @@
 import hashlib
 import json
 import re
+import subprocess
+import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
@@ -17,6 +19,15 @@ LIFECYCLE_SKILLS = (
     "speckit-plan",
     "speckit-tasks",
     "speckit-converge",
+)
+
+ENTRY_CONTROLLERS = frozenset(
+    {
+        "native-focused-edit",
+        "systematic-debugging",
+        "openspec-propose",
+        "speckit-specify",
+    }
 )
 
 CONTRACT_HEADINGS = (
@@ -40,6 +51,21 @@ def headings(markdown: str) -> set[str]:
 
 def normalized(markdown: str) -> str:
     return " ".join(markdown.lower().split())
+
+
+def section(markdown: str, heading: str) -> str:
+    match = re.search(
+        rf"^## {re.escape(heading)}\n(.*?)(?=^## |\Z)",
+        markdown,
+        flags=re.MULTILINE | re.DOTALL,
+    )
+    if match is None:
+        raise AssertionError(f"missing section: {heading}")
+    return match.group(1).strip()
+
+
+def markdown_links(markdown: str) -> set[str]:
+    return set(re.findall(r"\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)", markdown))
 
 
 def fenced_json(relative: str) -> dict[str, object]:
@@ -207,48 +233,48 @@ class LifecycleContractTests(unittest.TestCase):
         expected = {
             "trivial-edit": (
                 "native-focused-edit",
-                ["verification-before-completion"],
+                ["project-backlog", "verification-before-completion"],
                 ["speckit-specify", "openspec-propose", "systematic-debugging"],
             ),
             "reproducible-defect": (
                 "systematic-debugging",
-                ["test-driven-development", "verification-before-completion"],
-                ["speckit-specify", "openspec-propose"],
+                ["project-backlog", "test-driven-development", "verification-before-completion"],
+                ["native-focused-edit", "openspec-propose", "speckit-specify"],
             ),
             "bounded-behavior-delta": (
                 "openspec-propose",
-                ["test-driven-development", "verification-before-completion"],
-                ["speckit-specify", "systematic-debugging"],
+                ["project-backlog", "test-driven-development", "verification-before-completion"],
+                ["native-focused-edit", "systematic-debugging", "speckit-specify"],
             ),
             "multi-component-feature": (
                 "speckit-specify",
-                ["architecture-modeling", "verification-before-completion"],
-                ["openspec-propose", "systematic-debugging"],
+                ["project-backlog", "architecture-modeling", "verification-before-completion"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose"],
             ),
             "architecture-migration": (
                 "speckit-specify",
-                ["architecture-modeling", "verification-before-completion"],
-                ["openspec-propose", "systematic-debugging"],
+                ["project-backlog", "architecture-modeling", "verification-before-completion"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose"],
             ),
             "existing-artifacts": (
                 "speckit-plan",
-                [],
-                ["speckit-specify", "openspec-propose"],
+                ["project-backlog"],
+                sorted(ENTRY_CONTROLLERS),
             ),
             "received-review": (
                 "native-focused-edit",
-                ["receiving-code-review", "verification-before-completion"],
-                ["speckit-specify", "openspec-propose"],
+                ["project-backlog", "receiving-code-review", "verification-before-completion"],
+                ["speckit-specify", "openspec-propose", "systematic-debugging"],
             ),
             "independent-failures": (
                 "systematic-debugging",
-                ["dispatching-parallel-agents", "verification-before-completion"],
-                ["speckit-specify", "openspec-propose"],
+                ["project-backlog", "dispatching-parallel-agents", "verification-before-completion"],
+                ["native-focused-edit", "openspec-propose", "speckit-specify"],
             ),
             "completion-without-evidence": (
                 "native-focused-edit",
-                ["verification-before-completion"],
-                ["speckit-specify", "openspec-propose"],
+                ["project-backlog", "verification-before-completion"],
+                ["speckit-specify", "openspec-propose", "systematic-debugging"],
             ),
         }
         actual = {
@@ -267,6 +293,9 @@ class LifecycleContractTests(unittest.TestCase):
                 self.assertNotIn(case["primary"], case["supporting"])
                 self.assertNotIn(case["primary"], case["prohibited"])
                 self.assertEqual([], sorted(set(case["supporting"]) & set(case["prohibited"])))
+                self.assertIn("project-backlog", case["supporting"])
+                competing_entries = ENTRY_CONTROLLERS - {case["primary"]}
+                self.assertEqual(set(competing_entries), set(case["prohibited"]) & ENTRY_CONTROLLERS)
 
         mutated = deepcopy(matrix)
         mutated[1]["primary"] = "openspec-propose"
@@ -275,6 +304,24 @@ class LifecycleContractTests(unittest.TestCase):
             for case in mutated
         }
         self.assertNotEqual(expected, mutated_actual)
+
+    def test_trigger_matrix_structurally_declares_artifact_state_handoffs(self) -> None:
+        """A case without explicit artifact state cannot prove lifecycle continuity."""
+        matrix = json.loads(read("tests/fixtures/trigger-cases/matrix.json"))
+        for case in matrix:
+            with self.subTest(case=case["id"]):
+                self.assertEqual(
+                    {"id", "request", "primary", "supporting", "prohibited", "handoff"},
+                    set(case),
+                )
+                handoff = case["handoff"]
+                self.assertEqual({"consumes", "produces", "next"}, set(handoff))
+                for field in ("consumes", "produces"):
+                    self.assertIsInstance(handoff[field], list)
+                    self.assertTrue(handoff[field])
+                    self.assertTrue(all(isinstance(value, str) and value for value in handoff[field]))
+                self.assertIsInstance(handoff["next"], str)
+                self.assertTrue(handoff["next"])
 
     def test_installed_resource_links_are_skill_relative_and_resolve(self) -> None:
         """An installed skill must not depend on the invoking working directory."""
@@ -292,27 +339,104 @@ class LifecycleContractTests(unittest.TestCase):
             "skills/test-driven-development/SKILL.md": {"writing-good-tests.md"},
             "skills/requesting-code-review/SKILL.md": {"code-reviewer.md"},
         }
-        link_pattern = re.compile(r"\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)")
         for relative, required in expected.items():
             with self.subTest(skill=relative):
-                links = set(link_pattern.findall(read(relative)))
+                links = markdown_links(read(relative))
                 self.assertEqual(required, required & links)
                 for link in links:
                     target = ((ROOT / relative).parent / link).resolve()
                     target.relative_to(ROOT.resolve())
-                    self.assertTrue(target.exists(), f"missing bundled resource {link}")
+                    self.assertTrue(target.is_file(), f"missing bundled resource file {link}")
 
-    def test_stateful_checkpoint_operations_disclose_pending_integration(self) -> None:
-        """Tasks 1-5 must not claim operational checkpoint writes before integration."""
+    def test_stateful_lifecycles_recover_and_persist_operational_handoffs(self) -> None:
+        """Stateful work must recover first and persist every meaningful transition."""
         for skill in LIFECYCLE_SKILLS:
             with self.subTest(skill=skill):
-                content = normalized(read(f"skills/{skill}/SKILL.md"))
+                markdown = read(f"skills/{skill}/SKILL.md")
+                recovery = normalized(section(markdown, "Recovery preamble"))
+                handoffs = normalized(section(markdown, "Operational state handoffs"))
                 for phrase in (
-                    "checkpoint initialization and writes",
-                    "em-002 and task 6 integration",
-                    "do not claim checkpoint continuity is operational",
+                    "discover an active run",
+                    "state.json",
+                    "resume.md",
+                    "canonical backlog or issue state",
+                    "reconcile saved agent identities",
+                    "repository evidence wins",
+                    "never silently restart or reclassify",
                 ):
-                    self.assertIn(phrase, content)
+                    self.assertIn(phrase, recovery)
+                for phrase in (
+                    "project-backlog",
+                    "work start",
+                    "scope change",
+                    "blocker",
+                    "completed slice",
+                    "handoff",
+                    "backlog state",
+                    "run checkpoint",
+                ):
+                    self.assertIn(phrase, handoffs)
+                self.assertNotIn("pending integration", normalized(markdown))
+                self.assertNotIn("do not claim checkpoint continuity is operational", normalized(markdown))
+
+
+class ProjectBacklogSkillContractTests(unittest.TestCase):
+    def test_project_backlog_owns_state_services_but_never_methodology(self) -> None:
+        """A state helper must not become a second lifecycle controller."""
+        markdown = read("skills/project-backlog/SKILL.md")
+        description = frontmatter(markdown)["description"].lower()
+        responsibilities_section = section(markdown, "Responsibilities")
+        responsibilities = normalized(responsibilities_section)
+        boundary = normalized(section(markdown, "Methodology boundary"))
+        self.assertEqual(7, len(re.findall(r"^- ", responsibilities_section, re.MULTILINE)))
+        for phrase in (
+            "state initialization only when absent",
+            "stable-id status, priority, dependency, and blocker updates",
+            "blocker-first ordering",
+            "features.md handoff",
+            "automatic github-mode detection",
+            "cache refresh",
+            "continuity pointers",
+        ):
+            self.assertIn(phrase, responsibilities)
+        self.assertIn("supporting skill", description)
+        for phrase in (
+            "never classify a request",
+            "choose a primary lifecycle",
+            "control implementation methodology",
+        ):
+            self.assertIn(phrase, boundary)
+
+    def test_bundled_scripts_resolve_from_the_skill_and_run_in_a_target_project(self) -> None:
+        """Changing cwd must not turn bundled script paths into target-relative paths."""
+        markdown = read("skills/project-backlog/SKILL.md")
+        required = {
+            "../../scripts/project-state",
+            "../../scripts/backlog-to-issues",
+            "../../scripts/refresh-issue-cache",
+            "../../scripts/continuity-state",
+        }
+        links = markdown_links(section(markdown, "Bundled script resolution"))
+        self.assertEqual(required, links)
+        skill_dir = ROOT / "skills/project-backlog"
+        for link in links:
+            with self.subTest(link=link):
+                resolved = (skill_dir / link).resolve()
+                resolved.relative_to(ROOT.resolve())
+                self.assertTrue(resolved.is_file())
+
+        project_state = (skill_dir / "../../scripts/project-state").resolve()
+        with tempfile.TemporaryDirectory() as directory:
+            completed = subprocess.run(
+                [str(project_state), "backlog", "init", "--project-key", "TP"],
+                cwd=directory,
+                check=False,
+                capture_output=True,
+                text=True,
+            )
+            self.assertEqual(0, completed.returncode, completed.stderr)
+            self.assertTrue((Path(directory) / "BACKLOG.md").is_file())
+            self.assertTrue((Path(directory) / "FEATURES.md").is_file())
 
 
 class SpecKitSkillContractTests(unittest.TestCase):

@@ -283,12 +283,26 @@ def _validate_project_backlog_contract(root: Path, errors: list[str]) -> None:
             _error(relative, "description must exclude implementation methodology selection")
         )
     lowered_content = content.lower()
+    required_script_links = {
+        "../../scripts/project-state",
+        "../../scripts/backlog-to-issues",
+        "../../scripts/refresh-issue-cache",
+        "../../scripts/continuity-state",
+    }
+    script_links = {
+        target.strip().strip("<>").split("#", 1)[0]
+        for target in MARKDOWN_LINK.findall(content)
+        if target.strip().strip("<>").split("#", 1)[0].startswith("../../scripts/")
+    }
     has_target_relative_command = re.search(
         r"(?m)^\s*scripts/(?:project-state|backlog-to-issues|refresh-issue-cache|continuity-state)\b",
         content,
     )
     if (
-        "<plugin-root>/scripts/" not in content
+        script_links != required_script_links
+        or "skill.md" not in lowered_content
+        or "relative" not in lowered_content
+        or "absolute path" not in lowered_content
         or "target repository" not in lowered_content
         or "cwd" not in lowered_content
         or has_target_relative_command is not None
@@ -296,7 +310,7 @@ def _validate_project_backlog_contract(root: Path, errors: list[str]) -> None:
         errors.append(
             _error(
                 relative,
-                "commands must resolve from the plugin root and run with the target repository cwd",
+                "bundled script links must resolve from the skill directory and run with the target repository cwd",
             )
         )
 
@@ -327,7 +341,7 @@ def _validate_skill_resources(root: Path, errors: list[str]) -> None:
                     _error(relative, f"bundled resource {target} must stay within the repository")
                 )
                 continue
-            if not candidate.exists():
+            if not candidate.is_file():
                 errors.append(_error(relative, f"bundled resource {target} is required"))
 
 

@@ -12,20 +12,24 @@ produce the complete planning set needed by its one executor.
 
 Before creating or updating an artifact:
 
-1. Look for a relevant `.engineering-method/runs/<work-id>/state.json` and
-   `resume.md`.
-2. Compare recorded commits, worktree, artifacts, and canonical task state with
-   the repository.
-3. Repository evidence wins over stale checkpoint or memory data.
-4. Preserve validated completed work and never redispatch completed work after
+1. Invoke `project-backlog` to discover an active run relevant to this work.
+2. Read its `state.json` and `resume.md`.
+3. Check recorded commits, worktree, artifacts, and canonical backlog or issue
+   state against current reality.
+4. Reconcile saved agent identities with agents still available from the host.
+5. Preserve validated completed work and never redispatch completed work after
    compaction or resumption.
-5. Continue the recorded next action when it still matches current evidence;
-   otherwise reconstruct the phase from git and canonical artifacts.
+6. Reconstruct stale state from git and canonical artifacts when they disagree.
+7. Continue from the validated next action.
 
-Checkpoint initialization and writes become operational only after EM-002 and
-Task 6 integration. Until then, use existing checkpoint files read-only when
-present, recover from repository artifacts when absent, and do not claim
-checkpoint continuity is operational.
+Repository evidence wins over stale checkpoint or memory data. Never silently
+restart or reclassify an active workflow.
+
+## Operational state handoffs
+
+Invoke `project-backlog` to update backlog state and the run checkpoint at work
+start, scope change, blocker discovery, each completed slice, and every phase or
+final handoff. Record only concise recovery facts and the exact next action.
 
 ## Trigger
 

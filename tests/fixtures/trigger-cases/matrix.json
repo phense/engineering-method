@@ -3,63 +3,108 @@
     "id": "trivial-edit",
     "request": "Correct a typo in one documentation sentence.",
     "primary": "native-focused-edit",
-    "supporting": ["verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"]
+    "supporting": ["project-backlog", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"],
+    "handoff": {
+      "consumes": ["focused edit request"],
+      "produces": ["verified repository change"],
+      "next": "complete"
+    }
   },
   {
     "id": "reproducible-defect",
     "request": "A regression test reproduces an unexplained failure.",
     "primary": "systematic-debugging",
-    "supporting": ["test-driven-development", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose"]
+    "supporting": ["project-backlog", "test-driven-development", "verification-before-completion"],
+    "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify"],
+    "handoff": {
+      "consumes": ["observed failure evidence"],
+      "produces": ["root-cause evidence", "failing regression test"],
+      "next": "test-driven-development"
+    }
   },
   {
     "id": "bounded-behavior-delta",
     "request": "Change one existing capability's intentional behavior without redesigning its boundaries.",
     "primary": "openspec-propose",
-    "supporting": ["test-driven-development", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "systematic-debugging"]
+    "supporting": ["project-backlog", "test-driven-development", "verification-before-completion"],
+    "prohibited": ["native-focused-edit", "systematic-debugging", "speckit-specify"],
+    "handoff": {
+      "consumes": ["existing capability state"],
+      "produces": ["openspec/changes/<change-id>/ planning artifacts"],
+      "next": "openspec-apply"
+    }
   },
   {
     "id": "multi-component-feature",
     "request": "Add a new capability spanning several tightly coupled components.",
     "primary": "speckit-specify",
-    "supporting": ["architecture-modeling", "verification-before-completion"],
-    "prohibited": ["openspec-propose", "systematic-debugging"]
+    "supporting": ["project-backlog", "architecture-modeling", "verification-before-completion"],
+    "prohibited": ["native-focused-edit", "systematic-debugging", "openspec-propose"],
+    "handoff": {
+      "consumes": ["new capability request"],
+      "produces": ["specs/<stable-feature-id>-<name>/spec.md"],
+      "next": "speckit-plan"
+    }
   },
   {
     "id": "architecture-migration",
     "request": "Plan and implement a risky migration that changes system boundaries.",
     "primary": "speckit-specify",
-    "supporting": ["architecture-modeling", "verification-before-completion"],
-    "prohibited": ["openspec-propose", "systematic-debugging"]
+    "supporting": ["project-backlog", "architecture-modeling", "verification-before-completion"],
+    "prohibited": ["native-focused-edit", "systematic-debugging", "openspec-propose"],
+    "handoff": {
+      "consumes": ["risky migration request"],
+      "produces": ["specs/<stable-feature-id>-<name>/spec.md"],
+      "next": "speckit-plan"
+    }
   },
   {
     "id": "existing-artifacts",
     "request": "Continue an existing Spec Kit feature whose spec is complete and plan is absent.",
     "primary": "speckit-plan",
-    "supporting": [],
-    "prohibited": ["speckit-specify", "openspec-propose"]
+    "supporting": ["project-backlog"],
+    "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify", "systematic-debugging"],
+    "handoff": {
+      "consumes": ["specs/<stable-feature-id>-<name>/spec.md"],
+      "produces": ["specs/<stable-feature-id>-<name>/plan.md"],
+      "next": "architecture-modeling"
+    }
   },
   {
     "id": "received-review",
     "request": "Evaluate received review feedback on a focused implementation slice.",
     "primary": "native-focused-edit",
-    "supporting": ["receiving-code-review", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose"]
+    "supporting": ["project-backlog", "receiving-code-review", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"],
+    "handoff": {
+      "consumes": ["review findings", "current implementation evidence"],
+      "produces": ["verified finding dispositions"],
+      "next": "verification-before-completion"
+    }
   },
   {
     "id": "independent-failures",
     "request": "Investigate two observed failures after evidence establishes independent root-cause domains.",
     "primary": "systematic-debugging",
-    "supporting": ["dispatching-parallel-agents", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose"]
+    "supporting": ["project-backlog", "dispatching-parallel-agents", "verification-before-completion"],
+    "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify"],
+    "handoff": {
+      "consumes": ["independent observed failure groups"],
+      "produces": ["independent root-cause evidence"],
+      "next": "test-driven-development"
+    }
   },
   {
     "id": "completion-without-evidence",
     "request": "Claim a focused edit is complete without fresh command output.",
     "primary": "native-focused-edit",
-    "supporting": ["verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose"]
+    "supporting": ["project-backlog", "verification-before-completion"],
+    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"],
+    "handoff": {
+      "consumes": ["unverified focused change"],
+      "produces": ["fresh verification output"],
+      "next": "complete"
+    }
   }
 ]

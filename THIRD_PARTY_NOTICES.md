@@ -17,6 +17,9 @@ record both immutable source and current destination SHA-256 hashes in
 
 Adapted in EM-003:
 
+Task 6 further adapts the four `skills/speckit-*/SKILL.md` destinations below
+to add operational project-state and compact-continuity handoffs.
+
 - `templates/spec-template.md` -> `templates/spec-kit/spec.md`: adapted
 - `templates/plan-template.md` -> `templates/spec-kit/plan.md`: adapted
 - `templates/tasks-template.md` -> `templates/spec-kit/tasks.md`: adapted
@@ -57,6 +60,9 @@ SOFTWARE.
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
 
 Adapted in EM-003:
+
+Task 6 further adapts the three `skills/openspec-*/SKILL.md` destinations below
+to add operational project-state and compact-continuity handoffs.
 
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/proposal.md`: adapted
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/design.md`: adapted
@@ -102,6 +108,9 @@ SOFTWARE.
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
 
 Adapted in EM-003:
+
+Task 6 further adapts `skills/systematic-debugging/SKILL.md` to add operational
+project-state and compact-continuity handoffs.
 
 - `skills/systematic-debugging/SKILL.md` -> `skills/systematic-debugging/SKILL.md`: adapted
 - `skills/test-driven-development/SKILL.md` -> `skills/test-driven-development/SKILL.md`: adapted

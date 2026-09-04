@@ -365,7 +365,7 @@ class ValidatePluginTests(unittest.TestCase):
             errors,
         )
         self.assertIn(
-            "ERROR skills/project-backlog/SKILL.md: commands must resolve from the plugin root and run with the target repository cwd",
+            "ERROR skills/project-backlog/SKILL.md: bundled script links must resolve from the skill directory and run with the target repository cwd",
             errors,
         )
 
@@ -410,6 +410,27 @@ class ValidatePluginTests(unittest.TestCase):
             errors = validate_repository(root)
 
         self.assertEqual([], errors)
+
+    def test_rejects_a_directory_as_a_bundled_skill_resource(self) -> None:
+        """A Markdown resource link must resolve to a file, not merely an existing path."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            skill_path = root / "skills/example/SKILL.md"
+            resource = root / "templates/example"
+            resource.mkdir(parents=True)
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8")
+                + "[resource](../../templates/example)\n",
+                encoding="utf-8",
+            )
+
+            errors = validate_repository(root)
+
+        self.assertIn(
+            "ERROR skills/example/SKILL.md: bundled resource ../../templates/example is required",
+            errors,
+        )
 
     def test_reports_stale_locked_destination_hash(self) -> None:
         """An adapted destination changed without a lock update must fail validation."""
