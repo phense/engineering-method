@@ -30,17 +30,13 @@
 - Create: `templates/orchestration/{slice-brief,agent-report,review-report,resume}.md`
 - Create: `tests/test_orchestration_contract.py`
 
-**Role mapping contract:**
-
-| Role | Codex | Claude |
-|---|---|---|
-| `strong` | `gpt-5.6-sol` | `claude-fable-5-1`, then `claude-opus-5` |
-| `standard` | `gpt-5.6-terra` | `claude-sonnet-5` |
-| `fast` | `gpt-5.6-luna` | `claude-haiku-4-5-20251001` |
+**Role contract:** EM-004 defines only the host-neutral `strong`, `standard`,
+and `fast` semantics. The concrete Codex and Claude mappings approved in the
+design are implemented exclusively by the platform adapters in EM-005.
 
 - [ ] Write red tests requiring exactly the three semantic roles in common policies, no provider model IDs in common `skills/`, and the four agent briefs with explicit input/output contracts.
 - [ ] Require every agent report to return `status`, `work_id`, `slice_id`, commits/files, tests with command and result, root-cause/fix findings, concerns, and next dependency facts.
-- [ ] Define runtime selection: inspect the host's actual available models, choose the preferred tier, fall back once per next lower available tier, and record the fallback. Never claim the main model changed if the host cannot change it.
+- [ ] Define host-neutral runtime selection requirements: inspect the host's actual available models through its later adapter, choose the preferred tier, fall back once per next lower available tier, and record the fallback. Never claim the main model changed if the host cannot change it.
 - [ ] Define delegation economics: use fast only for fully specified mechanical work; standard for normal multi-file work/review; strong for design judgment, difficult debugging, integration, and final review. Optimize completed-task turns rather than token price alone.
 - [ ] Re-run tests and commit with `git commit -m "feat: add model roles and agent contracts"`.
 
