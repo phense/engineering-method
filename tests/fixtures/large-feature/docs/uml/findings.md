@@ -8,7 +8,7 @@
       "id": "AF-001",
       "category": "interface_mismatch",
       "requirement_ids": ["CHECKOUT-001"],
-      "evidence": ["initial/contracts.py", "initial/inventory.py", "docs/uml/design-component.mmd"],
+      "evidence": ["initial/contracts.py", "initial/order.py", "initial/inventory.py", "docs/uml/design-component.mmd"],
       "required_task": "T001",
       "initial_status": "open",
       "final_status": "resolved"

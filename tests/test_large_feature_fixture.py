@@ -107,6 +107,10 @@ class InitialArchitectureFindingTests(unittest.TestCase):
             method_return(FIXTURE / "initial/contracts.py", "InventoryPort", "reserve"),
         )
         self.assertEqual(
+            "Reservation",
+            method_return(FIXTURE / "initial/order.py", "OrderService", "reserve"),
+        )
+        self.assertEqual(
             "bool",
             method_return(FIXTURE / "initial/inventory.py", "Inventory", "reserve"),
         )

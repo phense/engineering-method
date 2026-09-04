@@ -2,13 +2,13 @@
 
 
 class CheckoutService:
-    def __init__(self, order, inventory, payment):
+    def __init__(self, order, payment):
         self.order = order
-        self.inventory = inventory
+        self.inventory = order.inventory
         self.payment = payment
 
     def checkout(self, order_id: str):
-        reservation = self.inventory.reserve(order_id)
+        reservation = self.order.reserve(order_id)
         receipt = self.payment.capture(order_id)
         try:
             self.inventory.commit(reservation)

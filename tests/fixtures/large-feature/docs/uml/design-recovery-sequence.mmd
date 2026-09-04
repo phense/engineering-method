@@ -5,10 +5,12 @@
 %% Verified on: 2026-09-04
 sequenceDiagram
     participant Checkout
+    participant Order
     participant Inventory
     participant Payment
-    Checkout->>Inventory: reserve(order_id)
+    Checkout->>Order: reserve(order_id) returns Reservation
+    Order->>Inventory: reserve(order_id) returns bool
     Checkout->>Payment: capture(order_id)
     Checkout->>Inventory: commit(reservation)
     Inventory--xCheckout: commit failure
-    Note over Checkout,Payment: AF-002 has no inventory release or payment reversal
+    Note over Checkout,Payment: AF-001 return mismatch; AF-002 has no release or reversal
