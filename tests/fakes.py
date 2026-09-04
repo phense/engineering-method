@@ -182,45 +182,74 @@ class MutableGitHubRunner:
             self.mutation_count += 1
             return GhResult(0, json.dumps(issue), "")
 
-        relation = re.fullmatch(
+        add_relation = re.fullmatch(
             rf"repos/{re.escape(self.repository)}/issues/(\d+)/(sub_issues|dependencies/blocked_by)",
             command[3] if len(command) > 3 else "",
         )
-        if len(command) >= 6 and command[0] == "api" and relation:
-            method = command[2]
-            if command[1] != "--method" or command[4] != "-F":
-                raise AssertionError("relationship mutations must use integer -F fields")
+        if command[:3] == ("api", "--method", "POST") and add_relation:
+            if len(command) != 6 or command[4] != "-F":
+                raise AssertionError("relationship additions must use integer -F fields")
             field, raw_value = command[5].split("=", 1)
-            if field not in {"sub_issue_id", "issue_id"} or not raw_value.isdigit():
-                raise AssertionError("relationship mutation field must be an integer")
+            expected_field = (
+                "sub_issue_id" if add_relation.group(2) == "sub_issues" else "issue_id"
+            )
+            if field != expected_field or not raw_value.isdigit():
+                raise AssertionError("relationship addition field must be an integer database ID")
             database_id = int(raw_value)
-            number = int(relation.group(1))
+            number = int(add_relation.group(1))
             target = (
                 self.sub_issues.setdefault(number, set())
-                if relation.group(2) == "sub_issues"
+                if add_relation.group(2) == "sub_issues"
                 else self.blocked_by.setdefault(number, set())
             )
-            operation = {
-                ("POST", "sub_issues"): "add-sub-issue",
-                ("DELETE", "sub_issues"): "remove-sub-issue",
-                ("POST", "dependencies/blocked_by"): "add-blocker",
-                ("DELETE", "dependencies/blocked_by"): "remove-blocker",
-            }.get((method, relation.group(2)))
-            if operation is None:
-                raise AssertionError(f"unexpected relation command: {command!r}")
+            operation = (
+                "add-sub-issue" if add_relation.group(2) == "sub_issues" else "add-blocker"
+            )
             failure = self._failure(operation)
             if failure:
                 return failure
-            if method == "POST":
-                if operation == "add-sub-issue" and any(
-                    database_id in children
-                    for parent, children in self.sub_issues.items()
-                    if parent != number
-                ):
-                    return GhResult(1, "", "sub-issue already has a parent")
-                target.add(database_id)
-            else:
-                target.discard(database_id)
+            if operation == "add-sub-issue" and any(
+                database_id in children
+                for parent, children in self.sub_issues.items()
+                if parent != number
+            ):
+                return GhResult(1, "", "sub-issue already has a parent")
+            target.add(database_id)
+            self.mutation_count += 1
+            return GhResult(0, "", "")
+
+        remove_sub_issue = re.fullmatch(
+            rf"repos/{re.escape(self.repository)}/issues/(\d+)/sub_issue",
+            command[3] if len(command) > 3 else "",
+        )
+        if command[:3] == ("api", "--method", "DELETE") and remove_sub_issue:
+            if len(command) != 6 or command[4] != "-F":
+                raise AssertionError("sub-issue removal must use an integer -F field")
+            field, raw_value = command[5].split("=", 1)
+            if field != "sub_issue_id" or not raw_value.isdigit():
+                raise AssertionError("sub-issue removal field must be an integer database ID")
+            failure = self._failure("remove-sub-issue")
+            if failure:
+                return failure
+            self.sub_issues.setdefault(int(remove_sub_issue.group(1)), set()).discard(
+                int(raw_value)
+            )
+            self.mutation_count += 1
+            return GhResult(0, "", "")
+
+        remove_blocker = re.fullmatch(
+            rf"repos/{re.escape(self.repository)}/issues/(\d+)/dependencies/blocked_by/(\d+)",
+            command[3] if len(command) > 3 else "",
+        )
+        if command[:3] == ("api", "--method", "DELETE") and remove_blocker:
+            if len(command) != 4:
+                raise AssertionError("dependency removal ID belongs only in the route")
+            failure = self._failure("remove-blocker")
+            if failure:
+                return failure
+            self.blocked_by.setdefault(int(remove_blocker.group(1)), set()).discard(
+                int(remove_blocker.group(2))
+            )
             self.mutation_count += 1
             return GhResult(0, "", "")
 

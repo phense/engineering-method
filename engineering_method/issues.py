@@ -15,7 +15,7 @@ from .backlog import (
     load_backlog_history,
     render_backlog,
 )
-from .files import append_jsonl, atomic_write_text
+from .files import append_jsonl, atomic_write_text, require_contained_path
 from .gh import RemoteIssue, RemoteLabel, RepositoryDetection, RepositoryRef
 from .models import (
     BacklogItem,
@@ -154,12 +154,12 @@ def _labels(item: BacklogItem) -> tuple[str, ...]:
 
 
 def _body(item: BacklogItem) -> str:
-    notes = item.notes if item.notes else "_None_"
+    notes = json.dumps(item.notes, ensure_ascii=False)
     return (
         f"{_marker(item.id)}\n\n"
         f"Backlog status: `{item.status.value}`\n"
         f"Priority: `{item.priority.value}`\n"
-        f"Notes: {notes}\n"
+        f"Notes JSON: {notes}\n"
     )
 
 
@@ -303,7 +303,7 @@ def _parse_remote_item(
         raise ValueError("remote issue title and marker disagree")
     status_match = re.search(r"^Backlog status: `([^`]+)`$", issue.body, re.MULTILINE)
     priority_match = re.search(r"^Priority: `(P[0-3])`$", issue.body, re.MULTILINE)
-    notes_match = re.search(r"^Notes: (.*)$", issue.body, re.MULTILINE)
+    notes_match = re.search(r"^Notes JSON: (.*)$", issue.body, re.MULTILINE)
     if status_match is None or priority_match is None or notes_match is None:
         raise ValueError("remote issue body is incomplete")
     try:
@@ -328,9 +328,12 @@ def _parse_remote_item(
         raise ValueError("remote issue state or status labels are invalid")
     if visible_status is not body_status:
         raise ValueError("remote issue body and visible status disagree")
-    notes = notes_match.group(1)
-    if notes == "_None_":
-        notes = ""
+    try:
+        notes = json.loads(notes_match.group(1))
+    except json.JSONDecodeError as error:
+        raise ValueError("remote issue notes encoding is invalid") from error
+    if not isinstance(notes, str):
+        raise ValueError("remote issue notes encoding must contain text")
     return BacklogItem(
         id=identifier,
         title=issue.title.removeprefix(title_prefix),
@@ -437,7 +440,11 @@ def workflow_state_check(path: Path, gateway: IssueGateway) -> StateCheckResult:
 
 
 def _queue_path(root: Path) -> Path:
-    return root / ".engineering-method" / "github-queue.jsonl"
+    return require_contained_path(
+        root,
+        root / ".engineering-method" / "github-queue.jsonl",
+        field="GitHub queue path",
+    )
 
 
 def queue_records(root: Path) -> tuple[dict[str, object], ...]:
@@ -463,15 +470,13 @@ def queue_records(root: Path) -> tuple[dict[str, object], ...]:
 
 def pending_queue(root: Path) -> tuple[dict[str, object], ...]:
     pending: dict[str, dict[str, object]] = {}
-    order: list[str] = []
     for record in queue_records(root):
         identifier = record["id"]
         if record["state"] == "pending" and identifier not in pending:
             pending[identifier] = record
-            order.append(identifier)
         elif record["state"] == "acknowledged":
             pending.pop(identifier, None)
-    result = tuple(pending[identifier] for identifier in order if identifier in pending)
+    result = tuple(pending.values())
     for record in result:
         mutation = {
             key: value
@@ -563,7 +568,7 @@ def queue_mutation(root: Path, mutation: Mapping[str, object]) -> str:
     payload = _validated_mutation(mutation)
     canonical = json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
     identifier = hashlib.sha256(canonical.encode("utf-8")).hexdigest()
-    if any(record["id"] == identifier for record in queue_records(root)):
+    if any(record["id"] == identifier for record in pending_queue(root)):
         return identifier
     record = {
         "schema_version": QUEUE_SCHEMA_VERSION,
@@ -621,6 +626,14 @@ def _apply_mutation(document: BacklogDocument, mutation: Mapping[str, object]) -
                 updated_at=str(mutation.get("updated_at", utc_timestamp())),
             )
     return BacklogDocument(document.project_key, "github-cache", tuple(items))
+
+
+def overlay_pending_queue(root: Path, document: BacklogDocument) -> BacklogDocument:
+    """Apply durable pending records in memory for validation of later offline changes."""
+    current = document
+    for mutation in pending_queue(root):
+        current = _apply_mutation(current, mutation)
+    return current
 
 
 def replay_pending_queue(

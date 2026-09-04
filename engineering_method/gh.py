@@ -168,7 +168,11 @@ class GitHubIssuesGateway:
             self._runner.run(("api", "--paginate", "--slurp", endpoint)),
             operation="issue list",
         )
-        return [_remote_issue(entry) for entry in values]
+        return [
+            _remote_issue(entry)
+            for entry in values
+            if not isinstance(entry, dict) or "pull_request" not in entry
+        ]
 
     def list_labels(self, repository: RepositoryRef) -> dict[str, RemoteLabel]:
         endpoint = f"repos/{repository.full_name}/labels?per_page=100"
@@ -360,7 +364,7 @@ class GitHubIssuesGateway:
             repository,
             method="DELETE",
             number=parent_number,
-            suffix="sub_issues",
+            suffix="sub_issue",
             field="sub_issue_id",
             database_id=child_id,
             operation="sub-issue removal",
@@ -382,12 +386,16 @@ class GitHubIssuesGateway:
     def remove_blocked_by(
         self, repository: RepositoryRef, *, blocked_number: int, blocker_id: int
     ) -> None:
-        self._relation_mutation(
-            repository,
-            method="DELETE",
-            number=blocked_number,
-            suffix="dependencies/blocked_by",
-            field="issue_id",
-            database_id=blocker_id,
-            operation="dependency removal",
+        if type(blocker_id) is not int:
+            raise ValueError("GitHub relationship IDs must be integer database IDs")
+        result = self._runner.run(
+            (
+                "api",
+                "--method",
+                "DELETE",
+                f"repos/{repository.full_name}/issues/{blocked_number}/"
+                f"dependencies/blocked_by/{blocker_id}",
+            )
         )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "gh dependency removal failed")

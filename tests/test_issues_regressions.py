@@ -53,12 +53,11 @@ def issue_body(
     priority: str = "P1",
     notes: str = "",
 ) -> str:
-    note = notes if notes else "_None_"
     return (
         f'<!-- engineering-method:issue {{"schema_version":1,"backlog_id":"{identifier}"}} -->\n\n'
         f"Backlog status: `{status}`\n"
         f"Priority: `{priority}`\n"
-        f"Notes: {note}\n"
+        f"Notes JSON: {json.dumps(notes, ensure_ascii=False)}\n"
     )
 
 
@@ -202,7 +201,7 @@ class MigrationConvergenceTests(unittest.TestCase):
             {label["name"] for label in by_id["EM-001"]["labels"]},
             {"custom", "engineering-method", "priority:p1", "status:open"},
         )
-        self.assertIn("Notes: Keep context", str(by_id["EM-001"]["body"]))
+        self.assertIn('Notes JSON: "Keep context"', str(by_id["EM-001"]["body"]))
         self.assertEqual(by_id["EM-002"]["state"], "closed")
         child = by_id["EM-001.1"]
         self.assertEqual(runner.sub_issues[150], {int(child["id"])})
@@ -393,6 +392,97 @@ class CacheAndQueueRegressionTests(unittest.TestCase):
             )
             with self.assertRaisesRegex(ValueError, "queue line.*invalid"):
                 issues.pending_queue(root)
+
+    def test_acknowledged_content_hash_can_be_queued_again_after_intervening_state(self) -> None:
+        document = BacklogDocument("EM", "local", (backlog_item("EM-001"),))
+        runner = MutableGitHubRunner()
+        gateway = gh.GitHubIssuesGateway(runner)
+        cached = issues.migrate_backlog(document, gateway, REPOSITORY, language="en")
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "BACKLOG.md"
+            path.write_text(render_backlog(cached), encoding="utf-8")
+            complete = {
+                "kind": "status",
+                "backlog_id": "EM-001",
+                "status": "complete",
+            }
+            in_progress = {
+                "kind": "status",
+                "backlog_id": "EM-001",
+                "status": "in_progress",
+            }
+            first_complete_id = issues.queue_mutation(root, complete)
+            issues.replay_pending_queue(root, path, gateway, REPOSITORY)
+            issues.queue_mutation(root, in_progress)
+            issues.replay_pending_queue(root, path, gateway, REPOSITORY)
+
+            second_complete_id = issues.queue_mutation(root, complete)
+            self.assertEqual(second_complete_id, first_complete_id)
+            self.assertEqual(len(issues.pending_queue(root)), 1)
+            final = issues.replay_pending_queue(root, path, gateway, REPOSITORY)
+
+            self.assertEqual(final.items[0].status, TaskStatus.COMPLETE)
+
+    def test_notes_round_trip_empty_and_literal_legacy_sentinel_unambiguously(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                backlog_item("EM-001", notes=""),
+                backlog_item("EM-002", notes="_None_"),
+            ),
+        )
+        runner = MutableGitHubRunner()
+        gateway = gh.GitHubIssuesGateway(runner)
+        cached = issues.migrate_backlog(document, gateway, REPOSITORY, language="en")
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            path.write_text(render_backlog(cached), encoding="utf-8")
+            refreshed = issues.refresh_issue_cache(path, gateway, REPOSITORY)
+        self.assertEqual([entry.notes for entry in refreshed.items], ["", "_None_"])
+        bodies = [
+            str(entry["body"])
+            for entry in runner.issues
+            if "engineering-method:issue" in str(entry["body"])
+        ]
+        self.assertTrue(any('Notes JSON: ""' in body for body in bodies))
+
+    def test_pull_request_marker_never_claims_or_updates_the_corresponding_issue(self) -> None:
+        marker = '<!-- engineering-method:issue {"schema_version":1,"backlog_id":"EM-001"} -->'
+        pull_request = remote_issue(
+            1,
+            101,
+            identifier="EM-001",
+            title="Pull request title",
+            body=marker,
+            labels=(),
+        )
+        pull_request["pull_request"] = {"url": "https://api.github.test/pulls/1"}
+        runner = MutableGitHubRunner(issues=(pull_request,))
+        document = BacklogDocument("EM", "local", (backlog_item("EM-001"),))
+
+        issues.migrate_backlog(
+            document, gh.GitHubIssuesGateway(runner), REPOSITORY, language="en"
+        )
+
+        self.assertEqual(runner.issues[0]["title"], "Pull request title")
+        self.assertEqual(len(runner.issues), 2)
+
+    def test_queue_write_rejects_an_engineering_state_symlink_escape(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            base = Path(temporary)
+            root = base / "repo"
+            outside = base / "outside"
+            root.mkdir()
+            outside.mkdir()
+            (root / ".engineering-method").symlink_to(outside, target_is_directory=True)
+            with self.assertRaisesRegex(ValueError, "escapes"):
+                issues.queue_mutation(
+                    root,
+                    {"kind": "priority", "backlog_id": "EM-001", "priority": "P0"},
+                )
+            self.assertEqual(list(outside.iterdir()), [])
 
 
 class DetectionReasonTests(unittest.TestCase):

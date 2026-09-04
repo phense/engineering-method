@@ -187,6 +187,53 @@ class GitHubIssueOperationsTests(unittest.TestCase):
         self.assertEqual((created.id, created.number), (9_013, 13))
         runner.assert_drained()
 
+    def test_removal_routes_match_github_rest_contracts(self) -> None:
+        runner = FakeGhRunner(
+            (
+                ExpectedGhCall(
+                    (
+                        "api",
+                        "--method",
+                        "DELETE",
+                        "repos/peter/engineering-method/issues/10/sub_issue",
+                        "-F",
+                        "sub_issue_id=9011",
+                    ),
+                    GhResult(0, "", ""),
+                ),
+                ExpectedGhCall(
+                    (
+                        "api",
+                        "--method",
+                        "DELETE",
+                        "repos/peter/engineering-method/issues/11/dependencies/blocked_by/9010",
+                    ),
+                    GhResult(0, "", ""),
+                ),
+            )
+        )
+        gateway = GitHubIssuesGateway(runner)
+        gateway.remove_sub_issue(REPOSITORY, parent_number=10, child_id=9011)
+        gateway.remove_blocked_by(REPOSITORY, blocked_number=11, blocker_id=9010)
+        runner.assert_drained()
+
+    def test_excludes_pull_request_rows_even_when_their_body_contains_a_marker(self) -> None:
+        command = (
+            "api",
+            "--paginate",
+            "--slurp",
+            "repos/peter/engineering-method/issues?state=all&per_page=100",
+        )
+        pull_request = {
+            **remote_payload(11, 8_011),
+            "body": '<!-- engineering-method:issue {"schema_version":1,"backlog_id":"EM-001"} -->',
+            "pull_request": {"url": "https://api.github.test/pulls/11"},
+        }
+        issue = remote_payload(12, 8_012)
+        runner = FakeGhRunner((ExpectedGhCall(command, result([[pull_request, issue]])),))
+        found = GitHubIssuesGateway(runner).list_method_issues(REPOSITORY)
+        self.assertEqual([entry.number for entry in found], [12])
+
 
 class MigrationSafetyTests(unittest.TestCase):
     def test_rejects_non_english_duplicate_and_unknown_markers(self) -> None:

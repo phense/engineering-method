@@ -49,6 +49,28 @@ def require_safe_component(value: str, *, field: str = "path component") -> str:
     return value
 
 
+def require_contained_path(root: Path, path: Path, *, field: str) -> Path:
+    """Reject lexical traversal and every existing symlink that escapes a repository root."""
+    root_lexical = Path(os.path.abspath(root))
+    candidate = path if path.is_absolute() else root_lexical / path
+    candidate_lexical = Path(os.path.abspath(candidate))
+    try:
+        relative = candidate_lexical.relative_to(root_lexical)
+    except ValueError as error:
+        raise ValueError(f"{field} escapes the repository") from error
+    root_resolved = root_lexical.resolve(strict=False)
+    current = root_lexical
+    try:
+        for component in relative.parts:
+            current = current / component
+            if current.is_symlink():
+                current.resolve(strict=False).relative_to(root_resolved)
+        candidate_lexical.resolve(strict=False).relative_to(root_resolved)
+    except (OSError, RuntimeError, ValueError) as error:
+        raise ValueError(f"{field} escapes the repository through a symlink") from error
+    return candidate_lexical
+
+
 def _json_bytes(payload: Mapping[str, Any]) -> bytes:
     return (json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode("utf-8")
 
