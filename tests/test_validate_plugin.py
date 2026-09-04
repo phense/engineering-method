@@ -124,11 +124,11 @@ class ValidatePluginTests(unittest.TestCase):
         """Reject claims for functionality intentionally absent from EM-001."""
         self.assertNotRegex(
             readme.lower(),
-            r"\blifecycle skills?\s+(?:(?:are|is)\s+(?:currently )?(?:available|implemented|working)|works?)\b",
+            r"\blifecycle skills?\s+(?:(?:are|is)\s+(?:currently )?(?:available|implemented|working|supported|enabled|functional)|works?|function)\b",
         )
         self.assertNotRegex(
             readme.lower(),
-            r"\bmarketplace installation\s+(?:(?:is|are)\s+(?:currently )?(?:available|working)|works?)\b",
+            r"\bmarketplace installation\s+(?:(?:is|are)\s+(?:currently )?(?:available|implemented|working|supported|enabled|functional)|works?|function)\b",
         )
 
     def test_readme_contract_rejects_direct_lifecycle_skill_claim(self) -> None:
@@ -140,6 +140,15 @@ class ValidatePluginTests(unittest.TestCase):
         """The terse sentence 'Marketplace installation works.' must be rejected."""
         with self.assertRaises(AssertionError):
             self.assert_readme_avoids_unavailable_capabilities("Marketplace installation works.")
+
+    def test_readme_contract_rejects_affirmative_capability_synonyms(self) -> None:
+        """Affirmative lifecycle and marketplace claims must be rejected regardless of synonym."""
+        for claim in (
+            "Lifecycle skills are supported.",
+            "Marketplace installation is supported.",
+        ):
+            with self.subTest(claim=claim), self.assertRaises(AssertionError):
+                self.assert_readme_avoids_unavailable_capabilities(claim)
 
     def test_real_repository_pins_the_required_upstream_provenance(self) -> None:
         """Changing a source ID, revision, license digest, or mapping must fail."""
@@ -215,6 +224,39 @@ class ValidatePluginTests(unittest.TestCase):
             errors = validate_repository(root)
 
         self.assertEqual([], errors)
+
+    def test_rejects_noncanonical_codex_skills_paths(self) -> None:
+        """Accepting a directory other than the shared skills root must fail validation."""
+        for skills in (".",):
+            with self.subTest(skills=skills), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.make_repository(root)
+                manifest_path = root / ".codex-plugin/plugin.json"
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                manifest["skills"] = skills
+                self.write_json(manifest_path, manifest)
+
+                errors = validate_repository(root)
+
+            self.assertIn(
+                "ERROR .codex-plugin/plugin.json: skills must be exactly ./skills/",
+                errors,
+            )
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            manifest_path = root / ".codex-plugin/plugin.json"
+            manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+            manifest["skills"] = str(root / "skills")
+            self.write_json(manifest_path, manifest)
+
+            errors = validate_repository(root)
+
+        self.assertIn(
+            "ERROR .codex-plugin/plugin.json: skills must be exactly ./skills/",
+            errors,
+        )
 
     def test_reports_manifest_identity_mismatch(self) -> None:
         """Changing one host's package identity must invalidate the shared plugin."""
@@ -295,6 +337,51 @@ class ValidatePluginTests(unittest.TestCase):
             errors = validate_repository(root)
 
         self.assertIn("ERROR skills/example/SKILL.md: YAML frontmatter is required", errors)
+
+    def test_enforces_safe_skill_frontmatter_scalars(self) -> None:
+        """Only non-empty plain or balanced quoted name and description scalars are valid."""
+        valid_frontmatter = (
+            "---\nname: example\ndescription: An example workflow.\n---\n\n# Example\n",
+            "---\nname: \"example\"\ndescription: 'An example workflow.'\n---\n\n# Example\n",
+        )
+        for content in valid_frontmatter:
+            with self.subTest(valid=content), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.make_repository(root)
+                (root / "skills/example/SKILL.md").write_text(content, encoding="utf-8")
+
+                errors = validate_repository(root)
+
+            self.assertEqual([], errors)
+
+        invalid_scalars = (
+            ("name", "[unterminated"),
+            ("description", "{workflow: example}"),
+            ("description", "|"),
+            ("description", "!workflow example"),
+            ("description", "&workflow example"),
+            ("description", "*workflow"),
+            ("name", "\"unterminated"),
+            ("description", "'unterminated"),
+        )
+        for field, value in invalid_scalars:
+            with self.subTest(field=field, value=value), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.make_repository(root)
+                (root / "skills/example/SKILL.md").write_text(
+                    "---\n"
+                    f"name: {'example' if field != 'name' else value}\n"
+                    f"description: {'An example workflow.' if field != 'description' else value}\n"
+                    "---\n\n# Example\n",
+                    encoding="utf-8",
+                )
+
+                errors = validate_repository(root)
+
+            self.assertIn(
+                f"ERROR skills/example/SKILL.md: frontmatter {field} must be a supported scalar",
+                errors,
+            )
 
     def test_accepts_complete_repository(self) -> None:
         """Removing required files or validation fields from this fixture must fail validation."""

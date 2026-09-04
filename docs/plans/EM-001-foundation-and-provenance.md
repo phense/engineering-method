@@ -38,7 +38,7 @@
 | `third-party/sources.lock.json` | Machine-readable provenance ledger. |
 | `README.md` | Truthful pre-release scope and validation instructions. |
 
-### Task 1: EM-001.1 Add the portable validator contract
+### Task 1: EM-001.2 Add the portable validator contract
 
 **Files:**
 
@@ -75,7 +75,7 @@ def main(argv: collections.abc.Sequence[str] | None = None) -> int:
 - [ ] Run `python3 -m unittest tests.test_validate_plugin -v`. Expected: all fixture tests pass.
 - [ ] Commit with `git commit -m "test: add dependency-free plugin validator"`.
 
-### Task 2: EM-001.2 Create dual-host manifests
+### Task 2: EM-001.1 Create dual-host manifests
 
 **Files:**
 

@@ -41,6 +41,12 @@ SCAFFOLD_PHRASES = tuple(
     )
 )
 EXCLUDED_SCAN_PARTS = {".git", "__pycache__", ".engineering-method"}
+SKILL_FRONTMATTER_FIELDS = frozenset({"name", "description"})
+PLAIN_SCALAR_START_INDICATORS = frozenset("-?:,[]{}#&*!|>@`")
+DOUBLE_QUOTED_SCALAR = re.compile(
+    r'^"(?:[^"\\\r\n]|\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4}))*"$'
+)
+SINGLE_QUOTED_SCALAR = re.compile(r"^'(?:[^'\r\n]|'')*'$")
 
 
 def _relative(root: Path, path: Path) -> str:
@@ -111,6 +117,8 @@ def _validate_codex_manifest(
         errors.append(_error(relative, "skills is required"))
     elif not isinstance(skills, str) or not skills:
         errors.append(_error(relative, "skills must be a non-empty string"))
+    elif skills != "./skills/":
+        errors.append(_error(relative, "skills must be exactly ./skills/"))
     for field, expected_type in CODEX_REQUIRED_INTERFACE_FIELDS.items():
         value = interface.get(field)
         if field not in interface:
@@ -146,6 +154,26 @@ def _validate_codex_manifest(
             errors.append(_error(relative, f"{field} path {_relative(root, component_path)} is required"))
 
 
+def _is_supported_frontmatter_scalar(value: str) -> bool:
+    """Accept the narrow, dependency-free scalar subset used by skill metadata.
+
+    A scalar is non-empty plain text without YAML control syntax, a JSON-style
+    double-quoted string, or a YAML single-quoted string. Collections, blocks,
+    tags, anchors, aliases, and nested mappings are intentionally unsupported.
+    """
+    if not value:
+        return False
+    if value.startswith('"'):
+        return bool(DOUBLE_QUOTED_SCALAR.fullmatch(value) and value[1:-1].strip())
+    if value.startswith("'"):
+        return bool(SINGLE_QUOTED_SCALAR.fullmatch(value) and value[1:-1].strip())
+    return (
+        value[0] not in PLAIN_SCALAR_START_INDICATORS
+        and ": " not in value
+        and " #" not in value
+    )
+
+
 def _validate_skill_frontmatter(root: Path, errors: list[str]) -> None:
     skills_root = root / "skills"
     if not skills_root.is_dir():
@@ -164,13 +192,21 @@ def _validate_skill_frontmatter(root: Path, errors: list[str]) -> None:
         if closing == -1:
             errors.append(_error(relative, "YAML frontmatter must be closed"))
             continue
-        fields: dict[str, str] = {}
+        fields: set[str] = set()
         for line in content[4:closing].splitlines():
+            if not line.strip():
+                continue
             key, separator, value = line.partition(":")
-            if separator and key in {"name", "description"}:
-                fields[key] = value.strip().strip('"').strip("'")
-        for field in ("name", "description"):
-            if not fields.get(field):
+            if not separator or key not in SKILL_FRONTMATTER_FIELDS or key in fields:
+                errors.append(
+                    _error(relative, "frontmatter supports only unique name and description scalars")
+                )
+                continue
+            fields.add(key)
+            if not _is_supported_frontmatter_scalar(value.strip()):
+                errors.append(_error(relative, f"frontmatter {key} must be a supported scalar"))
+        for field in SKILL_FRONTMATTER_FIELDS:
+            if field not in fields:
                 errors.append(_error(relative, f"frontmatter {field} is required"))
 
 
