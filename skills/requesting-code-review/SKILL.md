@@ -29,8 +29,8 @@ Provide:
 - relevant verification commands and current output;
 - known constraints, decisions, and unresolved concerns.
 
-Use `code-reviewer.md` as the review contract. Keep the review read-only and do
-not give the reviewer unrelated session history.
+Use [code-reviewer.md](code-reviewer.md) as the review contract. Keep the review
+read-only and do not give the reviewer unrelated session history.
 
 ## Act on findings
 

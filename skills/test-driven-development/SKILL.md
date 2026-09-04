@@ -1,6 +1,6 @@
 ---
 name: test-driven-development
-description: "Use when implementing meaningful testable behavior or repairing a confirmed defect and before implementation code is written. Not for documentation, generated artifacts, or tests that only mirror implementation details."
+description: "Use when testable behavior that is new or a confirmed defect needs verified tests before implementation, or when a behavior-preserving refactor needs characterization. Not for documentation, generated artifacts, or implementation-mirroring tests."
 ---
 
 # Test-Driven Development
@@ -22,9 +22,16 @@ whose consumer-visible contract can be exercised by a meaningful automated test.
 
 ## The rule
 
-No implementation code for testable behavior exists before a test has been run
-and watched fail for the expected missing-behavior reason. If implementation was
-written first, remove it and begin from the behavior contract.
+New behavior and confirmed defects require verified red-green: run a meaningful
+test and observe the expected failure before writing the implementation change.
+Do not delete pre-existing code to manufacture a red state. Deletion applies
+only to your own uncommitted and safely recoverable production diff written
+before a required red test; restore that diff and begin from the behavior
+contract.
+
+A behavior-preserving refactor uses passing characterization tests before and
+after every step to cover the preserved contract. Do not invent a failing
+behavior when no behavior change is intended.
 
 ## Red green refactor
 
@@ -37,12 +44,13 @@ written first, remove it and begin from the behavior contract.
 3. **Green:** Write the minimal implementation needed for this behavior only.
 4. **Verify green:** Run the narrow test and relevant affected tests. Read the
    output and ensure there are no new errors or warnings.
-5. **Refactor:** Improve structure only while tests remain green, then start the
-   next behavior with a new failing test.
+5. **Refactor:** Improve structure only while characterization and affected
+   tests remain green. Start a new red cycle only for new or changed behavior.
 
 ## Test quality gate
 
-Read `writing-good-tests.md` before writing or changing tests. In particular:
+Read [writing-good-tests.md](writing-good-tests.md) before writing or changing
+tests. In particular:
 
 - name the bug-producing mutation the test would catch;
 - assert the consumer-visible result rather than a mock or private structure;
@@ -54,9 +62,11 @@ Read `writing-good-tests.md` before writing or changing tests. In particular:
 
 ## Completion
 
-The behavior is complete when the red failure and its reason were observed, the
-minimal implementation passes the new test, affected tests pass, and a realistic
-mutation of the implementation would make at least one test fail.
+New or changed behavior is complete when the red failure and its reason were
+observed, the minimal implementation passes the new test, affected tests pass,
+and a realistic mutation would make at least one test fail. A behavior-preserving
+refactor is complete when the characterization suite passed before and after the
+change and the externally visible contract is unchanged.
 
 ## Handoff
 

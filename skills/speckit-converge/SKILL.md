@@ -23,6 +23,11 @@ Before assessing or appending an artifact:
 5. Continue the recorded next action when it still matches current evidence;
    otherwise reconstruct the phase from git and canonical artifacts.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use after `orchestrated-implementation` when the implementation, as-built UML,

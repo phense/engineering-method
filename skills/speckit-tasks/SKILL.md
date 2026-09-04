@@ -22,6 +22,11 @@ Before creating or updating an artifact:
 5. Continue the recorded next action when it still matches current evidence;
    otherwise reconstruct the phase from git and canonical artifacts.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use when `spec.md`, `plan.md`, and required design-time architecture findings
@@ -45,7 +50,8 @@ before implementation starts.
 ## Produces
 
 `specs/<stable-feature-id>-<name>/tasks.md` from
-`templates/spec-kit/tasks.md`, with immutable sequential task IDs, explicit
+the [installed tasks template](../../templates/spec-kit/tasks.md), with
+immutable sequential task IDs, explicit
 paths, source requirement or finding references, dependency edges, and
 verification evidence.
 
@@ -68,7 +74,10 @@ dependencies are disjoint.
 ## Planning boundary
 
 This phase must not edit application code. It creates or repairs the task
-artifact only and never starts implementation in the same phase.
+artifact only, then must return control to the coordinator. When the original
+request authorizes end-to-end build work, the coordinator must continue the
+declared next phase without a new request unless a material decision, blocker,
+or authority boundary requires user input.
 
 ## Workflow
 

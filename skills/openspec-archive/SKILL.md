@@ -23,6 +23,11 @@ Before synchronization or movement:
 5. Continue the recorded next action when it still matches current evidence;
    otherwise reconstruct the phase from git and canonical artifacts.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use only when one active OpenSpec change is fully implemented, every task is
@@ -85,3 +90,32 @@ and move the completed change directory only after every gate passes.
    semantics.
 6. Ensure the archive destination does not exist, move the entire change, and
    verify the source is absent and destination complete.
+
+## Delta merge contract
+
+Before any main-spec write, validate stable requirement identities and reject
+duplicates or cross-operation conflicts. Stop on conflict and leave both the
+main spec and active change in place.
+
+If the main spec does not exist, only ADDED requirements are valid and Purpose
+must seed the new capability. MODIFIED or RENAMED is an error; REMOVED has no
+target and cannot justify creating an empty capability.
+
+For an existing main spec, apply operations in this deterministic order:
+RENAMED then REMOVED then MODIFIED then ADDED.
+
+1. RENAMED changes only the exact requirement heading from FROM to TO. The FROM
+   identity must exist and TO must not collide.
+2. REMOVED deletes the exact requirement block and requires the authored Reason
+   and Migration. Never leave an empty Requirements section or delete unrelated
+   prose.
+3. MODIFIED is a complete replacement block. Its stable requirement identity
+   must match the current block or the new TO identity from a rename, and it must
+   contain every surviving scenario. Missing scenarios are a hard error, not
+   permission to merge partial content.
+4. ADDED requires a new stable identity. An identical already-present block is
+   an already-synchronized no-op; differing content is a conflict.
+
+Recompose the main spec under one `## Requirements` section without delta
+operation headers, then re-read it and prove every operation before moving the
+change directory.

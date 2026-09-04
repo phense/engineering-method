@@ -61,10 +61,14 @@ Adapted in EM-003:
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/proposal.md`: adapted
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/design.md`: adapted
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/tasks.md`: adapted
+- `schemas/spec-driven/templates/spec.md` -> `templates/openspec/spec.md`: adapted
 - `skills/openspec-propose/SKILL.md` -> `skills/openspec-propose/SKILL.md`: adapted
 - `skills/openspec-apply-change/SKILL.md` -> `skills/openspec-apply/SKILL.md`: adapted
 - `skills/openspec-archive-change/SKILL.md` -> `skills/openspec-archive/SKILL.md`: adapted
-- `skills/openspec-propose/SKILL.md` -> `templates/openspec/escalation.md`: adapted
+
+Original in EM-003:
+
+- `templates/openspec/escalation.md`: original; no upstream text was adapted
 
 MIT License
 

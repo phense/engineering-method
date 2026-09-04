@@ -22,6 +22,11 @@ Before implementation:
 5. Continue the recorded next action when it still matches current evidence;
    otherwise reconstruct the phase from git and canonical artifacts.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use when one unambiguous active change has a complete proposal, design, delta
@@ -81,5 +86,6 @@ pause without marking it complete.
 
 If implementation reveals new-subsystem, architecture, risky-migration, or
 tightly coupled cross-component scope, stop application-code edits. Write the
-formal escalation record, make this executor inactive, and hand the preserved
-change to `speckit-specify`.
+formal escalation record with completed task IDs and root evidence, preserve the
+change path, mark `openspec-apply` inactive, and hand the traceable change to
+`speckit-specify`.

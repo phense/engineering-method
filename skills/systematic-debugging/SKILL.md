@@ -22,6 +22,11 @@ Before continuing an investigation:
 5. Continue from the last evidence-backed hypothesis or reconstruct the
    investigation from current failures and git history.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use for an observed technical failure: a repeatable bug, test regression, build
@@ -89,6 +94,10 @@ assumption before another attempt.
 A failed repair does not by itself justify a feature lifecycle. Reclassify only
 when evidence establishes that the requested result is an intentional contract
 change or architecture change:
+
+Before the destination lifecycle becomes active, mark
+`systematic-debugging` inactive and link the reproduction, root-cause evidence,
+and stable work identity from the destination artifact.
 
 - A bounded intentional contract change hands to `openspec-propose` with the
   reproduction and root-cause evidence.

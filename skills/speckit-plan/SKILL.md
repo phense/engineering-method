@@ -22,6 +22,11 @@ Before creating or updating an artifact:
 5. Continue the recorded next action when it still matches current evidence;
    otherwise reconstruct the phase from git and canonical artifacts.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use when `specs/<stable-feature-id>-<name>/spec.md` exists, satisfies its
@@ -42,8 +47,8 @@ requires that plan to be updated before architecture analysis.
 
 ## Produces
 
-- Required: `specs/<stable-feature-id>-<name>/plan.md` from
-  `templates/spec-kit/plan.md`.
+- Required: `specs/<stable-feature-id>-<name>/plan.md` from the
+  [installed plan template](../../templates/spec-kit/plan.md).
 - Conditional: `research.md`, `data-model.md`, `contracts/`, and
   `quickstart.md` only when a concrete unknown, data lifecycle, formal interface,
   or end-to-end validation need justifies that artifact.
@@ -70,7 +75,10 @@ flows. Recheck gates after design decisions.
 ## Planning boundary
 
 This phase must not edit application code. It may create only the declared
-feature planning artifacts and must stop after reporting them.
+feature planning artifacts, then must return control to the coordinator. When
+the original request authorizes end-to-end build work, the coordinator must
+continue the declared next phase without a new request unless a material
+decision, blocker, or authority boundary requires user input.
 
 ## Workflow
 

@@ -29,6 +29,8 @@ The following JSON is the authoritative, machine-readable handoff graph:
   },
   "edges": [
     {"from": "systematic-debugging", "to": "test-driven-development", "artifact": "reproduction and root-cause evidence"},
+    {"from": "systematic-debugging", "to": "openspec-propose", "artifact": "openspec/changes/<change-id>/proposal.md", "condition": "evidence establishes a bounded intentional contract change", "deactivates": "systematic-debugging", "traceability": "proposal links the reproduction and root-cause evidence"},
+    {"from": "systematic-debugging", "to": "speckit-specify", "artifact": "specs/<stable-feature-id>-<name>/spec.md", "condition": "evidence establishes an architecture change or large-feature scope", "deactivates": "systematic-debugging", "traceability": "feature spec links the reproduction and root-cause evidence"},
     {"from": "test-driven-development", "to": "verification-before-completion", "artifact": "verified red-green evidence"},
     {"from": "openspec-propose", "to": "openspec-apply", "artifact": "openspec/changes/<change-id>/tasks.md"},
     {"from": "openspec-apply", "to": "openspec-archive", "artifact": "completed tasks and fresh verification"},
@@ -38,10 +40,14 @@ The following JSON is the authoritative, machine-readable handoff graph:
     {"from": "speckit-tasks", "to": "orchestrated-implementation", "artifact": "specs/<stable-feature-id>-<name>/tasks.md"},
     {"from": "orchestrated-implementation", "to": "speckit-converge", "artifact": "implementation, as-built models, integration results, and review state"},
     {"from": "speckit-converge", "to": "verification-before-completion", "artifact": "closed or appended convergence findings"},
-    {"from": "openspec-propose", "to": "speckit-specify", "artifact": "openspec/changes/<change-id>/escalation.md", "condition": "status: escalated"}
+    {"from": "openspec-propose", "to": "speckit-specify", "artifact": "openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-propose", "traceability": "escalation record preserves the change path and new feature ID"},
+    {"from": "openspec-apply", "to": "speckit-specify", "artifact": "openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-apply", "traceability": "escalation record preserves completed task IDs, change path, and new feature ID"}
   ]
 }
 ```
 
-The escalation edge is exceptional: preserve the OpenSpec change, write the
-formal escalation record, and make its executor inactive before Spec Kit starts.
+Reclassification and escalation edges are exceptional. Deactivate the prior
+lifecycle before the destination becomes active and preserve the source
+evidence, stable IDs, and artifact path named by the edge. For OpenSpec,
+preserve the change and write the formal escalation record before Spec Kit
+starts.

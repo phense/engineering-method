@@ -22,6 +22,11 @@ Before creating or updating an artifact:
 5. Continue the recorded next action when it still matches current evidence;
    otherwise reconstruct the phase from git and canonical artifacts.
 
+Checkpoint initialization and writes become operational only after EM-002 and
+Task 6 integration. Until then, use existing checkpoint files read-only when
+present, recover from repository artifacts when absent, and do not claim
+checkpoint continuity is operational.
+
 ## Trigger
 
 Use for an intentional, bounded behavior change to an existing capability when
@@ -52,8 +57,11 @@ Create one kebab-case `<change-id>` directory containing:
 - `openspec/changes/<change-id>/tasks.md`
 - `openspec/changes/<change-id>/specs/<capability>/spec.md`
 
-Use the three templates under `templates/openspec/`. The capability spec records
-only added, modified, removed, or renamed requirements and preserves the
+Use the installed [proposal](../../templates/openspec/proposal.md),
+[design](../../templates/openspec/design.md),
+[tasks](../../templates/openspec/tasks.md), and
+[delta-spec](../../templates/openspec/spec.md) templates. The capability spec
+records only added, modified, removed, or renamed requirements and preserves the
 capability's full existing path.
 
 ## Completion
@@ -73,8 +81,11 @@ escalation check remains negative.
 
 ## Planning boundary
 
-This phase must not edit application code. A request that includes implementation
-still authorizes planning only; stop after reporting the artifact paths.
+This phase must not edit application code. After verifying the artifacts, return
+control to the coordinator. When the original request authorizes end-to-end
+change work, the coordinator must continue the declared next phase without a
+new request unless a material decision, blocker, or authority boundary requires
+user input.
 
 ## Workflow
 
@@ -92,9 +103,10 @@ If evidence reveals a new subsystem, architecture work, a risky migration,
 tightly coupled multi-component scope, or material architectural uncertainty:
 
 1. Stop planning the Brownfield delta.
-2. Create `openspec/changes/<change-id>/escalation.md` from
-   `templates/openspec/escalation.md`.
-3. Preserve the entire change directory and record `status: escalated`, the
-   evidence-backed reason, and the new Spec Kit feature ID and path.
+2. Create `openspec/changes/<change-id>/escalation.md` from the
+   [installed escalation template](../../templates/openspec/escalation.md).
+3. Mark `openspec-propose` inactive, preserve the entire change directory, and
+   record `status: escalated`, the evidence-backed reason, and the new Spec Kit
+   feature ID and path.
 4. Do not enter `openspec-apply`; begin `speckit-specify` from the recorded
    handoff.

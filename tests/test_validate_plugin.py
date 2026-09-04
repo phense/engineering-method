@@ -340,6 +340,82 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertIn("ERROR skills/example/SKILL.md: YAML frontmatter is required", errors)
 
+    def test_reports_missing_and_escaping_bundled_skill_resources(self) -> None:
+        """A local skill link must resolve to an existing path inside the plugin root."""
+        cases = (
+            (
+                "[missing resource](missing.md)",
+                "ERROR skills/example/SKILL.md: bundled resource missing.md is required",
+            ),
+            (
+                "[escaping resource](../../../outside.md)",
+                "ERROR skills/example/SKILL.md: bundled resource ../../../outside.md must stay within the repository",
+            ),
+        )
+        for reference, expected in cases:
+            with self.subTest(reference=reference), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.make_repository(root)
+                skill_path = root / "skills/example/SKILL.md"
+                skill_path.write_text(skill_path.read_text(encoding="utf-8") + reference + "\n", encoding="utf-8")
+
+                errors = validate_repository(root)
+
+            self.assertIn(expected, errors)
+
+    def test_accepts_existing_bundled_skill_resource(self) -> None:
+        """A valid skill-relative link must resolve from the document directory."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            skill_path = root / "skills/example/SKILL.md"
+            resource = root / "templates/example.md"
+            resource.parent.mkdir(parents=True)
+            resource.write_text("example\n", encoding="utf-8")
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8")
+                + "[resource](../../templates/example.md)\n",
+                encoding="utf-8",
+            )
+
+            errors = validate_repository(root)
+
+        self.assertEqual([], errors)
+
+    def test_reports_stale_locked_destination_hash(self) -> None:
+        """An adapted destination changed without a lock update must fail validation."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            lock_path = root / "third-party/sources.lock.json"
+            self.write_json(
+                lock_path,
+                {
+                    "schema_version": 1,
+                    "sources": [
+                        {
+                            "id": "example-upstream",
+                            "files": [
+                                {
+                                    "source_path": "source.md",
+                                    "destination_path": "skills/example/SKILL.md",
+                                    "source_sha256": "1" * 64,
+                                    "destination_sha256": "0" * 64,
+                                    "modification_status": "adapted",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+
+            errors = validate_repository(root)
+
+        self.assertIn(
+            "ERROR third-party/sources.lock.json: destination hash mismatch for skills/example/SKILL.md",
+            errors,
+        )
+
     def test_enforces_safe_skill_frontmatter_scalars(self) -> None:
         """Only non-empty plain or balanced quoted name and description scalars are valid."""
         valid_frontmatter = (
