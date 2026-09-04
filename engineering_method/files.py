@@ -88,6 +88,48 @@ def atomic_write_text(path: Path, content: str) -> None:
             temporary_path.unlink()
 
 
+def _staged_file(path: Path, data: bytes, *, role: str) -> Path:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(
+        prefix=f".{path.name}.{role}.", suffix=".tmp", dir=path.parent
+    )
+    temporary_path = Path(temporary_name)
+    with os.fdopen(descriptor, "wb") as handle:
+        handle.write(data)
+        handle.flush()
+        os.fsync(handle.fileno())
+    return temporary_path
+
+
+def atomic_write_bundle(replacements: Mapping[Path, bytes]) -> None:
+    """Replace a small related file set with rollback if a later replacement fails."""
+    if not replacements:
+        return
+    staged: dict[Path, Path] = {}
+    backups: dict[Path, Path | None] = {}
+    replaced: list[Path] = []
+    try:
+        for path, data in replacements.items():
+            staged[path] = _staged_file(path, data, role="new")
+            backups[path] = _staged_file(path, path.read_bytes(), role="old") if path.exists() else None
+        try:
+            for path in replacements:
+                os.replace(staged[path], path)
+                replaced.append(path)
+        except OSError:
+            for path in reversed(replaced):
+                backup = backups[path]
+                if backup is None:
+                    path.unlink(missing_ok=True)
+                else:
+                    os.replace(backup, path)
+                    backups[path] = None
+            raise
+    finally:
+        for temporary_path in (*staged.values(), *(path for path in backups.values() if path)):
+            temporary_path.unlink(missing_ok=True)
+
+
 def append_jsonl(path: Path, record: Mapping[str, Any]) -> None:
     """Append exactly one fsynced JSON object and newline per call."""
     path.parent.mkdir(parents=True, exist_ok=True)

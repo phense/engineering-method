@@ -1,17 +1,87 @@
-"""Versioned compact-continuity state with append-only safe events."""
+"""Versioned compact-continuity state, events, and evidence-based recovery."""
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, fields, replace
+import json
 from pathlib import Path
-from typing import Collection, Mapping
+import re
+import subprocess
+from typing import Collection, Mapping, Protocol
 
-from .files import append_jsonl, atomic_write_json, atomic_write_text, require_repo_relative
-from .models import utc_timestamp
+from .backlog import load_backlog_history
+from .files import (
+    append_jsonl,
+    atomic_write_bundle,
+    atomic_write_json,
+    atomic_write_text,
+    require_repo_relative,
+    require_safe_component,
+)
+from .models import RFC_3339_UTC_PATTERN, TaskStatus, parse_task_id, utc_timestamp
 
 
-EVENT_KINDS = frozenset({"workflow_started", "phase_changed", "slice_started", "decision_recorded", "agent_dispatched", "agent_completed", "verification_failed", "verification_passed", "workflow_completed"})
-SENSITIVE = frozenset({"token", "password", "secret", "authorization", "cookie"})
+SCHEMA_VERSION = 1
+GIT_TIMEOUT_SECONDS = 15
+EVENT_KINDS = frozenset(
+    {
+        "workflow_started",
+        "phase_changed",
+        "slice_started",
+        "decision_recorded",
+        "agent_dispatched",
+        "agent_completed",
+        "verification_failed",
+        "verification_passed",
+        "workflow_completed",
+    }
+)
+PRODUCER_EVENT_FIELDS = frozenset({"schema_version", "timestamp", "work_id", "sequence"})
+SENSITIVE_TERMS = ("token", "password", "secret", "authorization", "cookie")
+SENSITIVE_VALUE_PATTERN = re.compile(
+    r"(?i)(?:\b[A-Za-z0-9_-]*(?:token|password|secret|authorization|cookie)"
+    r"[A-Za-z0-9_-]*\s*[:=]\s*\S+|"
+    r"\bbearer\s+\S+|\bgh[pousr]_[A-Za-z0-9_]+)"
+)
+TUPLE_FIELDS = frozenset(
+    {
+        "uml_paths",
+        "report_paths",
+        "artifact_paths",
+        "completed_work",
+        "active_work",
+        "pending_work",
+        "active_agent_ids",
+        "completed_agent_ids",
+        "open_findings",
+        "failing_checks",
+    }
+)
+
+
+def _single_line(value: object, *, field: str, allow_empty: bool = False) -> str:
+    if not isinstance(value, str) or (not allow_empty and not value.strip()):
+        raise ValueError(f"{field} must be {'text' if allow_empty else 'non-empty text'}")
+    if "\n" in value or "\r" in value:
+        raise ValueError(f"{field} must not contain a newline")
+    return value
+
+
+def _contains_sensitive(value: object) -> bool:
+    if isinstance(value, Mapping):
+        for key, item in value.items():
+            lowered = str(key).lower()
+            if any(term in lowered for term in SENSITIVE_TERMS) or _contains_sensitive(item):
+                return True
+        return False
+    if isinstance(value, (tuple, list, set)):
+        return any(_contains_sensitive(item) for item in value)
+    return isinstance(value, str) and SENSITIVE_VALUE_PATTERN.search(value) is not None
+
+
+def reject_sensitive_content(value: object, *, artifact: str) -> None:
+    if _contains_sensitive(value):
+        raise ValueError(f"{artifact} contains sensitive content")
 
 
 @dataclass(frozen=True)
@@ -20,28 +90,158 @@ class RunState:
     lifecycle: str
     phase: str
     next_action: str
-    completed_slices: tuple[str, ...] = ()
-    active_agent_ids: tuple[str, ...] = ()
+    backlog_id: str | None = None
+    issue_id: int | None = None
+    feature_id: str | None = None
+    change_id: str | None = None
+    current_slice: str | None = None
+    spec_path: str | None = None
+    plan_path: str | None = None
+    tasks_path: str | None = None
+    uml_paths: tuple[str, ...] = ()
+    report_paths: tuple[str, ...] = ()
     artifact_paths: tuple[str, ...] = ()
-    schema_version: int = 1
+    worktree_path: str = "."
+    base_commit: str = ""
+    last_observed_head: str = ""
+    completed_work: tuple[str, ...] = ()
+    active_work: tuple[str, ...] = ()
+    pending_work: tuple[str, ...] = ()
+    active_agent_ids: tuple[str, ...] = ()
+    completed_agent_ids: tuple[str, ...] = ()
+    open_findings: tuple[str, ...] = ()
+    failing_checks: tuple[str, ...] = ()
+    verification_command: str | None = None
+    verification_timestamp: str | None = None
+    verification_output_digest: str | None = None
+    schema_version: int = SCHEMA_VERSION
 
     def __post_init__(self) -> None:
-        if self.schema_version != 1 or not self.work_id or "/" in self.work_id or ".." in self.work_id:
-            raise ValueError("invalid run state")
-        for path in self.artifact_paths:
+        if self.schema_version != SCHEMA_VERSION:
+            raise ValueError("invalid run schema version")
+        require_safe_component(self.work_id, field="work ID")
+        _single_line(self.lifecycle, field="lifecycle")
+        _single_line(self.phase, field="phase")
+        _single_line(self.next_action, field="next action")
+        if self.backlog_id is not None:
+            parse_task_id(self.backlog_id)
+        if self.issue_id is not None and (type(self.issue_id) is not int or self.issue_id <= 0):
+            raise ValueError("issue ID must be a positive integer")
+        if self.feature_id is not None and re.fullmatch(r"F-0*[1-9][0-9]*", self.feature_id) is None:
+            raise ValueError("feature ID must use the F-NNN form")
+        if self.change_id is not None:
+            require_safe_component(self.change_id, field="change ID")
+        if self.current_slice is not None:
+            _single_line(self.current_slice, field="current slice")
+        for path in self.all_artifact_paths:
             require_repo_relative(path)
+        _single_line(self.worktree_path, field="worktree path")
+        for field_name in ("base_commit", "last_observed_head"):
+            _single_line(getattr(self, field_name), field=field_name, allow_empty=True)
+        for field_name in TUPLE_FIELDS:
+            values = getattr(self, field_name)
+            if not isinstance(values, tuple):
+                raise ValueError(f"{field_name} must be a tuple")
+            for value in values:
+                _single_line(value, field=field_name)
+        verification = (
+            self.verification_command,
+            self.verification_timestamp,
+            self.verification_output_digest,
+        )
+        if any(value is not None for value in verification):
+            if any(value is None for value in verification):
+                raise ValueError("latest successful verification fields must be recorded together")
+            _single_line(self.verification_command, field="verification command")
+            if not RFC_3339_UTC_PATTERN.fullmatch(self.verification_timestamp or ""):
+                raise ValueError("verification timestamp must be UTC RFC-3339")
+            if re.fullmatch(r"[0-9a-f]{64}", self.verification_output_digest or "") is None:
+                raise ValueError("verification output digest must be lowercase SHA-256")
+        reject_sensitive_content(asdict(self), artifact="run state")
+
+    @property
+    def all_artifact_paths(self) -> tuple[str, ...]:
+        optional = tuple(
+            path for path in (self.spec_path, self.plan_path, self.tasks_path) if path is not None
+        )
+        return optional + self.uml_paths + self.report_paths + self.artifact_paths
+
+
+@dataclass(frozen=True)
+class GitSnapshot:
+    worktree_path: str
+    base_commit_exists: bool
+    head_commit: str
+
+
+class GitProbe(Protocol):
+    def inspect(self, root: Path, state: RunState) -> GitSnapshot: ...
+
+
+class CanonicalWorkProbe(Protocol):
+    def status(self, root: Path, state: RunState) -> TaskStatus | None: ...
+
+
+class SubprocessGitProbe:
+    """Inspect the actual worktree and commits with bounded local git commands."""
+
+    def _run(self, root: Path, *arguments: str) -> subprocess.CompletedProcess[str]:
+        try:
+            result = subprocess.run(
+                ("git", *arguments),
+                cwd=root,
+                text=True,
+                capture_output=True,
+                check=False,
+                timeout=GIT_TIMEOUT_SECONDS,
+            )
+        except subprocess.TimeoutExpired as error:
+            raise ValueError("git recovery probe timed out") from error
+        except OSError as error:
+            raise ValueError("git recovery probe is unavailable") from error
+        return result
+
+    def inspect(self, root: Path, state: RunState) -> GitSnapshot:
+        worktree = self._run(root, "rev-parse", "--show-toplevel")
+        head = self._run(root, "rev-parse", "HEAD")
+        if worktree.returncode != 0 or head.returncode != 0:
+            raise ValueError("cannot inspect recovery worktree")
+        base_exists = True
+        if state.base_commit:
+            base = self._run(root, "cat-file", "-e", f"{state.base_commit}^{{commit}}")
+            base_exists = base.returncode == 0
+        return GitSnapshot(
+            worktree.stdout.strip(), base_exists, head.stdout.strip()
+        )
+
+
+class BacklogCanonicalProbe:
+    """Read completion from the repository's active/cache backlog plus local archive."""
+
+    def status(self, root: Path, state: RunState) -> TaskStatus | None:
+        identifier = state.backlog_id or state.work_id
+        backlog_path = root / "BACKLOG.md"
+        if not backlog_path.is_file():
+            return None
+        document = load_backlog_history(backlog_path)
+        entry = next((item for item in document.items if item.id == identifier), None)
+        return entry.status if entry is not None else None
 
 
 @dataclass(frozen=True)
 class RecoveryResult:
-    completed_slices: tuple[str, ...]
+    state: RunState
     redispatchable_agent_ids: tuple[str, ...]
     next_action: str
+    canonical_status: TaskStatus | None
+
+    @property
+    def completed_work(self) -> tuple[str, ...]:
+        return self.state.completed_work
 
 
 def _run(root: Path, work_id: str) -> Path:
-    if not work_id or "/" in work_id or ".." in work_id:
-        raise ValueError("invalid work id")
+    require_safe_component(work_id, field="work ID")
     return root / ".engineering-method" / "runs" / work_id
 
 
@@ -49,59 +249,295 @@ def _state_payload(state: RunState) -> dict[str, object]:
     return asdict(state)
 
 
-def create_run(root: Path, state: RunState, resume_markdown: str, decisions_markdown: str = "") -> Path:
+def _state_bytes(state: RunState) -> bytes:
+    return (
+        json.dumps(_state_payload(state), ensure_ascii=False, indent=2, sort_keys=True) + "\n"
+    ).encode("utf-8")
+
+
+def create_run(
+    root: Path,
+    state: RunState,
+    resume_markdown: str,
+    decisions_markdown: str = "",
+    *,
+    replace_existing: bool = False,
+) -> Path:
+    reject_sensitive_content(resume_markdown, artifact="resume")
+    reject_sensitive_content(decisions_markdown, artifact="decisions")
     run = _run(root, state.work_id)
+    if run.exists() and not replace_existing:
+        raise ValueError(f"run already exists: {state.work_id}")
     run.mkdir(parents=True, exist_ok=True)
-    (run / "agent-reports").mkdir(exist_ok=True)
-    atomic_write_json(run / "state.json", _state_payload(state))
-    atomic_write_text(run / "resume.md", resume_markdown)
-    atomic_write_text(run / "decisions.md", decisions_markdown)
-    (run / "events.jsonl").touch(exist_ok=True)
+    reports = run / "agent-reports"
+    reports.mkdir(exist_ok=True)
+    if replace_existing:
+        for report in reports.iterdir():
+            if not report.is_file():
+                raise ValueError("agent report directory contains an unsafe entry")
+            report.unlink()
+    atomic_write_bundle(
+        {
+            run / "state.json": _state_bytes(state),
+            run / "resume.md": resume_markdown.encode("utf-8"),
+            run / "decisions.md": decisions_markdown.encode("utf-8"),
+            run / "events.jsonl": b"",
+        }
+    )
     return run
 
 
-def checkpoint(root: Path, work_id: str, state: RunState, resume_markdown: str) -> None:
-    if work_id != state.work_id:
-        raise ValueError("checkpoint work id does not match state")
+def _upgrade_payload(payload: object) -> tuple[dict[str, object], bool]:
+    if not isinstance(payload, dict):
+        raise ValueError("run state must be a JSON object")
+    version = payload.get("schema_version", 0)
+    if type(version) is not int:
+        raise ValueError("run schema version must be an integer")
+    if version > SCHEMA_VERSION:
+        raise ValueError("future run schema is unsupported")
+    upgraded = dict(payload)
+    changed = version < SCHEMA_VERSION
+    if version == 0:
+        completed = upgraded.pop("completed_slices", upgraded.get("completed_work", []))
+        upgraded["completed_work"] = completed
+        upgraded["schema_version"] = SCHEMA_VERSION
+    for field_name in TUPLE_FIELDS:
+        if field_name in upgraded and isinstance(upgraded[field_name], list):
+            upgraded[field_name] = tuple(upgraded[field_name])
+    return upgraded, changed
+
+
+def load_run_state(
+    root: Path, work_id: str, *, persist_upgrade: bool = False
+) -> RunState:
     run = _run(root, work_id)
-    if not run.is_dir():
-        raise ValueError("run does not exist")
-    atomic_write_json(run / "state.json", _state_payload(state))
-    atomic_write_text(run / "resume.md", resume_markdown)
+    path = run / "state.json"
+    if not run.is_dir() or not path.is_file():
+        raise ValueError("run does not exist or has no valid state")
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as error:
+        raise ValueError("run state is unreadable or malformed") from error
+    upgraded, changed = _upgrade_payload(payload)
+    allowed = {field.name for field in fields(RunState)}
+    unknown = set(upgraded) - allowed
+    if unknown:
+        raise ValueError(f"run state contains unknown fields: {', '.join(sorted(unknown))}")
+    try:
+        state = RunState(**upgraded)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"run state is invalid: {error}") from error
+    if state.work_id != work_id:
+        raise ValueError("run directory and state work IDs disagree")
+    if changed and persist_upgrade:
+        atomic_write_json(path, _state_payload(state))
+    return state
 
 
-def _unsafe(value: object) -> bool:
-    if isinstance(value, Mapping):
-        return any(str(key).lower() in SENSITIVE or _unsafe(item) for key, item in value.items())
-    if isinstance(value, (tuple, list)):
-        return any(_unsafe(item) for item in value)
-    return False
+def checkpoint(
+    root: Path,
+    work_id: str,
+    state: RunState,
+    resume_markdown: str | None = None,
+) -> None:
+    if work_id != state.work_id:
+        raise ValueError("checkpoint work ID does not match state")
+    run = _run(root, work_id)
+    load_run_state(root, work_id)
+    resume_path = run / "resume.md"
+    if resume_markdown is None:
+        if not resume_path.is_file():
+            raise ValueError("run resume does not exist")
+        resume_markdown = resume_path.read_text(encoding="utf-8")
+    reject_sensitive_content(resume_markdown, artifact="resume")
+    atomic_write_bundle(
+        {
+            run / "state.json": _state_bytes(state),
+            resume_path: resume_markdown.encode("utf-8"),
+        }
+    )
 
 
-def append_event(root: Path, work_id: str, event: Mapping[str, object]) -> dict[str, object]:
-    kind = event.get("kind")
-    if kind not in EVENT_KINDS or _unsafe(event):
-        raise ValueError("event kind is invalid or contains sensitive data")
-    artifact = event.get("artifact")
-    if artifact is not None:
-        require_repo_relative(str(artifact))
-    payload = {"schema_version": 1, "timestamp": utc_timestamp(), **event}
-    append_jsonl(_run(root, work_id) / "events.jsonl", payload)
+def _event_sequence(path: Path) -> int:
+    if not path.exists():
+        return 1
+    count = 0
+    for line in path.read_text(encoding="utf-8").splitlines():
+        try:
+            payload = json.loads(line)
+        except json.JSONDecodeError as error:
+            raise ValueError("event stream contains malformed JSON") from error
+        if not isinstance(payload, dict):
+            raise ValueError("event stream contains an invalid record")
+        count += 1
+    return count + 1
+
+
+def _validate_event_paths(event: Mapping[str, object]) -> None:
+    for key, value in event.items():
+        if key == "artifact" or key.endswith("_path"):
+            if not isinstance(value, str):
+                raise ValueError("event artifact paths must be text")
+            require_repo_relative(value)
+        elif key.endswith("_paths"):
+            if not isinstance(value, (tuple, list)):
+                raise ValueError("event artifact path collections must be lists")
+            for path in value:
+                if not isinstance(path, str):
+                    raise ValueError("event artifact paths must be text")
+                require_repo_relative(path)
+
+
+def append_event(
+    root: Path, work_id: str, event: Mapping[str, object]
+) -> dict[str, object]:
+    load_run_state(root, work_id)
+    if not isinstance(event, Mapping):
+        raise ValueError("event must be an object")
+    if PRODUCER_EVENT_FIELDS & set(event):
+        raise ValueError("event contains producer-owned fields")
+    if event.get("kind") not in EVENT_KINDS:
+        raise ValueError("event kind is invalid")
+    reject_sensitive_content(event, artifact="event")
+    _validate_event_paths(event)
+    if "status" in event and event["status"] not in {
+        "open",
+        "in_progress",
+        "complete",
+        "blocked",
+        "pending",
+        "active",
+        "passed",
+        "failed",
+    }:
+        raise ValueError("event status is invalid")
+    path = _run(root, work_id) / "events.jsonl"
+    payload = {
+        **event,
+        "schema_version": SCHEMA_VERSION,
+        "work_id": work_id,
+        "timestamp": utc_timestamp(),
+        "sequence": _event_sequence(path),
+    }
+    append_jsonl(path, payload)
     return payload
 
 
-def recover_run(root: Path, work_id: str, *, git_probe, canonical_probe, live_agent_ids: Collection[str]) -> RecoveryResult:
-    import json
-    payload = json.loads((_run(root, work_id) / "state.json").read_text(encoding="utf-8"))
-    version = payload.get("schema_version", 0)
-    if version > 1:
-        raise ValueError("future run schema is unsupported")
-    if version == 0:
-        payload["schema_version"] = 1
-    for field in ("completed_slices", "active_agent_ids", "artifact_paths"):
-        if field in payload:
-            payload[field] = tuple(payload[field])
-    state = RunState(**payload)
-    git_probe()
-    canonical_probe(work_id)
-    return RecoveryResult(state.completed_slices, tuple(agent for agent in state.active_agent_ids if agent not in live_agent_ids), state.next_action)
+def write_agent_report(root: Path, work_id: str, agent_id: str, markdown: str) -> Path:
+    load_run_state(root, work_id)
+    require_safe_component(agent_id, field="agent ID")
+    reject_sensitive_content(markdown, artifact="agent report")
+    path = _run(root, work_id) / "agent-reports" / f"{agent_id}.md"
+    atomic_write_text(path, markdown)
+    return path
+
+
+def _validate_recovery_artifacts(root: Path, state: RunState) -> None:
+    repository = root.resolve()
+    for relative in state.all_artifact_paths:
+        artifact = (root / relative).resolve()
+        try:
+            artifact.relative_to(repository)
+        except ValueError as error:
+            raise ValueError(f"recovery artifact escapes worktree: {relative}") from error
+        if not artifact.exists():
+            raise ValueError(f"recovery artifact does not exist: {relative}")
+
+
+def _read_recovery_text(run: Path, name: str, *, required: bool) -> str:
+    path = run / name
+    if not path.is_file():
+        if required:
+            raise ValueError(f"run {name.removesuffix('.md')} does not exist")
+        return ""
+    try:
+        content = path.read_text(encoding="utf-8")
+    except OSError as error:
+        raise ValueError(f"run {name} cannot be read") from error
+    reject_sensitive_content(content, artifact=name)
+    return content
+
+
+def recover_run(
+    root: Path,
+    work_id: str,
+    *,
+    git_probe: GitProbe,
+    canonical_probe: CanonicalWorkProbe,
+    live_agent_ids: Collection[str],
+) -> RecoveryResult:
+    run = _run(root, work_id)
+    state = load_run_state(root, work_id, persist_upgrade=True)
+    resume = _read_recovery_text(run, "resume.md", required=True)
+    _read_recovery_text(run, "decisions.md", required=False)
+    reports = run / "agent-reports"
+    if not reports.is_dir():
+        raise ValueError("run agent reports directory does not exist")
+    for report in reports.iterdir():
+        if not report.is_file():
+            raise ValueError("run agent reports contain an unsafe entry")
+        reject_sensitive_content(report.read_text(encoding="utf-8"), artifact="agent report")
+    _validate_recovery_artifacts(root, state)
+
+    snapshot = git_probe.inspect(root, state)
+    expected_worktree = (
+        Path(state.worktree_path)
+        if Path(state.worktree_path).is_absolute()
+        else root / state.worktree_path
+    ).resolve()
+    if Path(snapshot.worktree_path).resolve() != expected_worktree:
+        raise ValueError("recorded and actual recovery worktree disagree")
+    if state.base_commit and not snapshot.base_commit_exists:
+        raise ValueError("recorded recovery base commit does not exist")
+    if not snapshot.head_commit:
+        raise ValueError("recovery git head is empty")
+
+    canonical_status = canonical_probe.status(root, state)
+    live = set(live_agent_ids)
+    if canonical_status is TaskStatus.COMPLETE:
+        completed = list(state.completed_work)
+        for work in (*state.active_work, *((state.current_slice,) if state.current_slice else ())):
+            if work not in completed:
+                completed.append(work)
+        pending = tuple(
+            work
+            for work in state.pending_work
+            if work not in completed and "complete" not in work.lower()
+        )
+        next_action = pending[0] if pending else "Run final verification and prepare handoff"
+        recovered_state = replace(
+            state,
+            last_observed_head=snapshot.head_commit,
+            completed_work=tuple(completed),
+            active_work=(),
+            pending_work=pending,
+            active_agent_ids=(),
+            next_action=next_action,
+        )
+        redispatchable: tuple[str, ...] = ()
+    else:
+        redispatchable = tuple(agent for agent in state.active_agent_ids if agent not in live)
+        still_active = tuple(agent for agent in state.active_agent_ids if agent in live)
+        repeats_completed = any(
+            completed.lower() in state.next_action.lower() for completed in state.completed_work
+        )
+        if redispatchable:
+            next_action = "Redispatch unavailable agents: " + ", ".join(redispatchable)
+        elif repeats_completed:
+            next_action = next(
+                (work for work in state.pending_work if work not in state.completed_work),
+                "Run final verification and prepare handoff",
+            )
+        else:
+            next_action = state.next_action
+        recovered_state = replace(
+            state,
+            last_observed_head=snapshot.head_commit,
+            active_agent_ids=still_active,
+            next_action=next_action,
+        )
+    if recovered_state != state:
+        checkpoint(root, work_id, recovered_state, resume)
+    return RecoveryResult(
+        recovered_state, redispatchable, recovered_state.next_action, canonical_status
+    )
