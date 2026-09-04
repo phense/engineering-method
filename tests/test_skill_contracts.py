@@ -628,6 +628,36 @@ class QualitySkillContractTests(unittest.TestCase):
         ):
             self.assertIn(phrase, content)
 
+    def test_tdd_starting_evidence_is_consistent_for_every_work_mode(self) -> None:
+        """No global red-test wording may contradict green-green refactor evidence."""
+        markdown = read("skills/test-driven-development/SKILL.md")
+        mode_rows = {
+            cells[0]: cells[1]
+            for line in markdown.splitlines()
+            if line.startswith("|")
+            and len(cells := [cell.strip() for cell in line.strip("|").split("|")]) == 2
+            and cells[0] not in {"Work mode", "---"}
+        }
+        self.assertEqual(
+            {
+                "New or changed behavior": "Verified red then green",
+                "Confirmed defect": "Verified regression red then green",
+                "Behavior-preserving refactor": "Passing characterization tests before and after",
+            },
+            mode_rows,
+        )
+
+        sentences = re.split(r"(?<=[.!?])(?:\s+|\n+-\s+)", normalized(markdown))
+        red_phrases = ("watch it fail", "test passed before implementation")
+        red_qualifiers = ("new or changed behavior", "confirmed defect", "red-green mode")
+        for sentence in sentences:
+            if any(phrase in sentence for phrase in red_phrases):
+                with self.subTest(sentence=sentence):
+                    self.assertTrue(
+                        any(qualifier in sentence for qualifier in red_qualifiers),
+                        f"unqualified red-test rule contradicts refactor mode: {sentence}",
+                    )
+
     def test_verification_requires_fresh_output_before_every_success_claim(self) -> None:
         """Prior or partial output must not support a pass, fix, or completion claim."""
         content = normalized(read("skills/verification-before-completion/SKILL.md"))
@@ -798,6 +828,23 @@ class ProvenanceContractTests(unittest.TestCase):
             "`templates/openspec/escalation.md`: original",
             read("THIRD_PARTY_NOTICES.md"),
         )
+
+    def test_plan_pins_the_delta_template_source_declared_by_the_lock(self) -> None:
+        """The approved source list must cover every newly selected OpenSpec input."""
+        plan = read("docs/plans/EM-003-curated-workflow-skills.md")
+        lock = json.loads(read("third-party/sources.lock.json"))
+        delta_mapping = next(
+            mapping
+            for source in lock["sources"]
+            if source["id"] == "openspec"
+            for mapping in source["files"]
+            if mapping.get("destination_path") == "templates/openspec/spec.md"
+        )
+        self.assertEqual("schemas/spec-driven/templates/spec.md", delta_mapping["source_path"])
+        openspec_row = next(
+            line for line in plan.splitlines() if line.startswith("| OpenSpec |")
+        )
+        self.assertIn(f"`{delta_mapping['source_path']}`", openspec_row)
 
 
 if __name__ == "__main__":

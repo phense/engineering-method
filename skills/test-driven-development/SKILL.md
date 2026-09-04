@@ -5,8 +5,19 @@ description: "Use when testable behavior that is new or a confirmed defect needs
 
 # Test-Driven Development
 
-Write one behavior test, watch it fail for the expected reason, then write the
-minimal implementation that makes it pass.
+Choose the starting evidence from the work's intent:
+
+| Work mode | Required starting evidence |
+|---|---|
+| New or changed behavior | Verified red then green |
+| Confirmed defect | Verified regression red then green |
+| Behavior-preserving refactor | Passing characterization tests before and after |
+
+For new or changed behavior and a confirmed defect, write one behavior test,
+watch it fail for the expected reason, then write the minimal implementation
+that makes it pass. A behavior-preserving refactor begins and ends green; it is
+explicitly exempt from a failing-test requirement because no behavior change is
+intended.
 
 ## Trigger
 
@@ -76,7 +87,8 @@ passing. An unexpected failure during the cycle returns to
 
 ## Warning signs
 
-- The test passed before implementation.
+- In red-green mode for new or changed behavior or a confirmed defect, the test
+  passed before implementation.
 - Setup and assertion compute the same value.
 - The assertion proves a mock exists rather than behavior works.
 - The test checks prose or source text instead of executing an artifact.
