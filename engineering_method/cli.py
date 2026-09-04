@@ -520,7 +520,9 @@ def _continuity_command(
         unknown = set(options) - {"--live-agents"}
         if unknown:
             raise ValueError("recover received unsupported options")
-        live_agents = _csv(options.get("--live-agents"), option="--live-agents")
+        if "--live-agents" not in options:
+            raise ValueError("recover requires --live-agents from an explicit host observation")
+        live_agents = _csv(options["--live-agents"], option="--live-agents")
         backlog = load_backlog(root / "BACKLOG.md")
         canonical_probe = (
             GitHubCanonicalProbe(

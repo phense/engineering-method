@@ -13,24 +13,41 @@ waiver mechanism.
 
 Before synchronization or movement:
 
-1. Invoke `project-backlog` to discover an active run relevant to this work.
-2. Read its `state.json` and `resume.md`.
-3. Check recorded commits, worktree, artifacts, and canonical backlog or issue
+1. Obtain host-observed live agent IDs through the platform capability seam. If
+   the host cannot observe agent state, stop before mutation.
+2. Invoke `project-backlog` to discover an active run and pass the observation
+   explicitly to `continuity-state recover --live-agents`. Use an explicit
+   empty observation only when the host confirms none are live; never omit it.
+3. Complete recovery, or verify that no run exists, before any canonical or
+   backlog mutation.
+4. Read the run's `state.json` and `resume.md`.
+5. Check recorded commits, worktree, artifacts, and canonical backlog or issue
    state against current reality.
-4. Reconcile saved agent identities with agents still available from the host.
-5. Preserve validated completed work and never redispatch completed work after
+6. Reconcile saved agent identities with agents still available from the host.
+7. Preserve validated completed work and never redispatch completed work after
    compaction or resumption.
-6. Reconstruct stale state from git and canonical artifacts when they disagree.
-7. Continue from the validated next action.
+8. Reconstruct stale state from git and canonical artifacts when they disagree.
+9. Continue from the validated next action.
 
 Repository evidence wins over stale checkpoint or memory data. Never silently
 restart or reclassify an active workflow.
 
 ## Operational state handoffs
 
-Invoke `project-backlog` to update backlog state and the run checkpoint at work
+Follow the [transition-to-event ordering
+contract](../project-backlog/SKILL.md#transition-to-event-ordering):
+
+1. After each durable transition, invoke `project-backlog` to call
+   `continuity-state event` with the applicable event and its concise facts.
+2. Then call `continuity-state checkpoint` with current state and the exact next
+   action, except where the dispatch or completion protocol requires two
+   checkpoints.
+3. Event emission is never automatic. Claim it only after the event call
+   succeeds, and likewise verify every checkpoint call.
+
+Apply this protocol while updating backlog state and the run checkpoint at work
 start, scope change, blocker discovery, each completed slice, and every phase or
-final handoff. Record only concise recovery facts and the exact next action.
+final handoff.
 
 ## Trigger
 
@@ -74,6 +91,7 @@ None. This is the terminal OpenSpec lifecycle phase.
 
 ## Supporting skills
 
+- `project-backlog` for recovery, canonical task state, events, and checkpoints.
 - `verification-before-completion` for fresh task, sync, and movement evidence.
 
 ## No implementation boundary

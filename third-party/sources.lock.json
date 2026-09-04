@@ -43,28 +43,28 @@
           "source_path": "templates/commands/specify.md",
           "destination_path": "skills/speckit-specify/SKILL.md",
           "source_sha256": "07de3d938def8407ccd30bd9a2c433bab8f299c10915fe86199bd10438b295ec",
-          "destination_sha256": "a10634cfdb5399c0ec0e750f06f2c551ec50e618a8bdfc1b694b46023ce81aae",
+          "destination_sha256": "c9cbf65286b5c48331791b07da7f924253ff654a0ecc1778638a53db2a503ebb",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/plan.md",
           "destination_path": "skills/speckit-plan/SKILL.md",
           "source_sha256": "c77757f07025404647134ba32cfc126ddf145fe20155a787266156c9bca4ecb2",
-          "destination_sha256": "a57da6a967d5594a7d9f22361031e5f38ff1d87f3e60ce84ae43b27854234596",
+          "destination_sha256": "34fc90e2b05cbd1b864a0080de8b9a39694e66d34534009aecee2c444fdeab3d",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/tasks.md",
           "destination_path": "skills/speckit-tasks/SKILL.md",
           "source_sha256": "19d3465fdffefb95117c8de493d7f13785dff3b4ad2b8c02d18a3ca5bbc572b5",
-          "destination_sha256": "9b4f395d0b56b660828e51ca2ed6ec2c03303d47c79c49f88e94f0b4f78d25ec",
+          "destination_sha256": "b51f8beab5a01f7aae93dd170024072c8ea380315b8f26c06fb2210b32270529",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/converge.md",
           "destination_path": "skills/speckit-converge/SKILL.md",
           "source_sha256": "a6dbe49b66ef34f421294e4148afce2af93ba02cb1b861bd80f72f753ee52eed",
-          "destination_sha256": "c876dd4c365f7754a974374ff0984d9b910c516629bd39258a7c933c7632812b",
+          "destination_sha256": "50cda8f353964c11e396ee447d37c80a533daa3009f297146a98a29afa6291ef",
           "modification_status": "adapted"
         }
       ]
@@ -118,21 +118,21 @@
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "skills/openspec-propose/SKILL.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "b3849c576386e58738e87b539efc267fb7b102441827f422c833b2b97da1490a",
+          "destination_sha256": "b49d3a6d4b2c486a9bca6ee1ea9b30739c06bebe76f6cc6eea09ec264d099fd0",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-apply-change/SKILL.md",
           "destination_path": "skills/openspec-apply/SKILL.md",
           "source_sha256": "0cf1cb26935b55d83e240631500c8cee484a7b241c84a705387c0eeb88676ccf",
-          "destination_sha256": "1b5765b72dfca513e12982c3cdd85fe7118b65401ed9405f43780b4854f31fb7",
+          "destination_sha256": "f4ba212a7f55da31adc31d48c6964182240c7482269a41c8f03e7995bb4adb8c",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-archive-change/SKILL.md",
           "destination_path": "skills/openspec-archive/SKILL.md",
           "source_sha256": "3ad0def4d299469fdfd5b05e4842284d65558e6b28710b5962f7f214d6153855",
-          "destination_sha256": "fc234a66e23abd6dcc68eba78f82fe823364dd66aaa5ad5ca45d6a4c0aa52d66",
+          "destination_sha256": "a9961495009a6b48ca90db5c5747851f77becaef09534e351a639a77f8b4c395",
           "modification_status": "adapted"
         }
       ]
@@ -158,7 +158,7 @@
           "source_path": "skills/systematic-debugging/SKILL.md",
           "destination_path": "skills/systematic-debugging/SKILL.md",
           "source_sha256": "808fc5717aa88ad65efff312b11c186294d3e6ee301afb584e2f86599b137787",
-          "destination_sha256": "8c2448d409620bb2ad6d22af74e1937d142df2cd138ba8ea38964308b9b29e43",
+          "destination_sha256": "9a1e297929eee61f80dfa1bbb12d708ddc830858f04958173e56feb05fc8f946",
           "modification_status": "adapted"
         },
         {

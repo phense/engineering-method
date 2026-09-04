@@ -567,7 +567,13 @@ class ContinuityCommandSurfaceTests(unittest.TestCase):
                 0,
             )
             self.assertEqual(main(["continuity-state", "status", "EM-001"], root=root), 0)
-            self.assertEqual(main(["continuity-state", "recover", "EM-001"], root=root), 0)
+            self.assertEqual(
+                main(
+                    ["continuity-state", "recover", "EM-001", "--live-agents", ""],
+                    root=root,
+                ),
+                0,
+            )
             self.assertEqual(load_run_state(root, "EM-001").phase, "verify")
 
     def test_github_mode_recovery_reads_remote_canonical_status_not_the_cache(self) -> None:
@@ -607,7 +613,7 @@ class ContinuityCommandSurfaceTests(unittest.TestCase):
 
             self.assertEqual(
                 main(
-                    ["continuity-state", "recover", "EM-001"],
+                    ["continuity-state", "recover", "EM-001", "--live-agents", ""],
                     root=root,
                     gateway=gateway,
                 ),
@@ -616,6 +622,16 @@ class ContinuityCommandSurfaceTests(unittest.TestCase):
             recovered = load_run_state(root, "EM-001")
             self.assertEqual(recovered.active_work, ("slice-1",))
             self.assertNotIn("slice-1", recovered.completed_work)
+
+    def test_recover_requires_an_explicit_live_agent_observation(self) -> None:
+        """Omitting host observation must fail before reading or mutating project state."""
+        with tempfile.TemporaryDirectory() as temporary, quiet_cli() as (_, errors):
+            root = Path(temporary)
+
+            result = main(["continuity-state", "recover", "EM-001"], root=root)
+
+        self.assertEqual(2, result)
+        self.assertIn("recover requires --live-agents", errors.getvalue())
 
 
 class WrapperPortabilityTests(unittest.TestCase):

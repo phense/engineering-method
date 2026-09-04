@@ -68,6 +68,27 @@ def markdown_links(markdown: str) -> set[str]:
     return set(re.findall(r"\[[^\]]+\]\(([^)#]+)(?:#[^)]+)?\)", markdown))
 
 
+def numbered_items(markdown: str) -> list[str]:
+    return [
+        normalized(match.group(1))
+        for match in re.finditer(
+            r"^\d+\. (.*?)(?=^\d+\. |\Z)",
+            markdown,
+            flags=re.MULTILINE | re.DOTALL,
+        )
+    ]
+
+
+def section_json(markdown: str, heading: str) -> dict[str, object]:
+    match = re.search(r"```json\n(.*?)\n```", section(markdown, heading), flags=re.DOTALL)
+    if match is None:
+        raise AssertionError(f"{heading} must contain a fenced JSON contract")
+    value = json.loads(match.group(1))
+    if not isinstance(value, dict):
+        raise AssertionError(f"{heading} JSON contract must be an object")
+    return value
+
+
 def fenced_json(relative: str) -> dict[str, object]:
     content = read(relative)
     match = re.search(r"```json\n(.*?)\n```", content, flags=re.DOTALL)
@@ -379,8 +400,54 @@ class LifecycleContractTests(unittest.TestCase):
                 self.assertNotIn("pending integration", normalized(markdown))
                 self.assertNotIn("do not claim checkpoint continuity is operational", normalized(markdown))
 
+    def test_recovery_precedes_canonical_mutation_with_explicit_host_observation(self) -> None:
+        """Omitted or guessed live-agent state can duplicate active work."""
+        for skill in LIFECYCLE_SKILLS:
+            with self.subTest(skill=skill):
+                items = numbered_items(section(read(f"skills/{skill}/SKILL.md"), "Recovery preamble"))
+                self.assertGreaterEqual(len(items), 3)
+                self.assertIn("platform capability seam", items[0])
+                self.assertIn("host-observed live agent ids", items[0])
+                self.assertIn("continuity-state recover", items[1])
+                self.assertIn("--live-agents", items[1])
+                self.assertIn("explicit empty observation", items[1])
+                self.assertIn("host confirms none are live", items[1])
+                self.assertIn("before any canonical or backlog mutation", items[2])
+
+    def test_stateful_lifecycles_declare_backlog_support_and_event_protocol(self) -> None:
+        """Implicit support or automatic event claims leave lifecycle state unauditable."""
+        contract_link = "../project-backlog/SKILL.md#transition-to-event-ordering"
+        for skill in LIFECYCLE_SKILLS:
+            with self.subTest(skill=skill):
+                markdown = read(f"skills/{skill}/SKILL.md")
+                support = section(markdown, "Supporting skills")
+                handoffs = section(markdown, "Operational state handoffs")
+                self.assertRegex(support, r"(?m)^- `project-backlog`(?:\s|$)")
+                self.assertIn(f"]({contract_link})", handoffs)
+                ordered = numbered_items(handoffs)
+                self.assertGreaterEqual(len(ordered), 3)
+                self.assertIn("continuity-state event", ordered[0])
+                self.assertIn("applicable event", ordered[0])
+                self.assertIn("continuity-state checkpoint", ordered[1])
+                self.assertIn("event call succeeds", ordered[2])
+                self.assertIn("never automatic", ordered[2])
+
 
 class ProjectBacklogSkillContractTests(unittest.TestCase):
+    def test_project_backlog_recovers_before_mutation_from_explicit_host_state(self) -> None:
+        """The state service must not mutate canonical truth from an unverified run."""
+        items = numbered_items(
+            section(read("skills/project-backlog/SKILL.md"), "Recovery gate")
+        )
+        self.assertGreaterEqual(len(items), 3)
+        self.assertIn("platform capability seam", items[0])
+        self.assertIn("host-observed live agent ids", items[0])
+        self.assertIn("continuity-state recover", items[1])
+        self.assertIn("--live-agents", items[1])
+        self.assertIn("explicit empty observation", items[1])
+        self.assertIn("host confirms none are live", items[1])
+        self.assertIn("before any canonical or backlog mutation", items[2])
+
     def test_project_backlog_owns_state_services_but_never_methodology(self) -> None:
         """A state helper must not become a second lifecycle controller."""
         markdown = read("skills/project-backlog/SKILL.md")
@@ -437,6 +504,177 @@ class ProjectBacklogSkillContractTests(unittest.TestCase):
             self.assertEqual(0, completed.returncode, completed.stderr)
             self.assertTrue((Path(directory) / "BACKLOG.md").is_file())
             self.assertTrue((Path(directory) / "FEATURES.md").is_file())
+
+    def test_transition_event_contract_has_exact_order_and_write_protocols(self) -> None:
+        """A transition log needs machine-checkable ordering, not an unordered vocabulary."""
+        contract = section_json(
+            read("skills/project-backlog/SKILL.md"), "Transition-to-event ordering"
+        )
+        self.assertEqual(
+            [
+                "workflow_started",
+                "phase_changed",
+                "slice_started",
+                "decision_recorded",
+                "agent_dispatched",
+                "agent_completed",
+                "verification_failed",
+                "verification_passed",
+                "workflow_completed",
+            ],
+            contract["event_order"],
+        )
+        self.assertEqual(
+            ["recover", "durable_transition", "event", "checkpoint"],
+            contract["transition_write_order"],
+        )
+        self.assertEqual(
+            [
+                "recover",
+                "checkpoint_before_dispatch",
+                "host_dispatch",
+                "agent_dispatched",
+                "checkpoint_after_dispatch",
+            ],
+            contract["agent_dispatch_order"],
+        )
+        self.assertEqual(
+            [
+                "verification_passed",
+                "checkpoint",
+                "canonical_completion",
+                "workflow_completed",
+                "checkpoint",
+            ],
+            contract["workflow_completion_order"],
+        )
+
+    def test_installed_continuity_wrapper_recovers_agents_and_preserves_event_order(self) -> None:
+        """The installed wrapper must preserve live work and expose only missing agents."""
+        markdown = read("skills/project-backlog/SKILL.md")
+        skill_dir = ROOT / "skills/project-backlog"
+        links = markdown_links(section(markdown, "Bundled script resolution"))
+        scripts = {
+            Path(link).name: (skill_dir / link).resolve()
+            for link in links
+        }
+        event_order = section_json(markdown, "Transition-to-event ordering")["event_order"]
+
+        with tempfile.TemporaryDirectory() as directory:
+            target = Path(directory)
+
+            def run(script: str, *arguments: str, input_text: str | None = None):
+                return subprocess.run(
+                    [str(scripts[script]), *arguments],
+                    cwd=target,
+                    input=input_text,
+                    check=False,
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+
+            for command in (
+                ("backlog", "init", "--project-key", "EM"),
+                ("backlog", "add", "--id", "EM-900", "--title", "External continuity", "--priority", "P1"),
+                ("backlog", "start", "EM-900"),
+            ):
+                result = run("project-state", *command)
+                self.assertEqual(0, result.returncode, result.stderr)
+
+            for command in (
+                ("init", "-q"),
+                ("config", "user.email", "test@example.com"),
+                ("config", "user.name", "Test User"),
+                ("add", "BACKLOG.md", "FEATURES.md"),
+                ("commit", "-q", "-m", "state"),
+            ):
+                subprocess.run(("git", *command), cwd=target, check=True, timeout=10)
+            head = subprocess.run(
+                ("git", "rev-parse", "HEAD"),
+                cwd=target,
+                check=True,
+                capture_output=True,
+                text=True,
+                timeout=10,
+            ).stdout.strip()
+            resume = target / "resume.md"
+            resume.write_text("Resume external continuity.\n", encoding="utf-8")
+            state_payload = {
+                "backlog_id": "EM-900",
+                "lifecycle": "openspec",
+                "phase": "apply",
+                "current_slice": "slice-1",
+                "active_work": ["slice-1"],
+                "active_agent_ids": ["agent-live", "agent-gone"],
+                "worktree_path": str(target),
+                "base_commit": head,
+                "last_observed_head": head,
+                "next_action": "continue slice-1",
+            }
+            initialized = run(
+                "continuity-state",
+                "init",
+                "EM-900",
+                "--file",
+                "-",
+                "--resume-file",
+                "resume.md",
+                input_text=json.dumps(state_payload),
+            )
+            self.assertEqual(0, initialized.returncode, initialized.stderr)
+
+            applicable_events = [
+                "workflow_started",
+                "phase_changed",
+                "slice_started",
+                "decision_recorded",
+                "agent_dispatched",
+                "verification_failed",
+            ]
+            for kind in applicable_events:
+                emitted = run(
+                    "continuity-state",
+                    "event",
+                    "EM-900",
+                    "--file",
+                    "-",
+                    input_text=json.dumps({"kind": kind}),
+                )
+                self.assertEqual(0, emitted.returncode, emitted.stderr)
+                checkpointed = run(
+                    "continuity-state",
+                    "checkpoint",
+                    "EM-900",
+                    "--file",
+                    "-",
+                    input_text=json.dumps(state_payload),
+                )
+                self.assertEqual(0, checkpointed.returncode, checkpointed.stderr)
+            recovered = run(
+                "continuity-state",
+                "recover",
+                "EM-900",
+                "--live-agents",
+                "agent-live",
+            )
+            self.assertEqual(0, recovered.returncode, recovered.stderr)
+            self.assertIn("agent-gone", recovered.stdout)
+            self.assertNotIn("agent-live", recovered.stdout)
+
+            run_root = target / ".engineering-method/runs/EM-900"
+            recovered_state = json.loads((run_root / "state.json").read_text(encoding="utf-8"))
+            self.assertEqual(["agent-live"], recovered_state["active_agent_ids"])
+            records = [
+                json.loads(line)
+                for line in (run_root / "events.jsonl").read_text(encoding="utf-8").splitlines()
+            ]
+            actual_kinds = [record["kind"] for record in records]
+            self.assertEqual(applicable_events, actual_kinds)
+            self.assertEqual(
+                applicable_events,
+                [kind for kind in event_order if kind in applicable_events],
+            )
 
 
 class SpecKitSkillContractTests(unittest.TestCase):
@@ -665,7 +903,8 @@ class OpenSpecSkillContractTests(unittest.TestCase):
             "openspec/changes/archive/yyyy-mm-dd-<change-id>/",
         ):
             self.assertIn(phrase, archive)
-        self.assertNotIn("confirm", archive)
+        for phrase in ("confirm archive", "confirmation to waive", "ask for confirmation"):
+            self.assertNotIn(phrase, archive)
 
     def test_openspec_skills_remove_cli_store_schema_and_dynamic_runtime_inputs(self) -> None:
         """The shared lifecycle must work without an OpenSpec runtime controller."""
