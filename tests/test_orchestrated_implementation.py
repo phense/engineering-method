@@ -85,6 +85,58 @@ class OrchestratedImplementationSkillTests(unittest.TestCase):
         self.assertIn("sole writer of state.json", content)
         self.assertIn("only their named report file", content)
 
+    def test_defect_loop_escalates_after_two_ineffective_attempts(self) -> None:
+        """Repeated local retries must change perspective before more code churn."""
+        policy = fenced_json("shared/policies/defect-convergence.md")
+        self.assertEqual(
+            [
+                "precise_finding_to_original_implementer",
+                "root_cause_and_covering_test",
+                "after_two_ineffective_attempts_use_fresh_or_stronger_agent",
+                "repeated_local_failure_run_interface_or_architecture_analysis",
+            ],
+            policy["escalation_sequence"],
+        )
+        self.assertEqual(2, policy["fresh_perspective_after_ineffective_attempts"])
+        self.assertTrue(policy["reject_identical_retry_brief"])
+        skill = fenced_json("skills/orchestrated-implementation/SKILL.md")
+        self.assertEqual("shared/policies/defect-convergence.md", skill["defect_convergence"])
+
+    def test_every_retry_adds_evidence_and_terminal_conditions_are_exhaustive(self) -> None:
+        """A retry without progress or an invented exit can silently discard a real defect."""
+        policy = fenced_json("shared/policies/defect-convergence.md")
+        self.assertEqual(
+            {"new_evidence", "new_hypothesis", "changed_approach", "model_or_perspective_escalation"},
+            set(policy["retry_progress_requires_one"]),
+        )
+        self.assertEqual(
+            {
+                "all_actionable_findings_resolved",
+                "external_blocker",
+                "missing_authorization",
+                "unsafe_irreversible_operation",
+                "specification_contradiction",
+            },
+            set(policy["terminal_conditions"]),
+        )
+        self.assertEqual("narrowest_meaningful_covering_tests", policy["after_each_fix"])
+        self.assertEqual(
+            ["integration_affecting_fix", "integration_boundary"],
+            policy["broaden_tests_only_for"],
+        )
+
+    def test_agent_roles_carry_finding_and_fix_evidence_across_retries(self) -> None:
+        """Escalation loses value if the next perspective cannot see prior evidence."""
+        implementer = normalized("shared/agent-roles/implementer.md")
+        debugger = normalized("shared/agent-roles/debugger.md")
+        reviewer = normalized("shared/agent-roles/reviewer.md")
+        for phrase in ("precise finding", "root-cause", "covering test", "prior attempts"):
+            self.assertIn(phrase, implementer)
+        for phrase in ("new evidence", "new hypothesis", "changed approach", "perspective escalation"):
+            self.assertIn(phrase, debugger)
+        for phrase in ("identical retry brief", "actionable", "resolution condition"):
+            self.assertIn(phrase, reviewer)
+
 
 class OrchestrationScriptTests(unittest.TestCase):
     def _repo(self, root: Path) -> None:

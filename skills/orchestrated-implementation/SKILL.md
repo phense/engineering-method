@@ -23,6 +23,7 @@ cross-slice state, integration, and acceptance.
     "mechanical": "coordinator_allowed",
     "independent_required": ["security", "migration", "interface", "concurrency", "cross_component"]
   },
+  "defect_convergence": "shared/policies/defect-convergence.md",
   "checkpoint_boundaries": ["before_dispatch", "after_dispatch", "after_implementation", "after_test", "after_review", "after_fix", "before_long_wait", "handoff"]
 }
 ```
@@ -185,3 +186,27 @@ broader suite at the final integration boundary.
 Do not silently park actionable findings. Do not impose a fixed retry count.
 Progress is bounded by new evidence and by the terminal conditions in the
 defect-convergence policy.
+
+## Finding loop
+
+1. Send the precise finding and evidence to the original implementer. Require a
+   root-cause statement and a meaningful covering test before accepting a fix.
+2. After each fix, run the narrowest meaningful covering tests, checkpoint the
+   result, package the fix range, and re-review only the finding and changed
+   range.
+3. A new attempt must add evidence, a hypothesis, a changed approach, or a
+   model/perspective escalation. Compare it with the prior brief and reject an
+   identical retry.
+4. After two ineffective attempts, use a fresh agent or stronger semantic role.
+   Carry forward the exact prior evidence and reports rather than conversational
+   summaries.
+5. If local fixes continue to fail, pause local editing and invoke interface or
+   architecture analysis. Turn its conclusion into a decision or normal
+   actionable finding before resuming.
+6. Broaden tests only for an integration-affecting fix or at an integration
+   boundary.
+
+The loop ends only when all actionable findings are resolved or a recorded
+external blocker, missing authorization, unsafe irreversible operation, or
+specification contradiction makes further action guesswork. Record evidence,
+attempts, affected work, and the exact next action for every terminal blocker.

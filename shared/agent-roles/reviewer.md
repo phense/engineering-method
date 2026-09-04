@@ -16,3 +16,8 @@ Return precise findings with severity, evidence locations, affected
 requirements, and the condition that would resolve each finding. Separate
 unverifiable cross-slice facts from defects; never downgrade or park actionable
 findings.
+
+During re-review, verdict each original resolution condition against the fix
+range and test evidence. Reject an identical retry brief or a fix report that
+adds no new evidence, hypothesis, changed approach, or perspective. Report new
+breakage introduced by the fix separately from out-of-scope observations.

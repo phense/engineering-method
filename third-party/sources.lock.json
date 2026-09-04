@@ -221,14 +221,14 @@
           "source_path": "skills/subagent-driven-development/SKILL.md",
           "destination_path": "skills/orchestrated-implementation/SKILL.md",
           "source_sha256": "8dd1b8e698edec3700c6d89517dbe96febd3bacd3f6ea21c1a3569c62ea104b5",
-          "destination_sha256": "c12635766edba4ceac72a84819b3b0b9aec79b538a77dabc1407d13b5bd93885",
+          "destination_sha256": "49d12462658b18a182211af4d7fbdf8495c1ed851ba225f69fc8827b2b22cd15",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/subagent-driven-development/implementer-prompt.md",
           "destination_path": "shared/agent-roles/implementer.md",
           "source_sha256": "81dd9d5a3fb0b09b96b5829f03b9796842f3199ef7591d1ba1c2db2a515f64d0",
-          "destination_sha256": "a95ebb9aed4747728c997884a58a6f8b5ee8548aa52ee91af28b88e25deeb847",
+          "destination_sha256": "8ac5966a8930388c97aea4fd2a7e144364c2684a45695672366397065805a603",
           "modification_status": "adapted"
         },
         {
@@ -249,7 +249,7 @@
           "source_path": "skills/subagent-driven-development/task-reviewer-prompt.md",
           "destination_path": "shared/agent-roles/reviewer.md",
           "source_sha256": "eea23e33ec570c3041f40e9569fa711d61b8029f9eecf908345138aa1c6e61ab",
-          "destination_sha256": "fb0f6af360d502541673583312094ba9a084531f1c1cc29628b59de76068c8b4",
+          "destination_sha256": "8ed94cc55adc7ebbcad64c88496a9ef945e63e01cd920a390a5400c1ad6f4825",
           "modification_status": "adapted"
         },
         {
