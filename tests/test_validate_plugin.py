@@ -20,16 +20,18 @@ class ValidatePluginTests(unittest.TestCase):
     def make_repository(self, root: Path) -> None:
         codex = {
             **IDENTITY,
-            "displayName": "Peter's Engineering Method",
-            "shortDescription": "Risk-proportionate workflows for engineering agents",
-            "longDescription": "A shared workflow skill set that selects lightweight or rigorous engineering practices according to the requested work and its risk.",
-            "developerName": "Peter Hense",
-            "category": "Developer Tools",
-            "capabilities": ["Interactive", "Read", "Write"],
-            "defaultPrompt": ["Plan a new multi-component feature."],
-            "brandColor": "#0B7285",
-            "screenshots": [],
             "skills": "./skills/",
+            "interface": {
+                "displayName": "Peter's Engineering Method",
+                "shortDescription": "Risk-proportionate workflows for engineering agents",
+                "longDescription": "A shared workflow skill set that selects lightweight or rigorous engineering practices according to the requested work and its risk.",
+                "developerName": "Peter Hense",
+                "category": "Developer Tools",
+                "capabilities": ["Interactive", "Read", "Write"],
+                "defaultPrompt": ["Plan a new multi-component feature."],
+                "brandColor": "#0B7285",
+                "screenshots": [],
+            },
         }
         claude = {
             **IDENTITY,
@@ -69,6 +71,16 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertIn("ERROR .codex-plugin/plugin.json: invalid JSON", errors)
 
+    def test_accepts_required_codex_fields_in_nested_interface(self) -> None:
+        """Moving Codex interface fields back to the top level must fail validation."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+
+            errors = validate_repository(root)
+
+        self.assertEqual([], errors)
+
     def test_reports_manifest_identity_mismatch(self) -> None:
         """Changing one host's package identity must invalidate the shared plugin."""
         with tempfile.TemporaryDirectory() as directory:
@@ -85,6 +97,20 @@ class ValidatePluginTests(unittest.TestCase):
             "ERROR .claude-plugin/plugin.json: name must match .codex-plugin/plugin.json",
             errors,
         )
+
+    def test_accepts_host_specific_author_metadata(self) -> None:
+        """Comparing complete author objects must reject harmless host metadata."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            claude_path = root / ".claude-plugin/plugin.json"
+            claude = json.loads(claude_path.read_text(encoding="utf-8"))
+            claude["author"] = {"name": "Peter Hense", "email": "peter@example.com"}
+            self.write_json(claude_path, claude)
+
+            errors = validate_repository(root)
+
+        self.assertEqual([], errors)
 
     def test_reports_missing_common_files(self) -> None:
         """Removing a public foundation artifact must make the repository incomplete."""

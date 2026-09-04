@@ -16,7 +16,7 @@ COMMON_REQUIRED_FILES = (
     "THIRD_PARTY_NOTICES.md",
     "third-party/sources.lock.json",
 )
-CODEX_REQUIRED_FIELDS = {
+CODEX_REQUIRED_INTERFACE_FIELDS = {
     "displayName": str,
     "shortDescription": str,
     "longDescription": str,
@@ -26,7 +26,6 @@ CODEX_REQUIRED_FIELDS = {
     "defaultPrompt": list,
     "brandColor": str,
     "screenshots": list,
-    "skills": str,
 }
 SEMVER = re.compile(
     r"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)"
@@ -103,18 +102,27 @@ def _validate_identity(
 def _validate_codex_manifest(
     root: Path, relative: str, manifest: dict[str, object], errors: list[str]
 ) -> None:
-    for field, expected_type in CODEX_REQUIRED_FIELDS.items():
-        value = manifest.get(field)
-        if field not in manifest:
+    interface = manifest.get("interface")
+    if not isinstance(interface, dict):
+        errors.append(_error(relative, "interface must be an object"))
+        interface = {}
+    skills = manifest.get("skills")
+    if "skills" not in manifest:
+        errors.append(_error(relative, "skills is required"))
+    elif not isinstance(skills, str) or not skills:
+        errors.append(_error(relative, "skills must be a non-empty string"))
+    for field, expected_type in CODEX_REQUIRED_INTERFACE_FIELDS.items():
+        value = interface.get(field)
+        if field not in interface:
             errors.append(_error(relative, f"{field} is required"))
         elif not isinstance(value, expected_type) or (isinstance(value, str) and not value):
             errors.append(_error(relative, f"{field} must be a non-empty {expected_type.__name__}"))
 
     for field in ("capabilities", "defaultPrompt"):
-        value = manifest.get(field)
+        value = interface.get(field)
         if isinstance(value, list) and not all(isinstance(item, str) and item for item in value):
             errors.append(_error(relative, f"{field} must be a list of non-empty strings"))
-    brand_color = manifest.get("brandColor")
+    brand_color = interface.get("brandColor")
     if isinstance(brand_color, str) and not re.fullmatch(r"#[0-9A-Fa-f]{6}", brand_color):
         errors.append(_error(relative, "brandColor must be a six-digit hex color"))
 
@@ -212,9 +220,17 @@ def validate_repository(root: Path) -> list[str]:
     if claude is not None:
         _validate_identity(claude_relative, claude, errors)
     if codex is not None and claude is not None:
-        for field in COMMON_IDENTITY_FIELDS:
+        for field in (field for field in COMMON_IDENTITY_FIELDS if field != "author"):
             if field in codex and field in claude and codex[field] != claude[field]:
                 errors.append(_error(claude_relative, f"{field} must match .codex-plugin/plugin.json"))
+        codex_author = codex.get("author")
+        claude_author = claude.get("author")
+        if (
+            isinstance(codex_author, dict)
+            and isinstance(claude_author, dict)
+            and codex_author.get("name") != claude_author.get("name")
+        ):
+            errors.append(_error(claude_relative, "author.name must match .codex-plugin/plugin.json"))
     _validate_skill_frontmatter(root, errors)
     _validate_unfinished_markers(root, errors)
     return sorted(errors)
