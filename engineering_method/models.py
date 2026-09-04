@@ -10,7 +10,9 @@ from typing import Iterable, Literal
 
 
 PROJECT_KEY_PATTERN = re.compile(r"^[A-Z][A-Z0-9]*$")
-TASK_ID_PATTERN = re.compile(r"^([A-Z][A-Z0-9]*)-(0*[1-9][0-9]*(?:\.0*[1-9][0-9]*)*)$")
+TASK_ID_PATTERN = re.compile(
+    r"^([A-Z][A-Z0-9]*)-((?:000|0*[1-9][0-9]*)(?:\.0*[1-9][0-9]*)*)$"
+)
 RFC_3339_UTC_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
 
 

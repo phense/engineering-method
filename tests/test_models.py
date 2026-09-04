@@ -56,8 +56,11 @@ class TaskIdentifierTests(unittest.TestCase):
     def test_parses_nested_uppercase_task_id(self) -> None:
         self.assertEqual(parse_task_id("EM-002.7.12"), ("EM", (2, 7, 12)))
 
+    def test_preserves_the_existing_top_level_em_000_identity(self) -> None:
+        self.assertEqual(parse_task_id("EM-000"), ("EM", (0,)))
+
     def test_rejects_lowercase_zero_and_malformed_task_components(self) -> None:
-        for value in ("em-002", "EM-0", "EM-002.0", "EM-002.", "EM002"):
+        for value in ("em-002", "EM-0", "EM-000.0", "EM-002.0", "EM-002.", "EM002"):
             with self.subTest(value=value), self.assertRaises(ValueError):
                 parse_task_id(value)
 
