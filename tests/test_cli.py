@@ -635,19 +635,100 @@ class ContinuityCommandSurfaceTests(unittest.TestCase):
 
 
 class WrapperPortabilityTests(unittest.TestCase):
+    SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
+
+    def run_script(
+        self, directory: str, script: str, *arguments: str
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.run(
+            (str(self.SCRIPTS / script), *arguments),
+            cwd=directory,
+            text=True,
+            capture_output=True,
+            timeout=15,
+            check=False,
+        )
+
     def test_project_state_wrapper_runs_from_an_unrelated_current_directory(self) -> None:
-        script = Path(__file__).resolve().parents[1] / "scripts" / "project-state"
         with tempfile.TemporaryDirectory() as temporary:
-            result = subprocess.run(
-                (str(script), "backlog", "init", "--project-key", "EM"),
-                cwd=temporary,
-                text=True,
-                capture_output=True,
-                timeout=15,
-                check=False,
+            result = self.run_script(
+                temporary, "project-state", "backlog", "init", "--project-key", "EM"
             )
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertTrue((Path(temporary) / "BACKLOG.md").is_file())
+
+    def test_project_state_help_is_portable_concise_and_non_mutating(self) -> None:
+        """Missing help dispatch must not force callers into unknown-command errors."""
+        cases = (
+            (
+                ("--help",),
+                ("Usage: project-state", "Commands:", "backlog", "feature", "continuity-state"),
+            ),
+            (
+                ("backlog", "--help"),
+                ("Usage: project-state backlog", "Actions:", "complete", "archive"),
+            ),
+            (
+                ("backlog", "complete", "--help"),
+                (
+                    "Usage: project-state backlog complete",
+                    "Options:",
+                    "--notes",
+                    "--depends-on",
+                ),
+            ),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            for arguments, expected in cases:
+                with self.subTest(arguments=arguments):
+                    result = self.run_script(temporary, "project-state", *arguments)
+                    self.assertEqual(0, result.returncode, result.stderr)
+                    self.assertEqual("", result.stderr)
+                    for fragment in expected:
+                        self.assertIn(fragment, result.stdout)
+                    self.assertEqual([], list(Path(temporary).iterdir()))
+
+    def test_sibling_wrapper_help_covers_every_applicable_action_without_mutation(self) -> None:
+        """Installed convenience wrappers need the same help behavior as project-state."""
+        cases = (
+            ("backlog-to-issues", ("--help",), ("Actions:", "migrate", "reconcile")),
+            ("backlog-to-issues", ("migrate", "--help"), ("Options:", "migrate")),
+            ("backlog-to-issues", ("reconcile", "--help"), ("Options:", "reconcile")),
+            ("refresh-issue-cache", ("--help",), ("Options:", "Refresh")),
+            ("continuity-state", ("--help",), ("Actions:", "init", "recover")),
+            ("continuity-state", ("init", "--help"), ("Options:", "--resume-file")),
+            ("continuity-state", ("checkpoint", "--help"), ("Options:", "--file")),
+            ("continuity-state", ("event", "--help"), ("Options:", "--file")),
+            ("continuity-state", ("status", "--help"), ("Options:", "work-id")),
+            ("continuity-state", ("recover", "--help"), ("Options:", "--live-agents")),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            for script, arguments, expected in cases:
+                with self.subTest(script=script, arguments=arguments):
+                    result = self.run_script(temporary, script, *arguments)
+                    self.assertEqual(0, result.returncode, result.stderr)
+                    self.assertEqual("", result.stderr)
+                    self.assertIn(f"Usage: {script}", result.stdout)
+                    for fragment in expected:
+                        self.assertIn(fragment, result.stdout)
+                    self.assertEqual([], list(Path(temporary).iterdir()))
+
+    def test_unknown_wrapper_commands_remain_nonzero_and_non_mutating(self) -> None:
+        """Adding help must not turn unknown command paths into successful no-ops."""
+        cases = (
+            ("project-state", ("unknown",)),
+            ("project-state", ("backlog", "unknown")),
+            ("backlog-to-issues", ("unknown",)),
+            ("continuity-state", ("unknown",)),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            for script, arguments in cases:
+                with self.subTest(script=script, arguments=arguments):
+                    result = self.run_script(temporary, script, *arguments)
+                    self.assertNotEqual(0, result.returncode)
+                    self.assertEqual("", result.stdout)
+                    self.assertTrue(result.stderr.strip())
+                    self.assertEqual([], list(Path(temporary).iterdir()))
 
 
 if __name__ == "__main__":

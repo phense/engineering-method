@@ -40,6 +40,235 @@ from .issues import (
 from .models import BacklogItem, Feature, Priority, TaskStatus, derive_project_key, utc_timestamp
 
 
+HELP_TEXT = {
+    (): """Usage: project-state <command> [action] [options]
+
+Commands:
+  backlog             Manage durable task state.
+  feature             Manage the capability inventory.
+  continuity-state    Manage compact-continuity runs and events.
+  backlog-to-issues   Migrate or reconcile GitHub Issues.
+  refresh-issue-cache Refresh the generated GitHub Issues cache.
+
+Options:
+  --help              Show help for a command or action.""",
+    ("backlog",): """Usage: project-state backlog <action> [options]
+
+Actions:
+  init          Initialize BACKLOG.md and FEATURES.md.
+  state-check   Detect canonical local or GitHub mode.
+  add           Add a stable backlog item.
+  start         Mark an item in progress.
+  block         Mark an item blocked.
+  complete      Mark an item complete.
+  priority      Change priority without changing identity.
+  dependencies  Replace dependency IDs.
+  archive       Archive eligible completed groups.
+
+Options:
+  --help        Show help for an action.""",
+    ("backlog", "init"): """Usage: project-state backlog init [--project-key KEY] [--replace]
+
+Action:
+  Initialize BACKLOG.md and FEATURES.md without replacing existing state by default.
+
+Options:
+  --project-key KEY  Set the stable uppercase project key.
+  --replace          Explicitly replace existing project state.
+  --help             Show this help.""",
+    ("backlog", "state-check"): """Usage: project-state backlog state-check
+
+Action:
+  Detect local or writable GitHub canonical mode without a methodology prompt.
+
+Options:
+  --help  Show this help.""",
+    ("backlog", "add"): """Usage: project-state backlog add --id ID --title TEXT --priority P0-P3 [options]
+
+Action:
+  Add one item with a stable caller-supplied ID.
+
+Options:
+  --parent ID       Set the parent backlog ID.
+  --depends-on IDS Set comma-separated dependency IDs.
+  --notes TEXT      Store concise notes.
+  --help            Show this help.""",
+    ("backlog", "start"): """Usage: project-state backlog start <backlog-id> [options]
+
+Action:
+  Mark one backlog item in progress.
+
+Options:
+  --notes TEXT      Replace concise notes.
+  --depends-on IDS Replace comma-separated dependency IDs.
+  --help            Show this help.""",
+    ("backlog", "block"): """Usage: project-state backlog block <backlog-id> [options]
+
+Action:
+  Mark one backlog item blocked.
+
+Options:
+  --notes TEXT      Record the blocker.
+  --depends-on IDS Replace comma-separated dependency IDs.
+  --help            Show this help.""",
+    ("backlog", "complete"): """Usage: project-state backlog complete <backlog-id> [options]
+
+Action:
+  Mark one backlog item complete.
+
+Options:
+  --notes TEXT      Replace concise notes.
+  --depends-on IDS Replace comma-separated dependency IDs.
+  --help            Show this help.""",
+    ("backlog", "priority"): """Usage: project-state backlog priority <backlog-id> <P0-P3>
+
+Action:
+  Change priority without changing the stable backlog ID.
+
+Options:
+  --help  Show this help.""",
+    ("backlog", "dependencies"): """Usage: project-state backlog dependencies <backlog-id> --depends-on IDS
+
+Action:
+  Replace comma-separated dependency IDs.
+
+Options:
+  --depends-on IDS  Required dependency IDs; use an empty value for none.
+  --help             Show this help.""",
+    ("backlog", "archive"): """Usage: project-state backlog archive [options]
+
+Action:
+  Archive eligible completed groups in local canonical mode.
+
+Options:
+  --active-line-limit N  Set the archive trigger line count.
+  --target-line-limit N  Set the active-file target line count.
+  --help                 Show this help.""",
+    ("feature",): """Usage: project-state feature <action> [options]
+
+Actions:
+  add     Add a verified capability.
+  change  Update a verified capability.
+  remove  Retain a removed capability with rationale.
+
+Options:
+  --help  Show help for an action.""",
+    ("feature", "add"): """Usage: project-state feature add --id ID --name TEXT --summary TEXT [options]
+
+Action:
+  Add one verified capability.
+
+Options:
+  --status VALUE  Set available, changed, or removed.
+  --related IDS   Set comma-separated related backlog IDs.
+  --help          Show this help.""",
+    ("feature", "change"): """Usage: project-state feature change --id ID [options]
+
+Action:
+  Update one existing capability without changing its identity.
+
+Options:
+  --name TEXT     Replace the capability name.
+  --summary TEXT  Replace the summary.
+  --status VALUE  Set available, changed, or removed.
+  --related IDS   Replace related backlog IDs.
+  --help          Show this help.""",
+    ("feature", "remove"): """Usage: project-state feature remove --id ID --rationale TEXT
+
+Action:
+  Retain a removed capability as history with its rationale.
+
+Options:
+  --id ID           Select the capability.
+  --rationale TEXT  Record why it was removed.
+  --help             Show this help.""",
+    ("backlog-to-issues",): """Usage: backlog-to-issues <action>
+
+Actions:
+  migrate    Detect a writable repository and migrate local history.
+  reconcile  Replay pending offline mutations in causal order.
+
+Options:
+  --help  Show help for an action.""",
+    ("backlog-to-issues", "migrate"): """Usage: backlog-to-issues migrate
+
+Action:
+  Detect writable GitHub Issues and migrate local backlog history idempotently.
+
+Options:
+  --help  Show this help for migrate.""",
+    ("backlog-to-issues", "reconcile"): """Usage: backlog-to-issues reconcile
+
+Action:
+  Reconcile pending offline mutations against canonical GitHub Issues.
+
+Options:
+  --help  Show this help for reconcile.""",
+    ("refresh-issue-cache",): """Usage: refresh-issue-cache [--help]
+
+Action:
+  Refresh the generated read-only BACKLOG.md cache from canonical GitHub Issues.
+
+Options:
+  --help  Show this help.""",
+    ("continuity-state",): """Usage: continuity-state <action> <work-id> [options]
+
+Actions:
+  init        Initialize a durable run.
+  checkpoint  Replace run state and optionally its resume brief.
+  event       Append one provider-neutral event.
+  status      Validate and print the state path.
+  recover     Reconcile saved state with current evidence.
+
+Options:
+  --help  Show help for an action.""",
+    ("continuity-state", "init"): """Usage: continuity-state init <work-id> --file PATH --resume-file PATH [options]
+
+Action:
+  Initialize a durable run from repository-relative JSON and Markdown inputs.
+
+Options:
+  --file PATH            Read run state JSON; use - for stdin.
+  --resume-file PATH     Read the required recovery brief.
+  --decisions-file PATH  Read optional durable decisions.
+  --replace              Explicitly replace an existing run.
+  --help                 Show this help.""",
+    ("continuity-state", "checkpoint"): """Usage: continuity-state checkpoint <work-id> --file PATH [options]
+
+Action:
+  Atomically checkpoint run state and optionally replace its resume brief.
+
+Options:
+  --file PATH         Read run state JSON; use - for stdin.
+  --resume-file PATH  Read a replacement recovery brief.
+  --help              Show this help.""",
+    ("continuity-state", "event"): """Usage: continuity-state event <work-id> --file PATH
+
+Action:
+  Append one validated provider-neutral event.
+
+Options:
+  --file PATH  Read event JSON; use - for stdin.
+  --help       Show this help.""",
+    ("continuity-state", "status"): """Usage: continuity-state status <work-id>
+
+Action:
+  Validate the named run and print its state path.
+
+Options:
+  work-id  Stable run identifier.
+  --help   Show this help.""",
+    ("continuity-state", "recover"): """Usage: continuity-state recover <work-id> --live-agents IDS
+
+Action:
+  Reconcile the run with git, artifacts, canonical task state, and observed agents.
+
+Options:
+  --live-agents IDS  Required comma-separated host-observed IDs; empty means confirmed none.
+  --help             Show this help.""",
+}
+
+
 def _error(message: str) -> int:
     print(message, file=sys.stderr)
     return 2
@@ -92,6 +321,17 @@ def _csv(value: str | None, *, option: str) -> tuple[str, ...]:
     if any(not part for part in values):
         raise ValueError(f"{option} contains an empty value")
     return values
+
+
+def _help_text(arguments: list[str]) -> str | None:
+    if "--help" not in arguments:
+        return None
+    if arguments.count("--help") != 1 or arguments[-1] != "--help":
+        raise ValueError("--help must appear once at the end of a command path")
+    topic = tuple(arguments[:-1])
+    if topic not in HELP_TEXT:
+        raise ValueError("unsupported help topic")
+    return HELP_TEXT[topic]
 
 
 def _read_repo_input(root: Path, value: str, *, stream: TextIO) -> str:
@@ -551,11 +791,15 @@ def main(
 ) -> int:
     arguments = list(sys.argv[1:] if argv is None else argv)
     project_root = Path.cwd() if root is None else Path(root)
-    issue_gateway = gateway or GitHubIssuesGateway()
     stream = sys.stdin if stdin is None else stdin
     try:
+        help_text = _help_text(arguments)
+        if help_text is not None:
+            print(help_text)
+            return 0
         if not arguments:
             raise ValueError("project-state command required")
+        issue_gateway = gateway or GitHubIssuesGateway()
         command, remaining = arguments[0], arguments[1:]
         if command == "backlog":
             output = _backlog_command(remaining, root=project_root, gateway=issue_gateway)
