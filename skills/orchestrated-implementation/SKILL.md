@@ -24,7 +24,8 @@ cross-slice state, integration, and acceptance.
     "independent_required": ["security", "migration", "interface", "concurrency", "cross_component"]
   },
   "defect_convergence": "shared/policies/defect-convergence.md",
-  "checkpoint_boundaries": ["before_dispatch", "after_dispatch", "after_implementation", "after_test", "after_review", "after_fix", "before_long_wait", "handoff"]
+  "checkpoint_boundaries": ["before_dispatch", "after_dispatch", "after_implementation", "after_test", "after_review", "after_fix", "before_long_wait", "handoff"],
+  "compaction_boundaries": ["before_dispatch", "active_agent", "completed_agent_before_integration", "failed_verification", "mid_fix", "post_slice", "pre_converge", "final_handoff"]
 }
 ```
 
@@ -45,6 +46,11 @@ Before implementation or any canonical mutation:
 
 Repository evidence wins over stale checkpoints and recalled memory. Never
 silently restart, reclassify, or redispatch completed work.
+
+Downstream memory supplies only a work ID and artifact pointers. Do not import
+recalled phase, status, commits, completed/active work, findings, verification,
+or next-action values into state. Resolve the pointers through EM-002 and
+validate their contents against current repository and canonical evidence.
 
 ## Operational state handoffs
 

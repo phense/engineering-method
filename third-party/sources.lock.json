@@ -221,7 +221,7 @@
           "source_path": "skills/subagent-driven-development/SKILL.md",
           "destination_path": "skills/orchestrated-implementation/SKILL.md",
           "source_sha256": "8dd1b8e698edec3700c6d89517dbe96febd3bacd3f6ea21c1a3569c62ea104b5",
-          "destination_sha256": "49d12462658b18a182211af4d7fbdf8495c1ed851ba225f69fc8827b2b22cd15",
+          "destination_sha256": "af119923596400da0b04f3b7259942f9f965c631d674d69e627af12322217a80",
           "modification_status": "adapted"
         },
         {
@@ -277,7 +277,7 @@
           "source_path": "skills/subagent-driven-development/scripts/sdd-workspace",
           "destination_path": "shared/policies/continuity-contract.md",
           "source_sha256": "95a09d9d3983ad1aafd093ca72b4587946dea885c6e302caa02a779a2f911c31",
-          "destination_sha256": "8b756925d4b21790a7877772a0530af0283ec3eb3e62b6d0f54bb456b8050de0",
+          "destination_sha256": "e8a5e24ed5cad14c5cb8cc78e8bdcf96bb44e378a9a643254f4afdae7ef92490",
           "modification_status": "adapted"
         },
         {

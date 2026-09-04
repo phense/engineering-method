@@ -5,6 +5,14 @@ second state format. The installed `continuity-state` interface owns
 `.engineering-method/runs/<work-id>/state.json`, `resume.md`, `decisions.md`,
 `agent-reports/`, and `events.jsonl`.
 
+```json
+{
+  "compaction_boundaries": ["before_dispatch", "active_agent", "completed_agent_before_integration", "failed_verification", "mid_fix", "post_slice", "pre_converge", "final_handoff"],
+  "downstream_recall_allowed": ["work_id", "artifact_pointers"],
+  "authority_on_conflict": "repository_evidence"
+}
+```
+
 ## Ownership
 
 - The coordinator is the sole writer of `state.json`, `resume.md`, and
@@ -30,3 +38,30 @@ worktree, commits, artifacts, reports, and canonical work before continuing.
 Preserve completed slices, keep observed active agents active, and make only
 unavailable active agents redispatchable. Downstream memory may provide the
 work ID and artifact pointers, but cannot override repository evidence.
+
+## Compaction boundary evidence
+
+Recovery must be exercised from checkpoints representing all of these states:
+
+- before dispatch, with a prepared brief as the exact next action;
+- an active agent, preserving it when the host still observes it;
+- a completed agent before integration, preserving completed work without
+  redispatch;
+- failed verification, retaining the failing check and diagnostic next action;
+- mid-fix, retaining the finding, attempt evidence, and covering-test action;
+- post-slice, preserving completion and advancing only to pending work;
+- pre-converge, retaining as-built and integration evidence; and
+- final handoff, retaining fresh verification and its exact handoff action.
+
+At every boundary, validate git head/base evidence, artifact existence,
+canonical status, live-agent observations, and the saved next action. Git or
+canonical progress may safely advance stale state; conversation reconstruction
+may not rewind it.
+
+## Downstream recall boundary
+
+An agentic-RAG or other memory adapter may return only the stable work ID and
+artifact pointers needed to locate the run. Ignore recalled status, commits,
+completed or active work, findings, verification results, and next actions.
+Load those values from EM-002 state and then validate them against git,
+artifacts, tests, and the canonical backlog or issue source.
