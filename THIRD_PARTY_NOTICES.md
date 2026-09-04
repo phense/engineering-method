@@ -125,6 +125,19 @@ project-state event/checkpoint handoffs.
 - `skills/using-git-worktrees/SKILL.md` -> `skills/using-git-worktrees/SKILL.md`: adapted
 - `skills/dispatching-parallel-agents/SKILL.md` -> `skills/dispatching-parallel-agents/SKILL.md`: adapted
 
+Adapted in EM-004 from the pinned subagent-driven-development sources:
+
+- `skills/subagent-driven-development/SKILL.md` -> `skills/orchestrated-implementation/SKILL.md`: adapted for cohesive slices, risk-proportionate review, and the EM-002 continuity seam
+- `skills/subagent-driven-development/implementer-prompt.md` -> `shared/agent-roles/implementer.md`: adapted into a host-neutral role contract
+- `skills/subagent-driven-development/implementer-prompt.md` -> `templates/orchestration/agent-report.md`: adapted into a durable report schema
+- `skills/subagent-driven-development/implementer-prompt.md` -> `templates/orchestration/slice-brief.md`: adapted into a cohesive-slice brief
+- `skills/subagent-driven-development/task-reviewer-prompt.md` -> `shared/agent-roles/reviewer.md`: adapted into a risk-proportionate reviewer role
+- `skills/subagent-driven-development/re-review-prompt.md` -> `templates/orchestration/review-report.md`: adapted into a scoped review/fix report
+- `skills/subagent-driven-development/scripts/task-brief` -> `scripts/task-brief`: adapted for Spec Kit slices and work-ID run paths
+- `skills/subagent-driven-development/scripts/review-package` -> `scripts/review-package`: adapted for complete commit ranges and work-ID run paths
+- `skills/subagent-driven-development/scripts/sdd-workspace` -> `shared/policies/continuity-contract.md`: adapted to consume the EM-002 run contract
+- `skills/subagent-driven-development/scripts/sdd-workspace` -> `templates/orchestration/resume.md`: adapted into a compaction-safe recovery brief
+
 MIT License
 
 Copyright (c) 2025 Jesse Vincent

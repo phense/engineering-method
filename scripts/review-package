@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# Store a complete base-to-head review range in an initialized EM-002 run.
+set -euo pipefail
+
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
+  echo "usage: review-package WORK_ID BASE HEAD [OUTFILE]" >&2
+  exit 2
+fi
+
+work_id=$1
+base=$2
+head=$3
+case "$work_id" in
+  ""|.|..|*/*|*\\*|*:*) echo "invalid work ID" >&2; exit 2 ;;
+esac
+
+root=$(git rev-parse --show-toplevel)
+root=$(cd "$root" && pwd -P)
+run="$root/.engineering-method/runs/$work_id"
+[ -d "$run" ] && [ -f "$run/state.json" ] \
+  || { echo "EM-002 run is not initialized: $work_id" >&2; exit 2; }
+run=$(cd "$run" && pwd -P)
+
+base=$(git rev-parse --verify "${base}^{commit}") \
+  || { echo "invalid base commit" >&2; exit 2; }
+head=$(git rev-parse --verify "${head}^{commit}") \
+  || { echo "invalid head commit" >&2; exit 2; }
+git merge-base --is-ancestor "$base" "$head" \
+  || { echo "base is not an ancestor of head" >&2; exit 2; }
+
+if [ "$#" -eq 4 ]; then
+  out=$4
+  case "$out" in /*) ;; *) out="$root/$out" ;; esac
+else
+  out="$run/review-${base%${base#???????}}..${head%${head#???????}}.diff"
+fi
+out_parent=$(dirname "$out")
+[ -d "$out_parent" ] || { echo "output directory does not exist: $out_parent" >&2; exit 2; }
+out_parent=$(cd "$out_parent" && pwd -P)
+out="$out_parent/$(basename "$out")"
+case "$out" in
+  "$run"/*) ;;
+  *) echo "output must stay inside the work run" >&2; exit 2 ;;
+esac
+
+result=$(mktemp "$run/.review-package.XXXXXX")
+trap 'rm -f "$result"' EXIT
+{
+  echo "# Review package: $base..$head"
+  echo
+  echo "## Commits"
+  git log --oneline "$base..$head"
+  echo
+  echo "## Files changed"
+  git diff --stat "$base..$head"
+  echo
+  echo "## Diff"
+  git diff --no-ext-diff -U10 "$base..$head"
+} > "$result"
+mv "$result" "$out"
+echo "$out"

@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+# Extract one cohesive Spec Kit slice into an initialized EM-002 run.
+set -euo pipefail
+
+if [ "$#" -lt 3 ] || [ "$#" -gt 4 ]; then
+  echo "usage: task-brief TASKS_FILE WORK_ID SLICE_ID [OUTFILE]" >&2
+  exit 2
+fi
+
+tasks=$1
+work_id=$2
+slice_id=$3
+
+case "$work_id" in
+  ""|.|..|*/*|*\\*|*:*) echo "invalid work ID" >&2; exit 2 ;;
+esac
+case "$slice_id" in
+  ""|.|..|*/*|*\\*|*:*) echo "invalid slice ID" >&2; exit 2 ;;
+esac
+
+[ -f "$tasks" ] || { echo "no such tasks file: $tasks" >&2; exit 2; }
+root=$(git rev-parse --show-toplevel)
+root=$(cd "$root" && pwd -P)
+tasks=$(cd "$(dirname "$tasks")" && pwd -P)/$(basename "$tasks")
+case "$tasks" in
+  "$root"/*) ;;
+  *) echo "tasks file must be inside the repository" >&2; exit 2 ;;
+esac
+
+run="$root/.engineering-method/runs/$work_id"
+[ -d "$run" ] && [ -f "$run/state.json" ] \
+  || { echo "EM-002 run is not initialized: $work_id" >&2; exit 2; }
+run=$(cd "$run" && pwd -P)
+
+if [ "$#" -eq 4 ]; then
+  out=$4
+  case "$out" in /*) ;; *) out="$root/$out" ;; esac
+else
+  out="$run/slice-$slice_id-brief.md"
+fi
+out_parent=$(dirname "$out")
+[ -d "$out_parent" ] || { echo "output directory does not exist: $out_parent" >&2; exit 2; }
+out_parent=$(cd "$out_parent" && pwd -P)
+out="$out_parent/$(basename "$out")"
+case "$out" in
+  "$run"/*) ;;
+  *) echo "output must stay inside the work run" >&2; exit 2 ;;
+esac
+
+extract=$(mktemp "$run/.slice-extract.XXXXXX")
+result=$(mktemp "$run/.slice-brief.XXXXXX")
+trap 'rm -f "$extract" "$result"' EXIT
+
+awk -v wanted="$slice_id" '
+  /^```/ { infence = !infence }
+  !infence && selected && /^##[ \t]+/ { exit }
+  !infence && /^###[ \t]+Slice[ \t]+/ {
+    heading = $0
+    sub(/^###[ \t]+Slice[ \t]+/, "", heading)
+    id = heading
+    sub(/:.*/, "", id)
+    sub(/[ \t].*/, "", id)
+    if (selected && id != wanted) exit
+    selected = (id == wanted)
+  }
+  selected { print }
+' "$tasks" > "$extract"
+
+[ -s "$extract" ] \
+  || { echo "slice $slice_id not found in $tasks" >&2; exit 3; }
+
+{
+  echo "# Slice Brief: $slice_id"
+  echo
+  echo "- Work ID: $work_id"
+  echo "- Slice ID: $slice_id"
+  echo "- Source tasks: ${tasks#"$root/"}"
+  echo
+  echo "## Extracted Spec Kit tasks"
+  echo
+  sed -n '1,$p' "$extract"
+} > "$result"
+mv "$result" "$out"
+echo "$out"

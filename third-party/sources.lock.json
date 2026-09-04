@@ -216,6 +216,76 @@
           "source_sha256": "1968923066f3b707eb01d1992cdf4c42284c3855f70253b9cd5000ff45fca13c",
           "destination_sha256": "8053aa5770a5075ae398875fa7e55e6ebb3d93cbdc53c337984c2c181875c443",
           "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/SKILL.md",
+          "destination_path": "skills/orchestrated-implementation/SKILL.md",
+          "source_sha256": "8dd1b8e698edec3700c6d89517dbe96febd3bacd3f6ea21c1a3569c62ea104b5",
+          "destination_sha256": "c12635766edba4ceac72a84819b3b0b9aec79b538a77dabc1407d13b5bd93885",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/implementer-prompt.md",
+          "destination_path": "shared/agent-roles/implementer.md",
+          "source_sha256": "81dd9d5a3fb0b09b96b5829f03b9796842f3199ef7591d1ba1c2db2a515f64d0",
+          "destination_sha256": "a95ebb9aed4747728c997884a58a6f8b5ee8548aa52ee91af28b88e25deeb847",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/implementer-prompt.md",
+          "destination_path": "templates/orchestration/agent-report.md",
+          "source_sha256": "81dd9d5a3fb0b09b96b5829f03b9796842f3199ef7591d1ba1c2db2a515f64d0",
+          "destination_sha256": "5f69bede77238ecfdacda598c86842478f0a51e4c2b444f292df0da08d088e73",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/implementer-prompt.md",
+          "destination_path": "templates/orchestration/slice-brief.md",
+          "source_sha256": "81dd9d5a3fb0b09b96b5829f03b9796842f3199ef7591d1ba1c2db2a515f64d0",
+          "destination_sha256": "6df9bb6098f14efd575f69957e88f1ab325da6c6aa9adee5b3db1fcdb62058ba",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/task-reviewer-prompt.md",
+          "destination_path": "shared/agent-roles/reviewer.md",
+          "source_sha256": "eea23e33ec570c3041f40e9569fa711d61b8029f9eecf908345138aa1c6e61ab",
+          "destination_sha256": "fb0f6af360d502541673583312094ba9a084531f1c1cc29628b59de76068c8b4",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/re-review-prompt.md",
+          "destination_path": "templates/orchestration/review-report.md",
+          "source_sha256": "db0d5849478bc79cbde97b9b2cf0e58b50be8b8ed18464b0252c2bf27b6440a6",
+          "destination_sha256": "f2dc75b25feaec24e865f79db2e510f3ce98948bfdce506655fb1eec2cfb941d",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/scripts/task-brief",
+          "destination_path": "scripts/task-brief",
+          "source_sha256": "d6954ef7841c7da3d77373e6ff5118b3f2f2e998606fd95d33e6527851bce044",
+          "destination_sha256": "0734a63743f36e312e5d669e9e4ac8686710b7f3f07f7ade8a0114a69790755f",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/scripts/review-package",
+          "destination_path": "scripts/review-package",
+          "source_sha256": "fac3d4bd7f94369e8037b9ead2a8a502dca6ab333902b560b9455dbb3c450ebe",
+          "destination_sha256": "7cdbda594650fa64097f2bfad4cee0af257e9c21ccee6b006d14c5a3bc91c649",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/scripts/sdd-workspace",
+          "destination_path": "shared/policies/continuity-contract.md",
+          "source_sha256": "95a09d9d3983ad1aafd093ca72b4587946dea885c6e302caa02a779a2f911c31",
+          "destination_sha256": "8b756925d4b21790a7877772a0530af0283ec3eb3e62b6d0f54bb456b8050de0",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/subagent-driven-development/scripts/sdd-workspace",
+          "destination_path": "templates/orchestration/resume.md",
+          "source_sha256": "95a09d9d3983ad1aafd093ca72b4587946dea885c6e302caa02a779a2f911c31",
+          "destination_sha256": "38c5b475852386d303c3c73108bec28b034ddeac781499bd197c383b5e170094",
+          "modification_status": "adapted"
         }
       ]
     }
