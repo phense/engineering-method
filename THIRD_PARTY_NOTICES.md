@@ -97,6 +97,13 @@ SOFTWARE.
 - Copyright holder: 2025 Jesse Vincent
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
 
+Adapted in EM-003:
+
+- `skills/systematic-debugging/SKILL.md` -> `skills/systematic-debugging/SKILL.md`: adapted
+- `skills/test-driven-development/SKILL.md` -> `skills/test-driven-development/SKILL.md`: adapted
+- `skills/test-driven-development/writing-good-tests.md` -> `skills/test-driven-development/writing-good-tests.md`: adapted
+- `skills/verification-before-completion/SKILL.md` -> `skills/verification-before-completion/SKILL.md`: adapted
+
 MIT License
 
 Copyright (c) 2025 Jesse Vincent

@@ -391,6 +391,88 @@ class OpenSpecSkillContractTests(unittest.TestCase):
                 self.assertNotRegex(content, r"(?m)^\s*(?:\$ )?openspec\s")
 
 
+class QualitySkillContractTests(unittest.TestCase):
+    SKILLS = (
+        "systematic-debugging",
+        "test-driven-development",
+        "verification-before-completion",
+    )
+
+    def test_debugging_requires_observed_failure_and_root_cause(self) -> None:
+        """A deliberate behavior request must not be misclassified as a defect."""
+        content = normalized(read("skills/systematic-debugging/SKILL.md"))
+        description = frontmatter(read("skills/systematic-debugging/SKILL.md"))["description"].lower()
+        for phrase in ("observed failure", "test regression", "unexplained behavior", "not for"):
+            self.assertIn(phrase, description)
+        for phrase in (
+            "reproduce",
+            "root cause",
+            "one hypothesis",
+            "smallest test",
+            "do not propose a fix",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_debugging_handoff_requires_evidence_of_intent_change(self) -> None:
+        """An unsuccessful repair attempt must not manufacture a feature lifecycle."""
+        content = normalized(read("skills/systematic-debugging/SKILL.md"))
+        for phrase in (
+            "intentional contract change",
+            "architecture change",
+            "evidence establishes",
+            "openspec-propose",
+            "speckit-specify",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_tdd_applies_only_to_meaningful_testable_behavior(self) -> None:
+        """TDD must not create implementation-mirroring tests for prose or mechanics."""
+        content = normalized(read("skills/test-driven-development/SKILL.md"))
+        description = frontmatter(read("skills/test-driven-development/SKILL.md"))["description"].lower()
+        for phrase in ("testable behavior", "before implementation", "not for documentation"):
+            self.assertIn(phrase, description)
+        for phrase in (
+            "watch it fail",
+            "expected reason",
+            "minimal implementation",
+            "implementation-mirroring",
+            "writing-good-tests.md",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_verification_requires_fresh_output_before_every_success_claim(self) -> None:
+        """Prior or partial output must not support a pass, fix, or completion claim."""
+        content = normalized(read("skills/verification-before-completion/SKILL.md"))
+        description = frontmatter(read("skills/verification-before-completion/SKILL.md"))["description"].lower()
+        for phrase in ("pass", "fix", "completion claim", "fresh output"):
+            self.assertIn(phrase, description)
+        for phrase in (
+            "identify the command",
+            "run the full command",
+            "read the complete output",
+            "exit status",
+            "prior output",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_quality_skills_are_host_and_provider_neutral(self) -> None:
+        """A shared quality skill must not depend on omitted controllers or host syntax."""
+        prohibited = (
+            "superpowers:",
+            "using-superpowers",
+            "finishing-a-development-branch",
+            "gpt-",
+            "claude-",
+            "spawn_agent",
+            "task(",
+        )
+        for skill in self.SKILLS:
+            with self.subTest(skill=skill):
+                content = read(f"skills/{skill}/SKILL.md").lower()
+                for token in prohibited:
+                    self.assertNotIn(token, content)
+
+
 class ProvenanceContractTests(unittest.TestCase):
     def test_mapped_source_and_destination_hashes_match_disk(self) -> None:
         """Changing an adapted file without its source-lock hash must fail provenance."""

@@ -153,6 +153,34 @@
           "destination_path": "THIRD_PARTY_NOTICES.md",
           "source_sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
           "modification_status": "notice-only"
+        },
+        {
+          "source_path": "skills/systematic-debugging/SKILL.md",
+          "destination_path": "skills/systematic-debugging/SKILL.md",
+          "source_sha256": "808fc5717aa88ad65efff312b11c186294d3e6ee301afb584e2f86599b137787",
+          "destination_sha256": "24325a2617fa1bb58bf3dff4603fb2c92a660d9263865a70b3faa2f26661d942",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/test-driven-development/SKILL.md",
+          "destination_path": "skills/test-driven-development/SKILL.md",
+          "source_sha256": "bf1b8216e523851a411e91d429a7c1c2a173e79d88957bc78e348218d50edd54",
+          "destination_sha256": "aa849dac415b56b5b2c8b153f67be44dd5b4edb03ac9395e0cb27d1ee4d4dbbb",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/test-driven-development/writing-good-tests.md",
+          "destination_path": "skills/test-driven-development/writing-good-tests.md",
+          "source_sha256": "51471c853306ff92ca8bb41dcaea05f31c0e46b03651f8f3c99754b7172f4ae1",
+          "destination_sha256": "2a318c4200f658492e6b0eb19cd4c5bc496f687bba1fac018fae7b09173ef8fb",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/verification-before-completion/SKILL.md",
+          "destination_path": "skills/verification-before-completion/SKILL.md",
+          "source_sha256": "2befe7fc55bcadaa3d97dd9e8efeb633d2561c0ebe74c5a8b17c4d9e7e4520b3",
+          "destination_sha256": "2e7e0a31f8b3965c68c443d8e11205edc07fbb6eaa7ceb1d9e7723bff4563f7f",
+          "modification_status": "adapted"
         }
       ]
     }
