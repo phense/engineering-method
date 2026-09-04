@@ -173,15 +173,16 @@ def _document_marker(document: BacklogDocument) -> str:
 
 def render_backlog(document: BacklogDocument) -> str:
     """Render a readable, marker-backed canonical local document or cache."""
-    header = [
-        "# Backlog",
-        f"<!-- engineering-method:backlog-document {_document_marker(document)} -->",
-    ]
+    header = ["# Backlog", f"<!-- engineering-method:backlog-document {_document_marker(document)} -->"]
     if document.mode == "github-cache":
+        header = [
+            GITHUB_CACHE_NOTICE,
+            "# Backlog",
+            f"<!-- engineering-method:backlog-document {_document_marker(document)} -->",
+        ]
         header.extend(
             [
                 "",
-                GITHUB_CACHE_NOTICE,
                 "GitHub Issues are canonical. Refresh this cache; do not make local canonical mutations.",
             ]
         )

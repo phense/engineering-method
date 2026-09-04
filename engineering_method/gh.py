@@ -104,12 +104,19 @@ class GitHubIssuesGateway:
             raise ValueError("gh issue list response is partial")
         return [_remote_issue(entry) for entry in payload]
 
-    def create_issue(self, repository: RepositoryRef, *, title: str, body: str, labels: Sequence[str]) -> RemoteIssue:
+    def create_issue(self, repository: RepositoryRef, *, title: str, body: str, labels: Sequence[str], language: str = "en") -> RemoteIssue:
+        if language != "en":
+            raise ValueError("GitHub-authored content must declare English")
         request = json.dumps({"title": title, "body": body, "labels": list(labels)}, separators=(",", ":"))
         payload = _json_result(self._runner.run((
             "api", "--method", "POST", f"repos/{repository.full_name}/issues", "--input", "-"
         ), stdin=request), operation="issue create")
         return _remote_issue(payload)
+
+    def close_issue(self, repository: RepositoryRef, number: int) -> None:
+        result = self._runner.run(("api", "--method", "PATCH", f"repos/{repository.full_name}/issues/{number}", "-f", "state=closed"))
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr.strip() or "gh issue close failed")
 
     def ensure_sub_issue(self, repository: RepositoryRef, parent: int, child: int) -> None:
         result = self._runner.run((

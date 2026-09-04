@@ -50,6 +50,22 @@ def atomic_write_json(path: Path, payload: Mapping[str, Any]) -> None:
             temporary_path.unlink()
 
 
+def atomic_write_text(path: Path, content: str) -> None:
+    """Atomically replace a UTF-8 text artifact using the same sibling-file protocol."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    descriptor, temporary_name = tempfile.mkstemp(prefix=f".{path.name}.", suffix=".tmp", dir=path.parent)
+    temporary_path = Path(temporary_name)
+    try:
+        with os.fdopen(descriptor, "wb") as handle:
+            handle.write(content.encode("utf-8"))
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path.exists():
+            temporary_path.unlink()
+
+
 def append_jsonl(path: Path, record: Mapping[str, Any]) -> None:
     """Append exactly one fsynced JSON object and newline per call."""
     path.parent.mkdir(parents=True, exist_ok=True)
