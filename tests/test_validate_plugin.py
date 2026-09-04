@@ -344,6 +344,7 @@ class ValidatePluginTests(unittest.TestCase):
             "---\nname: example-workflow\ndescription: An example workflow.\n---\n\n# Example\n",
             "---\nname: \"example-workflow\"\ndescription: 'An example workflow.'\n---\n\n# Example\n",
             "---\nname: 'example-workflow'\ndescription: \"true\"\n---\n\n# Example\n",
+            "---\nname: example-workflow\ndescription: \"A workflow: test and review!\"\n---\n\n# Example\n",
         )
         for content in valid_frontmatter:
             with self.subTest(valid=content), tempfile.TemporaryDirectory() as directory:
@@ -391,7 +392,17 @@ class ValidatePluginTests(unittest.TestCase):
             ("description", "true", "frontmatter description must be a supported scalar"),
             ("name", "example:", "frontmatter name must be a supported scalar"),
             ("description", "42", "frontmatter description must be a supported scalar"),
+            ("description", "1:20", "frontmatter description must be a supported scalar"),
+            ("description", ".inf", "frontmatter description must be a supported scalar"),
+            ("description", ".nan", "frontmatter description must be a supported scalar"),
+            ("description", "0xFF", "frontmatter description must be a supported scalar"),
+            ("description", "0o77", "frontmatter description must be a supported scalar"),
+            ("description", "+42", "frontmatter description must be a supported scalar"),
+            ("description", "-42", "frontmatter description must be a supported scalar"),
             ("description", "2026-09-04", "frontmatter description must be a supported scalar"),
+            ("description", "A:workflow", "frontmatter description must be a supported scalar"),
+            ("description", "A [workflow]", "frontmatter description must be a supported scalar"),
+            ("description", "A & workflow", "frontmatter description must be a supported scalar"),
             ("description", "An example # comment", "frontmatter description must be a supported scalar"),
             ("description", "An example\t# comment", "frontmatter description must be a supported scalar"),
             ("description", "key: value", "frontmatter description must be a supported scalar"),

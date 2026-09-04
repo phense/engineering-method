@@ -70,6 +70,7 @@ YAML_NUMERIC_PLAIN_SCALAR = re.compile(
 )
 YAML_DATE_LIKE_PLAIN_SCALAR = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[Tt \t].*)?$")
 PLAIN_SCALAR_COMMENT_OR_MAPPING = re.compile(r"(?:[ \t]#|:[ \t])")
+PLAIN_DESCRIPTION = re.compile(r"^[A-Za-z][A-Za-z0-9 .()/'\"-]*$")
 
 
 def _relative(root: Path, path: Path) -> str:
@@ -177,14 +178,15 @@ def _validate_codex_manifest(
             errors.append(_error(relative, f"{field} path {_relative(root, component_path)} is required"))
 
 
-def _parse_supported_frontmatter_scalar(value: str) -> str | None:
+def _parse_supported_frontmatter_scalar(field: str, value: str) -> str | None:
     """Resolve the narrow, dependency-free string subset used by skill metadata.
 
     Supported values are non-empty plain strings, JSON-style double-quoted
-    strings, and YAML single-quoted strings. Plain values that YAML might
-    resolve as null, booleans, numbers, dates, comments, or mappings are
-    intentionally unsupported, as are collections, blocks, tags, anchors, and
-    aliases.
+    strings, and YAML single-quoted strings. Unquoted descriptions must begin
+    with an ASCII letter and use only conservative text characters; values
+    needing YAML structural, comment, tag, or anchor indicators must be
+    quoted. Plain values that YAML might resolve as null, booleans, numbers,
+    or dates are also intentionally unsupported.
     """
     if not value:
         return None
@@ -208,6 +210,7 @@ def _parse_supported_frontmatter_scalar(value: str) -> str | None:
         or value.lower() in YAML_AMBIGUOUS_PLAIN_SCALARS
         or YAML_NUMERIC_PLAIN_SCALAR.fullmatch(value)
         or YAML_DATE_LIKE_PLAIN_SCALAR.fullmatch(value)
+        or (field == "description" and not PLAIN_DESCRIPTION.fullmatch(value))
     ):
         return None
     return value
@@ -242,7 +245,7 @@ def _validate_skill_frontmatter(root: Path, errors: list[str]) -> None:
                 )
                 continue
             fields.add(key)
-            scalar = _parse_supported_frontmatter_scalar(value.strip())
+            scalar = _parse_supported_frontmatter_scalar(key, value.strip())
             if scalar is None:
                 errors.append(_error(relative, f"frontmatter {key} must be a supported scalar"))
             elif key == "name" and not SKILL_NAME.fullmatch(scalar):
