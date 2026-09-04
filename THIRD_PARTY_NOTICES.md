@@ -1,8 +1,10 @@
 # Third-Party Notices
 
-EM-001 contains no copied workflow text. The following upstream MIT licenses
-are recorded for provenance only. Each `LICENSE -> THIRD_PARTY_NOTICES.md`
-mapping is `notice-only`.
+EM-001 contains no copied workflow text. Later milestones adapt only the files
+listed below from the pinned upstream revisions. Each
+`LICENSE -> THIRD_PARTY_NOTICES.md` mapping is `notice-only`; adapted mappings
+record both immutable source and current destination SHA-256 hashes in
+`third-party/sources.lock.json`.
 
 ## Spec Kit
 
@@ -12,6 +14,16 @@ mapping is `notice-only`.
 - License SHA-256: `2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7`
 - Copyright holder: GitHub, Inc.
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Adapted in EM-003:
+
+- `templates/spec-template.md` -> `templates/spec-kit/spec.md`: adapted
+- `templates/plan-template.md` -> `templates/spec-kit/plan.md`: adapted
+- `templates/tasks-template.md` -> `templates/spec-kit/tasks.md`: adapted
+- `templates/commands/specify.md` -> `skills/speckit-specify/SKILL.md`: adapted
+- `templates/commands/plan.md` -> `skills/speckit-plan/SKILL.md`: adapted
+- `templates/commands/tasks.md` -> `skills/speckit-tasks/SKILL.md`: adapted
+- `templates/commands/converge.md` -> `skills/speckit-converge/SKILL.md`: adapted
 
 MIT License
 
@@ -44,6 +56,20 @@ SOFTWARE.
 - Copyright holder: 2024 OpenSpec Contributors
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
 
+Adapted in EM-003:
+
+- `skills/openspec-propose/SKILL.md` -> `templates/openspec/proposal.md`: adapted
+- `skills/openspec-propose/SKILL.md` -> `templates/openspec/design.md`: adapted
+- `skills/openspec-propose/SKILL.md` -> `templates/openspec/tasks.md`: adapted
+- `schemas/spec-driven/templates/spec.md` -> `templates/openspec/spec.md`: adapted
+- `skills/openspec-propose/SKILL.md` -> `skills/openspec-propose/SKILL.md`: adapted
+- `skills/openspec-apply-change/SKILL.md` -> `skills/openspec-apply/SKILL.md`: adapted
+- `skills/openspec-archive-change/SKILL.md` -> `skills/openspec-archive/SKILL.md`: adapted
+
+Original in EM-003:
+
+- `templates/openspec/escalation.md`: original; no upstream text was adapted
+
 MIT License
 
 Copyright (c) 2024 OpenSpec Contributors
@@ -74,6 +100,18 @@ SOFTWARE.
 - License SHA-256: `a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400`
 - Copyright holder: 2025 Jesse Vincent
 - `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Adapted in EM-003:
+
+- `skills/systematic-debugging/SKILL.md` -> `skills/systematic-debugging/SKILL.md`: adapted
+- `skills/test-driven-development/SKILL.md` -> `skills/test-driven-development/SKILL.md`: adapted
+- `skills/test-driven-development/writing-good-tests.md` -> `skills/test-driven-development/writing-good-tests.md`: adapted
+- `skills/verification-before-completion/SKILL.md` -> `skills/verification-before-completion/SKILL.md`: adapted
+- `skills/requesting-code-review/SKILL.md` -> `skills/requesting-code-review/SKILL.md`: adapted
+- `skills/requesting-code-review/code-reviewer.md` -> `skills/requesting-code-review/code-reviewer.md`: adapted
+- `skills/receiving-code-review/SKILL.md` -> `skills/receiving-code-review/SKILL.md`: adapted
+- `skills/using-git-worktrees/SKILL.md` -> `skills/using-git-worktrees/SKILL.md`: adapted
+- `skills/dispatching-parallel-agents/SKILL.md` -> `skills/dispatching-parallel-agents/SKILL.md`: adapted
 
 MIT License
 

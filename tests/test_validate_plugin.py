@@ -172,16 +172,18 @@ class ValidatePluginTests(unittest.TestCase):
             self.assertEqual("LICENSE", actual["license"]["source_path"])
             self.assertEqual(expected["license_sha256"], actual["license"]["sha256"])
             self.assertEqual(
-                [
-                    {
-                        "source_path": "LICENSE",
-                        "destination_path": "THIRD_PARTY_NOTICES.md",
-                        "source_sha256": expected["license_sha256"],
-                        "modification_status": "notice-only",
-                    }
-                ],
-                actual["files"],
+                {
+                    "source_path": "LICENSE",
+                    "destination_path": "THIRD_PARTY_NOTICES.md",
+                    "source_sha256": expected["license_sha256"],
+                    "modification_status": "notice-only",
+                },
+                actual["files"][0],
             )
+            for mapping in actual["files"][1:]:
+                self.assertEqual("adapted", mapping["modification_status"])
+                self.assertRegex(mapping["source_sha256"], r"^[0-9a-f]{64}$")
+                self.assertRegex(mapping["destination_sha256"], r"^[0-9a-f]{64}$")
 
     def test_real_repository_notices_agree_with_the_source_lock(self) -> None:
         """Every locked MIT license must be recorded as a notice-only source."""
@@ -364,6 +366,82 @@ class ValidatePluginTests(unittest.TestCase):
         )
         self.assertIn(
             "ERROR skills/project-backlog/SKILL.md: commands must resolve from the plugin root and run with the target repository cwd",
+            errors,
+        )
+
+    def test_reports_missing_and_escaping_bundled_skill_resources(self) -> None:
+        """A local skill link must resolve to an existing path inside the plugin root."""
+        cases = (
+            (
+                "[missing resource](missing.md)",
+                "ERROR skills/example/SKILL.md: bundled resource missing.md is required",
+            ),
+            (
+                "[escaping resource](../../../outside.md)",
+                "ERROR skills/example/SKILL.md: bundled resource ../../../outside.md must stay within the repository",
+            ),
+        )
+        for reference, expected in cases:
+            with self.subTest(reference=reference), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                self.make_repository(root)
+                skill_path = root / "skills/example/SKILL.md"
+                skill_path.write_text(skill_path.read_text(encoding="utf-8") + reference + "\n", encoding="utf-8")
+
+                errors = validate_repository(root)
+
+            self.assertIn(expected, errors)
+
+    def test_accepts_existing_bundled_skill_resource(self) -> None:
+        """A valid skill-relative link must resolve from the document directory."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            skill_path = root / "skills/example/SKILL.md"
+            resource = root / "templates/example.md"
+            resource.parent.mkdir(parents=True)
+            resource.write_text("example\n", encoding="utf-8")
+            skill_path.write_text(
+                skill_path.read_text(encoding="utf-8")
+                + "[resource](../../templates/example.md)\n",
+                encoding="utf-8",
+            )
+
+            errors = validate_repository(root)
+
+        self.assertEqual([], errors)
+
+    def test_reports_stale_locked_destination_hash(self) -> None:
+        """An adapted destination changed without a lock update must fail validation."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            lock_path = root / "third-party/sources.lock.json"
+            self.write_json(
+                lock_path,
+                {
+                    "schema_version": 1,
+                    "sources": [
+                        {
+                            "id": "example-upstream",
+                            "files": [
+                                {
+                                    "source_path": "source.md",
+                                    "destination_path": "skills/example/SKILL.md",
+                                    "source_sha256": "1" * 64,
+                                    "destination_sha256": "0" * 64,
+                                    "modification_status": "adapted",
+                                }
+                            ],
+                        }
+                    ],
+                },
+            )
+
+            errors = validate_repository(root)
+
+        self.assertIn(
+            "ERROR third-party/sources.lock.json: destination hash mismatch for skills/example/SKILL.md",
             errors,
         )
 

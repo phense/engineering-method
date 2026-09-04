@@ -25,7 +25,7 @@
 | Family | Revision | Selected source paths |
 |---|---|---|
 | Spec Kit | `df6b3187022ce986759bd854467e8a4bb56bb0f4` | `templates/commands/specify.md`, `plan.md`, `tasks.md`, `converge.md`; `templates/spec-template.md`, `plan-template.md`, `tasks-template.md` |
-| OpenSpec | `e062b9572be933564ba3899d059377dfa1393e32` | `skills/openspec-propose/SKILL.md`, `openspec-apply-change/SKILL.md`, `openspec-archive-change/SKILL.md` |
+| OpenSpec | `e062b9572be933564ba3899d059377dfa1393e32` | `skills/openspec-propose/SKILL.md`, `openspec-apply-change/SKILL.md`, `openspec-archive-change/SKILL.md`, `schemas/spec-driven/templates/spec.md` |
 | Superpowers | `b36e0829c6d0140e93cfef2ca599b1b07d4a7797` | Identically named selected skill folders plus `requesting-code-review/code-reviewer.md`; SDD materials are reserved for EM-004 |
 
 ### Task 1: EM-003.1 Define lifecycle contracts and artifact templates

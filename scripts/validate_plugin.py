@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import collections.abc
+import hashlib
 import json
 import re
 import sys
 from pathlib import Path
+from urllib.parse import unquote
 
 
 COMMON_IDENTITY_FIELDS = ("name", "version", "description", "author", "license", "keywords")
@@ -71,6 +73,8 @@ YAML_NUMERIC_PLAIN_SCALAR = re.compile(
 YAML_DATE_LIKE_PLAIN_SCALAR = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[Tt \t].*)?$")
 PLAIN_SCALAR_COMMENT_OR_MAPPING = re.compile(r"(?:[ \t]#|:[ \t])")
 PLAIN_DESCRIPTION = re.compile(r"^[A-Za-z][A-Za-z0-9 .()/'\"-]*$")
+MARKDOWN_LINK = re.compile(r"\[[^\]\n]+\]\(([^)\n]+)\)")
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
 def _relative(root: Path, path: Path) -> str:
@@ -297,6 +301,85 @@ def _validate_project_backlog_contract(root: Path, errors: list[str]) -> None:
         )
 
 
+def _validate_skill_resources(root: Path, errors: list[str]) -> None:
+    """Validate local Markdown links from skills as installed-relative resources."""
+    skills_root = root / "skills"
+    if not skills_root.is_dir():
+        return
+    resolved_root = root.resolve()
+    for path in sorted(skills_root.rglob("*.md")):
+        relative = _relative(root, path)
+        try:
+            content = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        for raw_target in MARKDOWN_LINK.findall(content):
+            target = raw_target.strip().strip("<>")
+            target = target.split("#", 1)[0]
+            if not target or re.match(r"^[A-Za-z][A-Za-z0-9+.-]*:", target):
+                continue
+            target = unquote(target)
+            candidate = (path.parent / target).resolve()
+            try:
+                candidate.relative_to(resolved_root)
+            except ValueError:
+                errors.append(
+                    _error(relative, f"bundled resource {target} must stay within the repository")
+                )
+                continue
+            if not candidate.exists():
+                errors.append(_error(relative, f"bundled resource {target} is required"))
+
+
+def _validate_locked_destinations(
+    root: Path, lock: dict[str, object], errors: list[str]
+) -> None:
+    """Validate repository-contained provenance facts without upstream checkouts."""
+    sources = lock.get("sources")
+    if not isinstance(sources, list):
+        errors.append(_error("third-party/sources.lock.json", "sources must be a list"))
+        return
+    resolved_root = root.resolve()
+    destinations: set[str] = set()
+    for source in sources:
+        if not isinstance(source, dict) or not isinstance(source.get("files"), list):
+            errors.append(_error("third-party/sources.lock.json", "each source must have a files list"))
+            continue
+        for mapping in source["files"]:
+            if not isinstance(mapping, dict):
+                errors.append(_error("third-party/sources.lock.json", "file mappings must be objects"))
+                continue
+            source_hash = mapping.get("source_sha256")
+            if not isinstance(source_hash, str) or not SHA256.fullmatch(source_hash):
+                errors.append(_error("third-party/sources.lock.json", "source_sha256 must be lowercase SHA-256"))
+            if mapping.get("modification_status") != "adapted":
+                continue
+            destination = mapping.get("destination_path")
+            destination_hash = mapping.get("destination_sha256")
+            if not isinstance(destination, str) or not destination:
+                errors.append(_error("third-party/sources.lock.json", "adapted destination_path is required"))
+                continue
+            if destination in destinations:
+                errors.append(_error("third-party/sources.lock.json", f"duplicate destination {destination}"))
+                continue
+            destinations.add(destination)
+            candidate = (root / destination).resolve()
+            try:
+                candidate.relative_to(resolved_root)
+            except ValueError:
+                errors.append(_error("third-party/sources.lock.json", f"destination {destination} must stay within the repository"))
+                continue
+            if not candidate.is_file():
+                errors.append(_error("third-party/sources.lock.json", f"destination {destination} is required"))
+                continue
+            if not isinstance(destination_hash, str) or not SHA256.fullmatch(destination_hash):
+                errors.append(_error("third-party/sources.lock.json", f"destination_sha256 is required for {destination}"))
+                continue
+            actual = hashlib.sha256(candidate.read_bytes()).hexdigest()
+            if actual != destination_hash:
+                errors.append(_error("third-party/sources.lock.json", f"destination hash mismatch for {destination}"))
+
+
 def _is_excluded_scan_path(relative: Path) -> bool:
     return any(part in EXCLUDED_SCAN_PARTS for part in relative.parts) or relative.parts[:2] == (
         "tests",
@@ -337,6 +420,9 @@ def validate_repository(root: Path) -> list[str]:
     for relative in COMMON_REQUIRED_FILES:
         if not (root / relative).is_file():
             errors.append(_error(relative, "file is required"))
+    lock: dict[str, object] | None = None
+    if (root / "third-party/sources.lock.json").is_file():
+        lock = _load_json(root, "third-party/sources.lock.json", errors)
     if codex is not None:
         _validate_identity(codex_relative, codex, errors)
         _validate_codex_manifest(root, codex_relative, codex, errors)
@@ -356,6 +442,9 @@ def validate_repository(root: Path) -> list[str]:
             errors.append(_error(claude_relative, "author.name must match .codex-plugin/plugin.json"))
     _validate_skill_frontmatter(root, errors)
     _validate_project_backlog_contract(root, errors)
+    _validate_skill_resources(root, errors)
+    if lock is not None:
+        _validate_locked_destinations(root, lock, errors)
     _validate_unfinished_markers(root, errors)
     return sorted(errors)
 
