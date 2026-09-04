@@ -1,0 +1,62 @@
+{
+  "schema_version": 1,
+  "sources": [
+    {
+      "id": "github-spec-kit",
+      "project": "Spec Kit",
+      "repository": "https://github.com/github/spec-kit.git",
+      "revision": "df6b3187022ce986759bd854467e8a4bb56bb0f4",
+      "license": {
+        "spdx": "MIT",
+        "source_path": "LICENSE",
+        "sha256": "2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7"
+      },
+      "files": [
+        {
+          "source_path": "LICENSE",
+          "destination_path": "THIRD_PARTY_NOTICES.md",
+          "source_sha256": "2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7",
+          "modification_status": "notice-only"
+        }
+      ]
+    },
+    {
+      "id": "openspec",
+      "project": "OpenSpec",
+      "repository": "https://github.com/Fission-AI/OpenSpec.git",
+      "revision": "e062b9572be933564ba3899d059377dfa1393e32",
+      "license": {
+        "spdx": "MIT",
+        "source_path": "LICENSE",
+        "sha256": "c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64"
+      },
+      "files": [
+        {
+          "source_path": "LICENSE",
+          "destination_path": "THIRD_PARTY_NOTICES.md",
+          "source_sha256": "c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64",
+          "modification_status": "notice-only"
+        }
+      ]
+    },
+    {
+      "id": "superpowers",
+      "project": "Superpowers",
+      "repository": "https://github.com/obra/superpowers.git",
+      "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+      "license": {
+        "spdx": "MIT",
+        "source_path": "LICENSE",
+        "sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400"
+      },
+      "files": [
+        {
+          "source_path": "LICENSE",
+          "destination_path": "THIRD_PARTY_NOTICES.md",
+          "source_sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+          "modification_status": "notice-only"
+        }
+      ]
+    }
+  ]
+}

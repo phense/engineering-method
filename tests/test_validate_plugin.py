@@ -15,6 +15,30 @@ IDENTITY = {
     "keywords": ["engineering", "workflow", "specification", "testing", "review"],
 }
 
+PROVENANCE_SOURCES = (
+    {
+        "id": "github-spec-kit",
+        "project": "Spec Kit",
+        "repository": "https://github.com/github/spec-kit.git",
+        "revision": "df6b3187022ce986759bd854467e8a4bb56bb0f4",
+        "license_sha256": "2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7",
+    },
+    {
+        "id": "openspec",
+        "project": "OpenSpec",
+        "repository": "https://github.com/Fission-AI/OpenSpec.git",
+        "revision": "e062b9572be933564ba3899d059377dfa1393e32",
+        "license_sha256": "c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64",
+    },
+    {
+        "id": "superpowers",
+        "project": "Superpowers",
+        "repository": "https://github.com/obra/superpowers.git",
+        "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
+        "license_sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
+    },
+)
+
 
 class ValidatePluginTests(unittest.TestCase):
     def make_repository(self, root: Path) -> None:
@@ -68,13 +92,64 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertEqual(
             [
-                "ERROR LICENSE: file is required",
                 "ERROR README.md: file is required",
-                "ERROR THIRD_PARTY_NOTICES.md: file is required",
-                "ERROR third-party/sources.lock.json: file is required",
             ],
             errors,
         )
+
+    def test_real_repository_pins_the_required_upstream_provenance(self) -> None:
+        """Changing a source ID, revision, license digest, or mapping must fail."""
+        root = Path(__file__).resolve().parents[1]
+        lock_path = root / "third-party/sources.lock.json"
+
+        self.assertTrue(lock_path.is_file(), "third-party/sources.lock.json must exist")
+        if not lock_path.is_file():
+            return
+        lock = json.loads(lock_path.read_text(encoding="utf-8"))
+
+        self.assertEqual(1, lock["schema_version"])
+        sources = lock["sources"]
+        self.assertEqual([source["id"] for source in PROVENANCE_SOURCES], [source["id"] for source in sources])
+        for expected, actual in zip(PROVENANCE_SOURCES, sources, strict=True):
+            self.assertEqual(expected["project"], actual["project"])
+            self.assertEqual(expected["repository"], actual["repository"])
+            self.assertEqual(expected["revision"], actual["revision"])
+            self.assertRegex(actual["revision"], r"^[0-9a-f]{40}$")
+            self.assertEqual("MIT", actual["license"]["spdx"])
+            self.assertEqual("LICENSE", actual["license"]["source_path"])
+            self.assertEqual(expected["license_sha256"], actual["license"]["sha256"])
+            self.assertEqual(
+                [
+                    {
+                        "source_path": "LICENSE",
+                        "destination_path": "THIRD_PARTY_NOTICES.md",
+                        "source_sha256": expected["license_sha256"],
+                        "modification_status": "notice-only",
+                    }
+                ],
+                actual["files"],
+            )
+
+    def test_real_repository_notices_agree_with_the_source_lock(self) -> None:
+        """Every locked MIT license must be recorded as a notice-only source."""
+        root = Path(__file__).resolve().parents[1]
+        notice_path = root / "THIRD_PARTY_NOTICES.md"
+
+        self.assertTrue(notice_path.is_file(), "THIRD_PARTY_NOTICES.md must exist")
+        if not notice_path.is_file():
+            return
+        notices = notice_path.read_text(encoding="utf-8")
+
+        self.assertIn("EM-001 contains no copied workflow text.", notices)
+        for source in PROVENANCE_SOURCES:
+            for value in (
+                source["project"],
+                source["repository"],
+                source["revision"],
+                source["license_sha256"],
+                "LICENSE -> THIRD_PARTY_NOTICES.md: notice-only",
+            ):
+                self.assertIn(value, notices)
 
     def test_reports_invalid_manifest_json(self) -> None:
         """A malformed manifest must not be treated as an empty manifest."""
