@@ -149,7 +149,7 @@ class Feature:
     updated_at: str
 
     def __post_init__(self) -> None:
-        if re.fullmatch(r"F-[1-9][0-9]*", self.id) is None:
+        if re.fullmatch(r"F-0*[1-9][0-9]*", self.id) is None:
             raise ValueError("feature ID must use the F-NNN form")
         if not isinstance(self.name, str) or not self.name.strip():
             raise ValueError("feature name must be a non-empty string")
