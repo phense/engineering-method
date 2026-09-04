@@ -58,6 +58,8 @@ class FeatureDocument:
                 or not isinstance(entry[0], str)
                 or not isinstance(entry[1], str)
                 or not entry[1].strip()
+                or "\n" in entry[1]
+                or "\r" in entry[1]
             ):
                 raise ValueError("each removal rationale must contain an ID and non-empty text")
             if entry[0] in rationale_ids or entry[0] not in feature_by_id:
@@ -177,10 +179,9 @@ def load_features(path: Path) -> FeatureDocument:
     visible_indices = {
         index for index, line in enumerate(lines) if VISIBLE_FEATURE_PATTERN.fullmatch(line)
     }
-    if marker_indices:
-        for index in visible_indices:
-            if index == 0 or index - 1 not in marker_indices:
-                raise ValueError("visible feature has no immediately preceding marker")
+    for index in visible_indices:
+        if index == 0 or index - 1 not in marker_indices:
+            raise ValueError("visible feature has no immediately preceding marker")
     for index, line in enumerate(lines):
         marker = MARKER_PATTERN.fullmatch(line)
         if marker is None:

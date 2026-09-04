@@ -84,6 +84,11 @@ class FeatureInventoryTests(unittest.TestCase):
     def test_rejects_removed_feature_without_a_rationale(self) -> None:
         with self.assertRaisesRegex(ValueError, "rationale"):
             FeatureDocument(features=(feature(status="removed"),))
+        with self.assertRaisesRegex(ValueError, "rationale"):
+            FeatureDocument(
+                features=(feature(status="removed"),),
+                removal_rationales=(("F-001", "line one\nline two"),),
+            )
 
     def test_rejects_newlines_in_feature_fields(self) -> None:
         for field in ("name", "summary"):
@@ -119,6 +124,16 @@ class FeatureInventoryTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             path = Path(temporary) / "FEATURES.md"
             path.write_text(rendered, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "visible feature.*marker"):
+                load_features(path)
+
+    def test_rejects_visible_feature_in_a_pre_release_document_without_any_marker(self) -> None:
+        root = Path(__file__).resolve().parents[1]
+        content = (root / "FEATURES.md").read_text(encoding="utf-8")
+        content += "\n## `F-999` Unmarked\n\n- Status: available\n- Summary: Hidden.\n"
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "FEATURES.md"
+            path.write_text(content, encoding="utf-8")
             with self.assertRaisesRegex(ValueError, "visible feature.*marker"):
                 load_features(path)
 

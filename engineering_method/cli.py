@@ -1,4 +1,4 @@
-"""Small dependency-free command adapters for project-state workflows."""
+"""Dependency-free, non-destructive command adapters for project-state workflows."""
 
 from __future__ import annotations
 
@@ -6,13 +6,29 @@ from dataclasses import replace
 import json
 from pathlib import Path
 import sys
+from typing import TextIO
 
-from .backlog import BacklogDocument, load_backlog, render_backlog
-from .continuity import RunState, append_event, checkpoint, create_run, recover_run
+from .backlog import BacklogDocument, load_backlog, render_backlog, write_backlog
+from .continuity import (
+    BacklogCanonicalProbe,
+    SubprocessGitProbe,
+    append_event,
+    checkpoint,
+    create_run,
+    load_run_state,
+    recover_run,
+    run_state_from_payload,
+)
 from .features import FeatureDocument, load_features, remove_feature, render_features, upsert_feature
-from .files import atomic_write_text
-from .gh import GitHubIssuesGateway
-from .issues import workflow_state_check
+from .files import atomic_write_bundle, atomic_write_text, require_repo_relative
+from .gh import GitHubIssuesGateway, RepositoryRef
+from .issues import (
+    IssueGateway,
+    queue_mutation,
+    refresh_issue_cache,
+    replay_pending_queue,
+    workflow_state_check,
+)
 from .models import BacklogItem, Feature, Priority, TaskStatus, derive_project_key, utc_timestamp
 
 
@@ -21,157 +37,515 @@ def _error(message: str) -> int:
     return 2
 
 
-def _option(arguments: list[str], name: str, *, required: bool = False, default: str | None = None) -> str | None:
+def _parse(
+    arguments: list[str],
+    *,
+    value_options: frozenset[str] = frozenset(),
+    flags: frozenset[str] = frozenset(),
+) -> tuple[list[str], dict[str, str], set[str]]:
+    positionals: list[str] = []
+    values: dict[str, str] = {}
+    enabled: set[str] = set()
+    index = 0
+    while index < len(arguments):
+        argument = arguments[index]
+        if argument in flags:
+            if argument in enabled:
+                raise ValueError(f"duplicate option: {argument}")
+            enabled.add(argument)
+            index += 1
+        elif argument in value_options:
+            if argument in values:
+                raise ValueError(f"duplicate option: {argument}")
+            if index + 1 >= len(arguments):
+                raise ValueError(f"{argument} requires a value")
+            values[argument] = arguments[index + 1]
+            index += 2
+        elif argument.startswith("--"):
+            raise ValueError(f"unsupported option: {argument}")
+        else:
+            positionals.append(argument)
+            index += 1
+    return positionals, values, enabled
+
+
+def _required(options: dict[str, str], name: str) -> str:
+    if name not in options:
+        raise ValueError(f"{name} is required")
+    return options[name]
+
+
+def _csv(value: str | None, *, option: str) -> tuple[str, ...]:
+    if value is None:
+        return ()
+    if value == "":
+        return ()
+    values = tuple(part.strip() for part in value.split(","))
+    if any(not part for part in values):
+        raise ValueError(f"{option} contains an empty value")
+    return values
+
+
+def _read_repo_input(root: Path, value: str, *, stream: TextIO) -> str:
+    if value == "-":
+        return stream.read()
+    relative = require_repo_relative(value)
+    repository = root.resolve()
+    path = (root / relative).resolve()
     try:
-        index = arguments.index(name)
-    except ValueError:
-        if required:
-            raise ValueError(f"{name} is required")
-        return default
-    if index + 1 >= len(arguments):
-        raise ValueError(f"{name} requires a value")
-    return arguments[index + 1]
+        path.relative_to(repository)
+    except ValueError as error:
+        raise ValueError("input file escapes the repository") from error
+    if not path.is_file():
+        raise ValueError(f"input file does not exist: {relative}")
+    return path.read_text(encoding="utf-8")
 
 
-def _write_backlog(document: BacklogDocument) -> None:
-    atomic_write_text(Path("BACKLOG.md"), render_backlog(document))
+def _write_local_backlog(root: Path, document: BacklogDocument) -> None:
+    write_backlog(root / "BACKLOG.md", document)
 
 
-def _local_backlog() -> BacklogDocument:
-    document = load_backlog(Path("BACKLOG.md"))
-    if document.mode != "local":
-        raise ValueError("local backlog mutation is unavailable in github-cache mode")
-    return document
+def _load_mutable_backlog(root: Path) -> BacklogDocument:
+    return load_backlog(root / "BACKLOG.md")
 
 
-def _backlog_command(arguments: list[str]) -> int:
+def _replace_item(
+    document: BacklogDocument, identifier: str, transform
+) -> BacklogDocument:
+    found = False
+    items: list[BacklogItem] = []
+    for item in document.items:
+        if item.id == identifier:
+            found = True
+            items.append(transform(item))
+        else:
+            items.append(item)
+    if not found:
+        raise ValueError("backlog ID does not exist")
+    return BacklogDocument(document.project_key, document.mode, tuple(items))
+
+
+def _queue_or_write(
+    root: Path,
+    document: BacklogDocument,
+    *,
+    mutations: tuple[dict[str, object], ...],
+    local_document: BacklogDocument,
+    gateway: IssueGateway,
+) -> str:
+    if document.mode == "github-cache":
+        for mutation in mutations:
+            queue_mutation(root, mutation)
+        detection = gateway.detect_repository()
+        if detection.repository is not None:
+            replay_pending_queue(
+                root, root / "BACKLOG.md", gateway, detection.repository
+            )
+            return "BACKLOG.md\n.engineering-method/github-queue.jsonl"
+        return ".engineering-method/github-queue.jsonl"
+    _write_local_backlog(root, local_document)
+    return "BACKLOG.md"
+
+
+def _backlog_command(
+    arguments: list[str],
+    *,
+    root: Path,
+    gateway: IssueGateway,
+) -> str:
     if not arguments:
-        return _error("backlog action required")
-    action = arguments[0]
+        raise ValueError("backlog action required")
+    action, rest = arguments[0], arguments[1:]
+    path = root / "BACKLOG.md"
+    features_path = root / "FEATURES.md"
     if action == "init":
-        try:
-            key = _option(arguments, "--project-key") or derive_project_key(Path.cwd().name)
-            _write_backlog(BacklogDocument(key, "local", ()))
-            atomic_write_text(Path("FEATURES.md"), render_features(FeatureDocument(features=())))
-        except ValueError as error:
-            return _error(str(error))
-        print("BACKLOG.md")
-        return 0
-    try:
-        document = _local_backlog()
-        if action == "add":
-            identifier = _option(arguments, "--id", required=True)
-            title = _option(arguments, "--title", required=True)
-            priority = Priority(_option(arguments, "--priority", required=True))
-            parent = _option(arguments, "--parent")
-            item = BacklogItem(identifier, title, TaskStatus.OPEN, priority, parent, (), _option(arguments, "--notes", default="") or "", utc_timestamp())
-            document = BacklogDocument(document.project_key, "local", document.items + (item,))
-        elif action in {"start", "block", "complete"}:
-            if len(arguments) < 2:
-                raise ValueError("backlog ID is required")
-            identifier = arguments[1]
-            statuses = {"start": TaskStatus.IN_PROGRESS, "block": TaskStatus.BLOCKED, "complete": TaskStatus.COMPLETE}
-            found = False
-            items = []
-            for item in document.items:
-                if item.id == identifier:
-                    found = True
-                    items.append(replace(item, status=statuses[action], notes=_option(arguments, "--notes", default=item.notes) or "", updated_at=utc_timestamp()))
-                else:
-                    items.append(item)
-            if not found:
-                raise ValueError("backlog ID does not exist")
-            document = BacklogDocument(document.project_key, "local", tuple(items))
-        else:
-            raise ValueError("unsupported backlog action")
-        _write_backlog(document)
-    except (ValueError, OSError) as error:
-        return _error(str(error))
-    print("BACKLOG.md")
-    return 0
+        positionals, options, flags = _parse(
+            rest,
+            value_options=frozenset({"--project-key"}),
+            flags=frozenset({"--replace"}),
+        )
+        if positionals:
+            raise ValueError("backlog init accepts no positional arguments")
+        if (path.exists() or features_path.exists()) and "--replace" not in flags:
+            raise ValueError("project state already exists; use --replace to reinitialize")
+        key = options.get("--project-key") or derive_project_key(root.name)
+        atomic_write_bundle(
+            {
+                path: render_backlog(BacklogDocument(key, "local", ())).encode("utf-8"),
+                features_path: render_features(FeatureDocument(features=())).encode("utf-8"),
+            }
+        )
+        archive_path = root / "BACKLOG-ARCHIVE.md"
+        if "--replace" in flags and archive_path.exists():
+            archive_path.unlink()
+        return "BACKLOG.md\nFEATURES.md"
+
+    if action == "state-check":
+        positionals, _, _ = _parse(rest)
+        if positionals:
+            raise ValueError("backlog state-check accepts no arguments")
+        return workflow_state_check(path, gateway).reason
+
+    document = _load_mutable_backlog(root)
+    if action == "add":
+        positionals, options, _ = _parse(
+            rest,
+            value_options=frozenset(
+                {"--id", "--title", "--priority", "--parent", "--depends-on", "--notes"}
+            ),
+        )
+        if positionals:
+            raise ValueError("backlog add accepts options only")
+        identifier = _required(options, "--id")
+        title = _required(options, "--title")
+        priority = Priority(_required(options, "--priority"))
+        parent = options.get("--parent")
+        dependencies = _csv(options.get("--depends-on"), option="--depends-on")
+        notes = options.get("--notes", "")
+        new_item = BacklogItem(
+            identifier,
+            title,
+            TaskStatus.OPEN,
+            priority,
+            parent,
+            dependencies,
+            notes,
+            utc_timestamp(),
+        )
+        local_document = BacklogDocument(
+            document.project_key, document.mode, document.items + (new_item,)
+        )
+        return _queue_or_write(
+            root,
+            document,
+            mutations=(
+                {
+                    "kind": "add",
+                    "backlog_id": identifier,
+                    "title": title,
+                    "priority": priority.value,
+                    "parent_id": parent,
+                    "depends_on": list(dependencies),
+                    "notes": notes,
+                },
+            ),
+            local_document=local_document,
+            gateway=gateway,
+        )
+
+    if action in {"start", "block", "complete"}:
+        positionals, options, _ = _parse(
+            rest, value_options=frozenset({"--notes", "--depends-on"})
+        )
+        if len(positionals) != 1:
+            raise ValueError(f"backlog {action} requires one backlog ID")
+        identifier = positionals[0]
+        desired_status = {
+            "start": TaskStatus.IN_PROGRESS,
+            "block": TaskStatus.BLOCKED,
+            "complete": TaskStatus.COMPLETE,
+        }[action]
+
+        def update(item: BacklogItem) -> BacklogItem:
+            dependencies = (
+                _csv(options["--depends-on"], option="--depends-on")
+                if "--depends-on" in options
+                else item.depends_on
+            )
+            return replace(
+                item,
+                status=desired_status,
+                depends_on=dependencies,
+                notes=options.get("--notes", item.notes),
+                updated_at=utc_timestamp(),
+            )
+
+        local_document = _replace_item(document, identifier, update)
+        mutation: dict[str, object] = {
+            "kind": "status",
+            "backlog_id": identifier,
+            "status": desired_status.value,
+        }
+        if "--notes" in options:
+            mutation["notes"] = options["--notes"]
+        mutations = [mutation]
+        if "--depends-on" in options:
+            mutations.append(
+                {
+                    "kind": "dependencies",
+                    "backlog_id": identifier,
+                    "depends_on": list(
+                        _csv(options["--depends-on"], option="--depends-on")
+                    ),
+                }
+            )
+        return _queue_or_write(
+            root,
+            document,
+            mutations=tuple(mutations),
+            local_document=local_document,
+            gateway=gateway,
+        )
+
+    if action == "priority":
+        positionals, _, _ = _parse(rest)
+        if len(positionals) != 2:
+            raise ValueError("backlog priority requires a backlog ID and P0-P3")
+        identifier, raw_priority = positionals
+        priority = Priority(raw_priority)
+        local_document = _replace_item(
+            document,
+            identifier,
+            lambda item: replace(item, priority=priority, updated_at=utc_timestamp()),
+        )
+        return _queue_or_write(
+            root,
+            document,
+            mutations=(
+                {"kind": "priority", "backlog_id": identifier, "priority": priority.value},
+            ),
+            local_document=local_document,
+            gateway=gateway,
+        )
+
+    if action == "dependencies":
+        positionals, options, _ = _parse(
+            rest, value_options=frozenset({"--depends-on"})
+        )
+        if len(positionals) != 1:
+            raise ValueError("backlog dependencies requires one backlog ID")
+        identifier = positionals[0]
+        dependencies = _csv(_required(options, "--depends-on"), option="--depends-on")
+        local_document = _replace_item(
+            document,
+            identifier,
+            lambda item: replace(
+                item, depends_on=dependencies, updated_at=utc_timestamp()
+            ),
+        )
+        return _queue_or_write(
+            root,
+            document,
+            mutations=(
+                {
+                    "kind": "dependencies",
+                    "backlog_id": identifier,
+                    "depends_on": list(dependencies),
+                },
+            ),
+            local_document=local_document,
+            gateway=gateway,
+        )
+
+    if action == "archive":
+        positionals, options, _ = _parse(
+            rest,
+            value_options=frozenset({"--active-line-limit", "--target-line-limit"}),
+        )
+        if positionals:
+            raise ValueError("backlog archive accepts options only")
+        if document.mode != "local":
+            raise ValueError("cannot archive a github-cache backlog")
+        active_limit = int(options.get("--active-line-limit", "500"))
+        target_limit = int(options.get("--target-line-limit", "350"))
+        _, archived = write_backlog(
+            path,
+            document,
+            active_line_limit=active_limit,
+            target_line_limit=target_limit,
+        )
+        return "BACKLOG.md\nBACKLOG-ARCHIVE.md" if archived else "BACKLOG.md"
+    raise ValueError("unsupported backlog action")
 
 
-def _feature_command(arguments: list[str]) -> int:
+def _feature_command(arguments: list[str], *, root: Path) -> str:
     if not arguments:
-        return _error("feature action required")
-    try:
-        document = load_features(Path("FEATURES.md"))
-        action = arguments[0]
-        if action in {"add", "change"}:
-            identifier = _option(arguments, "--id", required=True)
-            existing = next((entry for entry in document.features if entry.id == identifier), None)
-            if action == "change" and existing is None:
-                raise ValueError("feature ID does not exist")
-            name = _option(arguments, "--name", default=existing.name if existing else None)
-            summary = _option(arguments, "--summary", default=existing.summary if existing else None)
-            status = _option(arguments, "--status", default=existing.status if existing else "available")
-            related = _option(arguments, "--related")
-            links = tuple(related.split(",")) if related else (existing.related_backlog_ids if existing else ())
-            document = upsert_feature(document, Feature(identifier, name, summary, status, links, utc_timestamp()))
-        elif action == "remove":
-            document = remove_feature(document, _option(arguments, "--id", required=True), rationale=_option(arguments, "--rationale", required=True))
-        else:
-            raise ValueError("unsupported feature action")
-        atomic_write_text(Path("FEATURES.md"), render_features(document))
-    except (ValueError, OSError) as error:
-        return _error(str(error))
-    print("FEATURES.md")
-    return 0
+        raise ValueError("feature action required")
+    document = load_features(root / "FEATURES.md")
+    action, rest = arguments[0], arguments[1:]
+    if action in {"add", "change"}:
+        positionals, options, _ = _parse(
+            rest,
+            value_options=frozenset(
+                {"--id", "--name", "--summary", "--status", "--related"}
+            ),
+        )
+        if positionals:
+            raise ValueError(f"feature {action} accepts options only")
+        identifier = _required(options, "--id")
+        existing = next((entry for entry in document.features if entry.id == identifier), None)
+        if action == "change" and existing is None:
+            raise ValueError("feature ID does not exist")
+        name = options.get("--name", existing.name if existing else None)
+        summary = options.get("--summary", existing.summary if existing else None)
+        if name is None or summary is None:
+            raise ValueError("--name and --summary are required for a new feature")
+        status = options.get("--status", existing.status if existing else "available")
+        related = (
+            _csv(options["--related"], option="--related")
+            if "--related" in options
+            else existing.related_backlog_ids if existing else ()
+        )
+        document = upsert_feature(
+            document,
+            Feature(identifier, name, summary, status, related, utc_timestamp()),
+        )
+    elif action == "remove":
+        positionals, options, _ = _parse(
+            rest, value_options=frozenset({"--id", "--rationale"})
+        )
+        if positionals:
+            raise ValueError("feature remove accepts options only")
+        document = remove_feature(
+            document,
+            _required(options, "--id"),
+            rationale=_required(options, "--rationale"),
+        )
+    else:
+        raise ValueError("unsupported feature action")
+    atomic_write_text(root / "FEATURES.md", render_features(document))
+    return "FEATURES.md"
 
 
-def _continuity_command(arguments: list[str]) -> int:
+def _repository(gateway: IssueGateway) -> RepositoryRef:
+    detection = gateway.detect_repository()
+    if detection.repository is None:
+        raise ValueError(detection.reason)
+    return detection.repository
+
+
+def _github_command(
+    command: str,
+    arguments: list[str],
+    *,
+    root: Path,
+    gateway: IssueGateway,
+) -> str:
+    path = root / "BACKLOG.md"
+    if command == "refresh-issue-cache":
+        if arguments:
+            raise ValueError("refresh-issue-cache accepts no arguments")
+        refresh_issue_cache(path, gateway, _repository(gateway))
+        return "BACKLOG.md"
     if not arguments:
-        return _error("continuity action required")
-    try:
-        action = arguments[0]
+        raise ValueError("backlog-to-issues requires migrate or reconcile")
+    action, rest = arguments[0], arguments[1:]
+    if rest:
+        raise ValueError(f"backlog-to-issues {action} accepts no arguments")
+    if action == "migrate":
+        return workflow_state_check(path, gateway).reason
+    if action == "reconcile":
+        replay_pending_queue(root, path, gateway, _repository(gateway))
+        return "BACKLOG.md\n.engineering-method/github-queue.jsonl"
+    raise ValueError("backlog-to-issues requires migrate or reconcile")
+
+
+def _continuity_command(
+    arguments: list[str], *, root: Path, stream: TextIO
+) -> str:
+    if not arguments:
+        raise ValueError("continuity action required")
+    action, rest = arguments[0], arguments[1:]
+    if action in {"init", "checkpoint", "event"}:
+        positionals, options, flags = _parse(
+            rest,
+            value_options=frozenset({"--file", "--resume-file", "--decisions-file"}),
+            flags=frozenset({"--replace"}),
+        )
+        if len(positionals) != 1:
+            raise ValueError(f"{action} requires one work ID")
+        work_id = positionals[0]
+        source = _required(options, "--file")
+        content = _read_repo_input(root, source, stream=stream)
         if action == "event":
-            if len(arguments) != 3:
-                raise ValueError("event requires work ID and JSON")
-            append_event(Path.cwd(), arguments[1], json.loads(arguments[2]))
-        elif action in {"init", "checkpoint"}:
-            if len(arguments) != 3:
-                raise ValueError(f"{action} requires work ID and JSON state")
-            payload = json.loads(arguments[2])
-            payload["work_id"] = arguments[1]
-            state = RunState(**payload)
-            if action == "init":
-                create_run(Path.cwd(), state, "")
-            else:
-                checkpoint(Path.cwd(), arguments[1], state, "")
-        elif action == "status":
-            if len(arguments) != 2:
-                raise ValueError("status requires work ID")
-            print((Path(".engineering-method") / "runs" / arguments[1] / "state.json").as_posix())
-            return 0
-        elif action == "recover":
-            if len(arguments) != 2:
-                raise ValueError("recover requires work ID")
-            print(recover_run(Path.cwd(), arguments[1], git_probe=lambda: "", canonical_probe=lambda _: False, live_agent_ids=()).next_action)
-            return 0
+            if flags or "--resume-file" in options or "--decisions-file" in options:
+                raise ValueError("event accepts only work ID and --file")
+            append_event(root, work_id, json.loads(content))
+            return f".engineering-method/runs/{work_id}/events.jsonl"
+        payload = json.loads(content)
+        run_state = run_state_from_payload(payload, work_id=work_id)
+        if action == "init":
+            if "--resume-file" not in options:
+                raise ValueError("continuity init requires --resume-file")
+            resume = _read_repo_input(root, options["--resume-file"], stream=stream)
+            decisions = (
+                _read_repo_input(root, options["--decisions-file"], stream=stream)
+                if "--decisions-file" in options
+                else ""
+            )
+            create_run(
+                root,
+                run_state,
+                resume,
+                decisions,
+                replace_existing="--replace" in flags,
+            )
         else:
-            raise ValueError("unsupported continuity action")
-    except (ValueError, OSError, json.JSONDecodeError, TypeError) as error:
-        return _error(str(error))
-    print(".engineering-method/runs")
-    return 0
+            if flags or "--decisions-file" in options:
+                raise ValueError("checkpoint does not accept --replace or --decisions-file")
+            resume = (
+                _read_repo_input(root, options["--resume-file"], stream=stream)
+                if "--resume-file" in options
+                else None
+            )
+            checkpoint(root, work_id, run_state, resume)
+        return f".engineering-method/runs/{work_id}"
+
+    positionals, options, flags = _parse(
+        rest, value_options=frozenset({"--live-agents"})
+    )
+    if flags or len(positionals) != 1:
+        raise ValueError(f"{action} requires one work ID")
+    work_id = positionals[0]
+    if action == "status":
+        if options:
+            raise ValueError("status accepts no options")
+        load_run_state(root, work_id)
+        return f".engineering-method/runs/{work_id}/state.json"
+    if action == "recover":
+        unknown = set(options) - {"--live-agents"}
+        if unknown:
+            raise ValueError("recover received unsupported options")
+        live_agents = _csv(options.get("--live-agents"), option="--live-agents")
+        recovered = recover_run(
+            root,
+            work_id,
+            git_probe=SubprocessGitProbe(),
+            canonical_probe=BacklogCanonicalProbe(),
+            live_agent_ids=live_agents,
+        )
+        return recovered.next_action
+    raise ValueError("unsupported continuity action")
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(
+    argv: list[str] | None = None,
+    *,
+    root: Path | None = None,
+    gateway: IssueGateway | None = None,
+    stdin: TextIO | None = None,
+) -> int:
     arguments = list(sys.argv[1:] if argv is None else argv)
-    if not arguments:
-        return _error("project-state command required")
-    command, remaining = arguments[0], arguments[1:]
-    if command == "backlog":
-        return _backlog_command(remaining)
-    if command == "feature":
-        return _feature_command(remaining)
-    if command == "continuity-state":
-        return _continuity_command(remaining)
-    if command in {"backlog-to-issues", "refresh-issue-cache"}:
-        try:
-            outcome = workflow_state_check(Path("BACKLOG.md"), GitHubIssuesGateway())
-        except (ValueError, OSError, RuntimeError) as error:
-            return _error(str(error))
-        print(outcome.reason)
-        return 0
-    return _error("unsupported project-state command")
+    project_root = Path.cwd() if root is None else Path(root)
+    issue_gateway = gateway or GitHubIssuesGateway()
+    stream = sys.stdin if stdin is None else stdin
+    try:
+        if not arguments:
+            raise ValueError("project-state command required")
+        command, remaining = arguments[0], arguments[1:]
+        if command == "backlog":
+            output = _backlog_command(remaining, root=project_root, gateway=issue_gateway)
+        elif command == "feature":
+            output = _feature_command(remaining, root=project_root)
+        elif command == "continuity-state":
+            output = _continuity_command(remaining, root=project_root, stream=stream)
+        elif command in {"backlog-to-issues", "refresh-issue-cache"}:
+            output = _github_command(
+                command, remaining, root=project_root, gateway=issue_gateway
+            )
+        else:
+            raise ValueError("unsupported project-state command")
+    except (ValueError, RuntimeError, OSError, TypeError, json.JSONDecodeError) as error:
+        return _error(str(error))
+    print(output)
+    return 0

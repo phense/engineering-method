@@ -212,6 +212,12 @@ class MutableGitHubRunner:
             if failure:
                 return failure
             if method == "POST":
+                if operation == "add-sub-issue" and any(
+                    database_id in children
+                    for parent, children in self.sub_issues.items()
+                    if parent != number
+                ):
+                    return GhResult(1, "", "sub-issue already has a parent")
                 target.add(database_id)
             else:
                 target.discard(database_id)

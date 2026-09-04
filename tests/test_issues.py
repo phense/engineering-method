@@ -125,6 +125,35 @@ class GitHubIssueOperationsTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "connection refused"):
             GitHubIssuesGateway(runner).list_method_issues(REPOSITORY)
 
+    def test_accepts_valid_null_rest_body_and_label_description(self) -> None:
+        issue = remote_payload()
+        issue["body"] = None
+        runner = FakeGhRunner(
+            (
+                ExpectedGhCall(
+                    (
+                        "api",
+                        "--paginate",
+                        "--slurp",
+                        "repos/peter/engineering-method/issues?state=all&per_page=100",
+                    ),
+                    result([[issue]]),
+                ),
+                ExpectedGhCall(
+                    (
+                        "api",
+                        "--paginate",
+                        "--slurp",
+                        "repos/peter/engineering-method/labels?per_page=100",
+                    ),
+                    result([[{"name": "engineering-method", "color": "0b7285", "description": None}]]),
+                ),
+            )
+        )
+        gateway = GitHubIssuesGateway(runner)
+        self.assertEqual(gateway.list_method_issues(REPOSITORY)[0].body, "")
+        self.assertEqual(gateway.list_labels(REPOSITORY)["engineering-method"].description, "")
+
     def test_creates_an_issue_with_json_stdin_and_complete_rest_identity(self) -> None:
         body = '<!-- engineering-method:issue {"schema_version":1,"backlog_id":"EM-002"} -->'
         request = json.dumps(

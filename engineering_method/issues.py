@@ -17,7 +17,14 @@ from .backlog import (
 )
 from .files import append_jsonl, atomic_write_text
 from .gh import RemoteIssue, RemoteLabel, RepositoryDetection, RepositoryRef
-from .models import BacklogItem, Priority, TaskStatus, parse_task_id, utc_timestamp
+from .models import (
+    BacklogItem,
+    Priority,
+    RFC_3339_UTC_PATTERN,
+    TaskStatus,
+    parse_task_id,
+    utc_timestamp,
+)
 
 
 ISSUE_MARKER_PATTERN = re.compile(
@@ -162,7 +169,11 @@ def _title(item: BacklogItem) -> str:
 
 def _desired_remote_labels(item: BacklogItem, remote: RemoteIssue | None) -> tuple[str, ...]:
     preserved = () if remote is None else tuple(
-        label for label in remote.labels if label not in CONTROLLED_LABEL_NAMES
+        label
+        for label in remote.labels
+        if label not in CONTROLLED_LABEL_NAMES
+        and not label.startswith("priority:")
+        and not label.startswith("status:")
     )
     return preserved + _labels(item)
 
@@ -224,6 +235,7 @@ def migrate_backlog(
             )
 
     method_database_ids = {remote.id for remote in mapping.values()}
+    sub_issue_changes: list[tuple[RemoteIssue, set[int], set[int]]] = []
     for parent_item in document.items:
         parent_remote = mapping[parent_item.id]
         desired_children = {
@@ -234,25 +246,32 @@ def migrate_backlog(
         current_children = gateway.list_sub_issue_ids(
             repository, parent_number=parent_remote.number
         ) & method_database_ids
+        sub_issue_changes.append((parent_remote, current_children, desired_children))
+    for parent_remote, current_children, desired_children in sub_issue_changes:
         for child_id in sorted(current_children - desired_children):
             gateway.remove_sub_issue(
                 repository, parent_number=parent_remote.number, child_id=child_id
             )
+    for parent_remote, current_children, desired_children in sub_issue_changes:
         for child_id in sorted(desired_children - current_children):
             gateway.ensure_sub_issue(
                 repository, parent_number=parent_remote.number, child_id=child_id
             )
 
+    dependency_changes: list[tuple[RemoteIssue, set[int], set[int]]] = []
     for item in document.items:
         remote = mapping[item.id]
         desired_blockers = {mapping[dependency].id for dependency in item.depends_on}
         current_blockers = gateway.list_blocker_ids(
             repository, blocked_number=remote.number
         ) & method_database_ids
+        dependency_changes.append((remote, current_blockers, desired_blockers))
+    for remote, current_blockers, desired_blockers in dependency_changes:
         for blocker_id in sorted(current_blockers - desired_blockers):
             gateway.remove_blocked_by(
                 repository, blocked_number=remote.number, blocker_id=blocker_id
             )
+    for remote, current_blockers, desired_blockers in dependency_changes:
         for blocker_id in sorted(desired_blockers - current_blockers):
             gateway.ensure_blocked_by(
                 repository, blocked_number=remote.number, blocker_id=blocker_id
@@ -452,7 +471,18 @@ def pending_queue(root: Path) -> tuple[dict[str, object], ...]:
             order.append(identifier)
         elif record["state"] == "acknowledged":
             pending.pop(identifier, None)
-    return tuple(pending[identifier] for identifier in order if identifier in pending)
+    result = tuple(pending[identifier] for identifier in order if identifier in pending)
+    for record in result:
+        mutation = {
+            key: value
+            for key, value in record.items()
+            if key not in {"schema_version", "id", "state", "queued_at"}
+        }
+        try:
+            _validated_mutation(mutation)
+        except (TypeError, ValueError) as error:
+            raise ValueError(f"GitHub queue line is invalid: {error}") from error
+    return result
 
 
 def _validated_mutation(mutation: Mapping[str, object]) -> dict[str, object]:
@@ -464,10 +494,58 @@ def _validated_mutation(mutation: Mapping[str, object]) -> dict[str, object]:
         raise ValueError("queued mutation kind or backlog ID is invalid")
     parse_task_id(backlog_id)
     payload = dict(mutation)
+    allowed = {
+        "add": {
+            "kind",
+            "backlog_id",
+            "title",
+            "priority",
+            "parent_id",
+            "depends_on",
+            "notes",
+            "updated_at",
+        },
+        "status": {"kind", "backlog_id", "status", "notes", "updated_at"},
+        "priority": {"kind", "backlog_id", "priority", "updated_at"},
+        "dependencies": {"kind", "backlog_id", "depends_on", "updated_at"},
+    }[kind]
+    if not set(payload) <= allowed:
+        raise ValueError("queued mutation contains unknown fields")
+    if "updated_at" in payload and (
+        not isinstance(payload["updated_at"], str)
+        or RFC_3339_UTC_PATTERN.fullmatch(payload["updated_at"]) is None
+    ):
+        raise ValueError("queued mutation updated_at is invalid")
+    if "notes" in payload and (
+        not isinstance(payload["notes"], str)
+        or "\n" in payload["notes"]
+        or "\r" in payload["notes"]
+    ):
+        raise ValueError("queued mutation notes must be single-line text")
     if kind == "add":
         required = {"kind", "backlog_id", "title", "priority"}
         if not required <= payload.keys():
             raise ValueError("queued add mutation is incomplete")
+        if (
+            not isinstance(payload["title"], str)
+            or not payload["title"].strip()
+            or "\n" in payload["title"]
+            or "\r" in payload["title"]
+        ):
+            raise ValueError("queued add title must be non-empty single-line text")
+        Priority(payload["priority"])
+        parent = payload.get("parent_id")
+        if parent is not None:
+            if not isinstance(parent, str):
+                raise ValueError("queued add parent ID is invalid")
+            parse_task_id(parent)
+        dependencies = payload.get("depends_on", [])
+        if not isinstance(dependencies, list):
+            raise ValueError("queued add dependencies must be a list")
+        for dependency in dependencies:
+            if not isinstance(dependency, str):
+                raise ValueError("queued add dependency ID is invalid")
+            parse_task_id(dependency)
     elif kind == "status":
         TaskStatus(payload.get("status"))
     elif kind == "priority":

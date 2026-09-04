@@ -3,11 +3,14 @@
 from __future__ import annotations
 
 import json
+import importlib
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 from unittest.mock import patch
 
+import engineering_method
 from engineering_method import models
 from engineering_method.files import (
     append_jsonl,
@@ -194,6 +197,14 @@ class PythonVersionTests(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, "Python 3.11"):
             models.require_supported_python((3, 10))
         models.require_supported_python((3, 11))
+
+    def test_package_guard_runs_before_importing_python_3_11_only_modules(self) -> None:
+        try:
+            with patch.object(sys, "version_info", (3, 10)):
+                with self.assertRaisesRegex(RuntimeError, "Python 3.11"):
+                    importlib.reload(engineering_method)
+        finally:
+            importlib.reload(engineering_method)
 
 
 if __name__ == "__main__":

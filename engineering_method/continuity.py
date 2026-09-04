@@ -172,6 +172,7 @@ class GitSnapshot:
     worktree_path: str
     base_commit_exists: bool
     head_commit: str
+    recorded_head_exists: bool = True
 
 
 class GitProbe(Protocol):
@@ -210,8 +211,17 @@ class SubprocessGitProbe:
         if state.base_commit:
             base = self._run(root, "cat-file", "-e", f"{state.base_commit}^{{commit}}")
             base_exists = base.returncode == 0
+        recorded_head_exists = True
+        if state.last_observed_head:
+            recorded_head = self._run(
+                root, "cat-file", "-e", f"{state.last_observed_head}^{{commit}}"
+            )
+            recorded_head_exists = recorded_head.returncode == 0
         return GitSnapshot(
-            worktree.stdout.strip(), base_exists, head.stdout.strip()
+            worktree.stdout.strip(),
+            base_exists,
+            head.stdout.strip(),
+            recorded_head_exists,
         )
 
 
@@ -334,6 +344,27 @@ def load_run_state(
     return state
 
 
+def run_state_from_payload(payload: object, *, work_id: str) -> RunState:
+    """Validate CLI JSON input without allowing it to redirect the target run."""
+    if not isinstance(payload, dict):
+        raise ValueError("run state input must be a JSON object")
+    supplied_work_id = payload.get("work_id")
+    if supplied_work_id is not None and supplied_work_id != work_id:
+        raise ValueError("state work ID does not match the command target")
+    candidate = dict(payload)
+    candidate["work_id"] = work_id
+    candidate.setdefault("schema_version", SCHEMA_VERSION)
+    upgraded, _ = _upgrade_payload(candidate)
+    allowed = {field.name for field in fields(RunState)}
+    unknown = set(upgraded) - allowed
+    if unknown:
+        raise ValueError(f"run state input contains unknown fields: {', '.join(sorted(unknown))}")
+    try:
+        return RunState(**upgraded)
+    except (TypeError, ValueError) as error:
+        raise ValueError(f"run state input is invalid: {error}") from error
+
+
 def checkpoint(
     root: Path,
     work_id: str,
@@ -344,6 +375,7 @@ def checkpoint(
         raise ValueError("checkpoint work ID does not match state")
     run = _run(root, work_id)
     load_run_state(root, work_id)
+    _require_complete_run_tree(run)
     resume_path = run / "resume.md"
     if resume_markdown is None:
         if not resume_path.is_file():
@@ -356,6 +388,14 @@ def checkpoint(
             resume_path: resume_markdown.encode("utf-8"),
         }
     )
+
+
+def _require_complete_run_tree(run: Path) -> None:
+    required_files = ("state.json", "resume.md", "decisions.md", "events.jsonl")
+    if any(not (run / name).is_file() for name in required_files) or not (
+        run / "agent-reports"
+    ).is_dir():
+        raise ValueError("run is incomplete")
 
 
 def _event_sequence(path: Path) -> int:
@@ -392,6 +432,7 @@ def append_event(
     root: Path, work_id: str, event: Mapping[str, object]
 ) -> dict[str, object]:
     load_run_state(root, work_id)
+    _require_complete_run_tree(_run(root, work_id))
     if not isinstance(event, Mapping):
         raise ValueError("event must be an object")
     if PRODUCER_EVENT_FIELDS & set(event):
@@ -425,6 +466,7 @@ def append_event(
 
 def write_agent_report(root: Path, work_id: str, agent_id: str, markdown: str) -> Path:
     load_run_state(root, work_id)
+    _require_complete_run_tree(_run(root, work_id))
     require_safe_component(agent_id, field="agent ID")
     reject_sensitive_content(markdown, artifact="agent report")
     path = _run(root, work_id) / "agent-reports" / f"{agent_id}.md"
@@ -455,6 +497,8 @@ def _read_recovery_text(run: Path, name: str, *, required: bool) -> str:
     except OSError as error:
         raise ValueError(f"run {name} cannot be read") from error
     reject_sensitive_content(content, artifact=name)
+    if required and not content.strip():
+        raise ValueError(f"run {name.removesuffix('.md')} is empty")
     return content
 
 
@@ -489,6 +533,8 @@ def recover_run(
         raise ValueError("recorded and actual recovery worktree disagree")
     if state.base_commit and not snapshot.base_commit_exists:
         raise ValueError("recorded recovery base commit does not exist")
+    if state.last_observed_head and not snapshot.recorded_head_exists:
+        raise ValueError("recorded recovery head commit does not exist")
     if not snapshot.head_commit:
         raise ValueError("recovery git head is empty")
 

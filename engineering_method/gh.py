@@ -102,6 +102,8 @@ def _remote_issue(payload: object) -> RemoteIssue:
         raise ValueError("gh issue response is partial")
     if type(payload["id"]) is not int or type(payload["number"]) is not int:
         raise ValueError("gh issue response is partial")
+    if payload["body"] is None:
+        payload = {**payload, "body": ""}
     for field in ("title", "body", "state", "updated_at"):
         if not isinstance(payload[field], str):
             raise ValueError("gh issue response is partial")
@@ -176,11 +178,17 @@ class GitHubIssuesGateway:
         )
         labels: dict[str, RemoteLabel] = {}
         for payload in values:
-            if not isinstance(payload, dict) or not all(
-                isinstance(payload.get(field), str) for field in ("name", "color", "description")
+            if (
+                not isinstance(payload, dict)
+                or not isinstance(payload.get("name"), str)
+                or not isinstance(payload.get("color"), str)
+                or payload.get("description") is not None
+                and not isinstance(payload.get("description"), str)
             ):
                 raise ValueError("gh label list response is partial")
-            label = RemoteLabel(payload["name"], payload["color"], payload["description"])
+            label = RemoteLabel(
+                payload["name"], payload["color"], payload.get("description") or ""
+            )
             if label.name in labels:
                 raise ValueError("gh label list contains a duplicate name")
             labels[label.name] = label

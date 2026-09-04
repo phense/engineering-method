@@ -164,7 +164,7 @@ class MigrationConvergenceTests(unittest.TestCase):
             title="Old title",
             body=issue_body("EM-001", status="complete", priority="P3"),
             state="closed",
-            labels=(),
+            labels=("status:obsolete", "custom"),
         )
         blocker = remote_issue(
             151,
@@ -200,7 +200,7 @@ class MigrationConvergenceTests(unittest.TestCase):
         self.assertEqual(by_id["EM-001"]["state"], "open")
         self.assertEqual(
             {label["name"] for label in by_id["EM-001"]["labels"]},
-            {"engineering-method", "priority:p1", "status:open"},
+            {"custom", "engineering-method", "priority:p1", "status:open"},
         )
         self.assertIn("Notes: Keep context", str(by_id["EM-001"]["body"]))
         self.assertEqual(by_id["EM-002"]["state"], "closed")
@@ -224,6 +224,48 @@ class MigrationConvergenceTests(unittest.TestCase):
         mutation_count = runner.mutation_count
         issues.migrate_backlog(self._document(), gateway, REPOSITORY, language="en")
         self.assertEqual(runner.mutation_count, mutation_count)
+
+    def test_reparents_only_after_removing_the_stale_parent_relation(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                backlog_item("EM-001", title="Desired parent"),
+                backlog_item("EM-001.1", title="Child", parent_id="EM-001"),
+                backlog_item("EM-002", title="Stale parent"),
+            ),
+        )
+        remote = (
+            remote_issue(
+                1,
+                101,
+                identifier="EM-001",
+                title="EM-001: Desired parent",
+                labels=("engineering-method", "priority:p1", "status:open"),
+            ),
+            remote_issue(
+                2,
+                102,
+                identifier="EM-001.1",
+                title="EM-001.1: Child",
+                labels=("engineering-method", "priority:p1", "status:open"),
+            ),
+            remote_issue(
+                3,
+                103,
+                identifier="EM-002",
+                title="EM-002: Stale parent",
+                labels=("engineering-method", "priority:p1", "status:open"),
+            ),
+        )
+        runner = MutableGitHubRunner(issues=remote)
+        runner.sub_issues[3] = {102}
+
+        migrate_backlog = issues.migrate_backlog
+        migrate_backlog(document, gh.GitHubIssuesGateway(runner), REPOSITORY, language="en")
+
+        self.assertEqual(runner.sub_issues[1], {102})
+        self.assertEqual(runner.sub_issues[3], set())
 
     def test_state_check_migrates_archived_history_only_after_complete_success(self) -> None:
         runner = MutableGitHubRunner()
@@ -329,6 +371,28 @@ class CacheAndQueueRegressionTests(unittest.TestCase):
             ]
             acknowledgements = [entry["id"] for entry in records if entry["state"] == "acknowledged"]
             self.assertEqual(acknowledgements, [entry["id"] for entry in issues.queue_records(root) if entry["state"] == "pending"])
+
+    def test_malformed_pending_queue_payload_is_rejected_before_remote_mutation(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            queue = root / ".engineering-method" / "github-queue.jsonl"
+            queue.parent.mkdir(parents=True)
+            queue.write_text(
+                json.dumps(
+                    {
+                        "schema_version": 1,
+                        "id": "broken",
+                        "state": "pending",
+                        "queued_at": "2026-09-04T10:20:30Z",
+                        "kind": "status",
+                        "backlog_id": "EM-001",
+                    }
+                )
+                + "\n",
+                encoding="utf-8",
+            )
+            with self.assertRaisesRegex(ValueError, "queue line.*invalid"):
+                issues.pending_queue(root)
 
 
 class DetectionReasonTests(unittest.TestCase):

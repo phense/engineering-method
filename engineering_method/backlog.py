@@ -8,7 +8,7 @@ from pathlib import Path
 import re
 from typing import Iterable, Literal
 
-from .files import atomic_write_text
+from .files import atomic_write_bundle, atomic_write_text
 from .models import (
     BacklogItem,
     PROJECT_KEY_PATTERN,
@@ -295,7 +295,9 @@ def _parse_marker_item(payload: object, display: re.Match[str]) -> BacklogItem:
     if not isinstance(payload, dict) or payload.get("schema_version") != SCHEMA_VERSION:
         raise ValueError("backlog marker must use schema_version 1")
     required = {"id", "title", "status", "priority", "parent_id", "depends_on", "notes", "updated_at"}
-    if not required <= payload.keys() or not isinstance(payload["depends_on"], list):
+    if set(payload) != required | {"schema_version"} or not isinstance(
+        payload["depends_on"], list
+    ):
         raise ValueError("backlog marker is incomplete")
     try:
         entry = BacklogItem(
@@ -322,6 +324,7 @@ def _parse_marker_item(payload: object, display: re.Match[str]) -> BacklogItem:
 
 def _load_marked_items(lines: list[str]) -> list[BacklogItem]:
     items: list[BacklogItem] = []
+    consumed_detail_indices: set[int] = set()
     marker_indices = {index for index, line in enumerate(lines) if MARKER_PATTERN.fullmatch(line)}
     visible_indices = {index for index, line in enumerate(lines) if DISPLAY_PATTERN.fullmatch(line)}
     marked_document = bool(marker_indices) or any(
@@ -357,11 +360,13 @@ def _load_marked_items(lines: list[str]) -> list[BacklogItem]:
             )
             if detail_index >= len(lines) or lines[detail_index] != expected:
                 raise ValueError("backlog marker and visible dependencies disagree")
+            consumed_detail_indices.add(detail_index)
             detail_index += 1
         if entry.notes:
             expected = f"{expected_indent}  - Notes: {entry.notes}"
             if detail_index >= len(lines) or lines[detail_index] != expected:
                 raise ValueError("backlog marker and visible notes disagree")
+            consumed_detail_indices.add(detail_index)
             detail_index += 1
         if detail_index < len(lines) and lines[detail_index].startswith(
             f"{expected_indent}  - Depends on:"
@@ -372,6 +377,14 @@ def _load_marked_items(lines: list[str]) -> list[BacklogItem]:
         ):
             raise ValueError("backlog marker and visible notes disagree")
         items.append(entry)
+    if marked_document:
+        visible_details = {
+            index
+            for index, line in enumerate(lines)
+            if re.fullmatch(r"\s*-\s+(?:Depends on|Notes):.*", line)
+        }
+        if visible_details != consumed_detail_indices:
+            raise ValueError("backlog marker and visible details disagree")
     return items
 
 
@@ -418,6 +431,7 @@ def _load_document_metadata(lines: list[str]) -> tuple[str | None, str | None]:
             raise ValueError("backlog document marker contains invalid JSON") from error
         if (
             not isinstance(payload, dict)
+            or set(payload) != {"schema_version", "project_key", "mode"}
             or payload.get("schema_version") != SCHEMA_VERSION
             or not isinstance(payload.get("project_key"), str)
             or payload.get("mode") not in {"local", "github-cache"}
@@ -433,6 +447,11 @@ def load_backlog(path: Path) -> BacklogDocument:
         lines = path.read_text(encoding="utf-8").splitlines()
     except OSError as error:
         raise ValueError(f"cannot read backlog: {path}") from error
+    if any(
+        "<!-- engineering-method:backlog " in line and MARKER_PATTERN.fullmatch(line) is None
+        for line in lines
+    ):
+        raise ValueError("backlog contains a malformed task marker")
     project_key, metadata_mode = _load_document_metadata(lines)
     has_markers = any(MARKER_PATTERN.fullmatch(line) for line in lines) or any(
         DOCUMENT_MARKER_PATTERN.fullmatch(line) for line in lines
@@ -467,12 +486,13 @@ def archive_completed_groups(
         root_id: _render_order_for_group(root_id, by_id)
         for root_id in {_root_id(entry, by_id) for entry in document.items}
     }
-    protected_group_ids = {
-        _root_id(by_id[dependency], by_id)
-        for entry in document.items
-        for dependency in entry.depends_on
-        if _root_id(entry, by_id) != _root_id(by_id[dependency], by_id)
-    }
+    protected_group_ids: set[str] = set()
+    for entry in document.items:
+        source_group = _root_id(entry, by_id)
+        for dependency in entry.depends_on:
+            dependency_group = _root_id(by_id[dependency], by_id)
+            if source_group != dependency_group:
+                protected_group_ids.update((source_group, dependency_group))
     eligible = sorted(
         (
             (max(entry.updated_at for entry in entries), root_id)
@@ -572,6 +592,12 @@ def write_backlog(
             "local",
             existing + newly_archived,
         )
-        atomic_write_text(archive_path, render_backlog_archive(combined))
-    atomic_write_text(path, render_backlog(active))
+        atomic_write_bundle(
+            {
+                archive_path: render_backlog_archive(combined).encode("utf-8"),
+                path: render_backlog(active).encode("utf-8"),
+            }
+        )
+    else:
+        atomic_write_text(path, render_backlog(active))
     return active, newly_archived

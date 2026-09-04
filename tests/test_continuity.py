@@ -241,6 +241,11 @@ class ContinuitySafetyTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "run does not exist"):
                 continuity.append_event(root, "EM-002", {"kind": "workflow_started"})
             continuity.create_run(root, state(), "Resume.")
+            decisions = root / ".engineering-method" / "runs" / "EM-002" / "decisions.md"
+            decisions.unlink()
+            with self.assertRaisesRegex(ValueError, "run.*incomplete"):
+                continuity.append_event(root, "EM-002", {"kind": "workflow_started"})
+            decisions.write_text("", encoding="utf-8")
             for field in ("schema_version", "timestamp", "work_id", "sequence"):
                 with self.subTest(field=field), self.assertRaisesRegex(ValueError, "producer"):
                     continuity.append_event(
@@ -474,6 +479,68 @@ class RecoveryTests(unittest.TestCase):
                     root,
                     "EM-002",
                     git_probe=GitProbe(str(root)),
+                    canonical_probe=CanonicalProbe(),
+                    live_agent_ids=(),
+                )
+
+    def test_recovery_rejects_a_recorded_head_that_no_longer_exists(self) -> None:
+        class GitProbe:
+            def inspect(self, root: Path, saved: continuity.RunState):
+                return continuity.GitSnapshot(
+                    str(root), True, "current-head", recorded_head_exists=False
+                )
+
+        class CanonicalProbe:
+            def status(self, root: Path, saved: continuity.RunState):
+                return TaskStatus.OPEN
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            saved = state(
+                worktree_path=str(root),
+                spec_path=None,
+                plan_path=None,
+                tasks_path=None,
+                uml_paths=(),
+                report_paths=(),
+                artifact_paths=(),
+            )
+            continuity.create_run(root, saved, "Resume.")
+            with self.assertRaisesRegex(ValueError, "recorded.*head"):
+                continuity.recover_run(
+                    root,
+                    "EM-002",
+                    git_probe=GitProbe(),
+                    canonical_probe=CanonicalProbe(),
+                    live_agent_ids=(),
+                )
+
+    def test_recovery_rejects_an_empty_resume_brief(self) -> None:
+        class GitProbe:
+            def inspect(self, root: Path, saved: continuity.RunState):
+                return continuity.GitSnapshot(str(root), True, "head")
+
+        class CanonicalProbe:
+            def status(self, root: Path, saved: continuity.RunState):
+                return TaskStatus.OPEN
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            saved = state(
+                worktree_path=str(root),
+                spec_path=None,
+                plan_path=None,
+                tasks_path=None,
+                uml_paths=(),
+                report_paths=(),
+                artifact_paths=(),
+            )
+            continuity.create_run(root, saved, "")
+            with self.assertRaisesRegex(ValueError, "resume.*empty"):
+                continuity.recover_run(
+                    root,
+                    "EM-002",
+                    git_probe=GitProbe(),
                     canonical_probe=CanonicalProbe(),
                     live_agent_ids=(),
                 )

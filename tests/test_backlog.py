@@ -5,7 +5,9 @@ from __future__ import annotations
 from datetime import datetime, timedelta, timezone
 import tempfile
 import unittest
+import os
 from pathlib import Path
+from unittest.mock import patch
 
 import engineering_method.backlog as backlog
 from engineering_method.backlog import (
@@ -148,6 +150,35 @@ class BacklogRenderingTests(unittest.TestCase):
                     path.write_text(content, encoding="utf-8")
                     with self.assertRaisesRegex(ValueError, "marker and visible"):
                         load_backlog(path)
+
+    def test_rejects_unknown_marker_fields_and_misindented_visible_details(self) -> None:
+        rendered = render_backlog(BacklogDocument("EM", "local", (item("EM-001"),)))
+        unknown_field = rendered.replace(
+            '"updated_at":"2026-09-04T10:20:30Z"',
+            '"updated_at":"2026-09-04T10:20:30Z","hidden":"value"',
+        )
+        misindented = rendered.replace(
+            "- ⭕ `EM-001` **P1** Task EM-001\n",
+            "- ⭕ `EM-001` **P1** Task EM-001\n - Depends on: `EM-999`\n",
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            for content in (unknown_field, misindented):
+                path.write_text(content, encoding="utf-8")
+                with self.subTest(content=content[-100:]), self.assertRaises(ValueError):
+                    load_backlog(path)
+
+    def test_rejects_a_malformed_marker_instead_of_falling_back_to_legacy_rows(self) -> None:
+        content = (
+            "# Backlog\n\n"
+            "<!-- engineering-method:backlog [not-json] -->\n"
+            "- ⭕ `EM-001` **P1** Visible\n"
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            path.write_text(content, encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "marker"):
+                load_backlog(path)
 
 
 class BacklogValidationTests(unittest.TestCase):
@@ -344,6 +375,58 @@ class BacklogArchiveTests(unittest.TestCase):
         )
         self.assertIn("EM-001", {entry.id for entry in active.items})
         self.assertNotIn("EM-001", {entry.id for entry in archived})
+
+    def test_archive_preserves_completed_groups_that_reference_active_work(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            (
+                item(
+                    "EM-001",
+                    status=TaskStatus.COMPLETE,
+                    depends_on=("EM-002",),
+                    updated_at="2020-01-01T00:00:00Z",
+                ),
+                item("EM-002"),
+                item("EM-003", status=TaskStatus.COMPLETE, updated_at="2021-01-01T00:00:00Z"),
+            ),
+        )
+        active, archived = archive_completed_groups(
+            document, active_line_limit=22, target_line_limit=22
+        )
+        self.assertIn("EM-001", {entry.id for entry in active.items})
+        self.assertNotIn("EM-001", {entry.id for entry in archived})
+
+    def test_archive_and_active_replacement_roll_back_together_on_failure(self) -> None:
+        document = BacklogDocument(
+            "EM",
+            "local",
+            tuple(
+                item(f"EM-{number:03d}", status=TaskStatus.COMPLETE)
+                for number in range(1, 15)
+            )
+            + (item("EM-999"),),
+        )
+        with tempfile.TemporaryDirectory() as temporary:
+            path = Path(temporary) / "BACKLOG.md"
+            path.write_text("original active\n", encoding="utf-8")
+            real_replace = os.replace
+            calls = 0
+
+            def fail_second(source, destination):
+                nonlocal calls
+                calls += 1
+                if calls == 2:
+                    raise OSError("active replacement failed")
+                return real_replace(source, destination)
+
+            with patch("engineering_method.files.os.replace", side_effect=fail_second):
+                with self.assertRaisesRegex(OSError, "active replacement"):
+                    backlog.write_backlog(
+                        path, document, active_line_limit=40, target_line_limit=40
+                    )
+            self.assertEqual(path.read_text(encoding="utf-8"), "original active\n")
+            self.assertFalse(path.with_name("BACKLOG-ARCHIVE.md").exists())
 
 
 if __name__ == "__main__":
