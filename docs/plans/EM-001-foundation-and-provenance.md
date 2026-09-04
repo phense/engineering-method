@@ -38,7 +38,7 @@
 | `third-party/sources.lock.json` | Machine-readable provenance ledger. |
 | `README.md` | Truthful pre-release scope and validation instructions. |
 
-### Task EM-001.1: Add the portable validator contract
+### Task 1: EM-001.1 Add the portable validator contract
 
 **Files:**
 
@@ -75,7 +75,7 @@ def main(argv: collections.abc.Sequence[str] | None = None) -> int:
 - [ ] Run `python3 -m unittest tests.test_validate_plugin -v`. Expected: all fixture tests pass.
 - [ ] Commit with `git commit -m "test: add dependency-free plugin validator"`.
 
-### Task EM-001.2: Create dual-host manifests
+### Task 2: EM-001.2 Create dual-host manifests
 
 **Files:**
 
@@ -124,7 +124,7 @@ def main(argv: collections.abc.Sequence[str] | None = None) -> int:
 - [ ] Run `python3 scripts/validate-plugin`. Expected: only `README.md`, `LICENSE`, `THIRD_PARTY_NOTICES.md`, and the source lock remain missing.
 - [ ] Commit with `git commit -m "feat: add Codex and Claude plugin manifests"`.
 
-### Task EM-001.3: Add licensing and pinned provenance
+### Task 3: EM-001.3 Add licensing and pinned provenance
 
 **Files:**
 
@@ -152,7 +152,7 @@ Each source entry contains `id`, `project`, `repository`, full `revision`, `lice
 - [ ] Run `python3 -m unittest tests.test_validate_plugin -v`. Expected: only the real-root README requirement remains red.
 - [ ] Commit with `git commit -m "docs: add MIT license and source provenance"`.
 
-### Task EM-001.4: Add truthful foundation documentation and host checks
+### Task 4: EM-001.4 Add truthful foundation documentation and host checks
 
 **Files:**
 

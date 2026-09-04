@@ -28,7 +28,7 @@
 | OpenSpec | `e062b9572be933564ba3899d059377dfa1393e32` | `skills/openspec-propose/SKILL.md`, `openspec-apply-change/SKILL.md`, `openspec-archive-change/SKILL.md` |
 | Superpowers | `b36e0829c6d0140e93cfef2ca599b1b07d4a7797` | Identically named selected skill folders plus `requesting-code-review/code-reviewer.md`; SDD materials are reserved for EM-004 |
 
-### Task EM-003.1: Define lifecycle contracts and artifact templates
+### Task 1: EM-003.1 Define lifecycle contracts and artifact templates
 
 **Files:**
 
@@ -57,7 +57,7 @@ speckit-specify -> speckit-plan -> architecture-modeling
 - [ ] Re-run focused tests as far as the existing files allow; missing lifecycle skills remain the only expected failures.
 - [ ] Commit with `git commit -m "feat: add lifecycle contracts and artifact templates"`.
 
-### Task EM-003.2: Adapt the Spec Kit lifecycle
+### Task 2: EM-003.2 Adapt the Spec Kit lifecycle
 
 **Files:** Create `skills/speckit-{specify,plan,tasks,converge}/SKILL.md`; modify provenance and contract tests.
 
@@ -75,7 +75,7 @@ speckit-specify -> speckit-plan -> architecture-modeling
 - [ ] Run the focused skill tests and `python3 scripts/validate-plugin`.
 - [ ] Commit with `git commit -m "feat: add curated Spec Kit lifecycle"`.
 
-### Task EM-003.3: Adapt the OpenSpec Brownfield lifecycle
+### Task 3: EM-003.3 Adapt the OpenSpec Brownfield lifecycle
 
 **Files:** Create `skills/openspec-{propose,apply,archive}/SKILL.md`; create `templates/openspec/escalation.md`; modify tests and provenance.
 
@@ -100,7 +100,7 @@ openspec/
 - [ ] Update lock mappings and notices; run focused tests and portable validation.
 - [ ] Commit with `git commit -m "feat: add bounded OpenSpec lifecycle"`.
 
-### Task EM-003.4: Port debugging, TDD, and verification
+### Task 4: EM-003.4 Port debugging, TDD, and verification
 
 **Files:**
 
@@ -115,7 +115,7 @@ openspec/
 - [ ] Update provenance for every retained/adapted file and run focused tests.
 - [ ] Commit with `git commit -m "feat: add debugging TDD and verification skills"`.
 
-### Task EM-003.5: Port review, worktree, and parallel-dispatch support
+### Task 5: EM-003.5 Port review, worktree, and parallel-dispatch support
 
 **Files:**
 
@@ -133,7 +133,7 @@ openspec/
 - [ ] Update provenance; run the complete skill-contract suite and plugin validator.
 - [ ] Commit with `git commit -m "feat: add review isolation and parallel skills"`.
 
-### Task EM-003.6: Add the project-backlog support skill and collision acceptance
+### Task 6: EM-003.6 Add the project-backlog support skill and collision acceptance
 
 **Files:** Modify `skills/project-backlog/SKILL.md`, `tests/test_skill_contracts.py`, the trigger matrix, and `BACKLOG.md`.
 

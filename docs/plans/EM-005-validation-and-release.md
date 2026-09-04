@@ -21,7 +21,7 @@
 - README claims only behavior demonstrated by the release gate.
 - No GitHub push or release publication occurs in this plan unless separately authorized.
 
-### Task EM-005.1: Finalize platform adapters and marketplace metadata
+### Task 1: EM-005.1 Finalize platform adapters and marketplace metadata
 
 **Files:**
 
@@ -42,7 +42,7 @@
 - [ ] Extend portable validation to cover both marketplace files and manifest identity.
 - [ ] Run adapter and validator tests; commit with `git commit -m "feat: add Codex and Claude distribution adapters"`.
 
-### Task EM-005.2: Build shared routing and workflow evaluations
+### Task 2: EM-005.2 Build shared routing and workflow evaluations
 
 **Files:**
 
@@ -62,7 +62,7 @@
 - [ ] Run fake-driver tests to green. Run live trigger evaluations on `gpt-5.6-luna` and the fastest adequate available Claude model; use stronger tiers only for cases that the routing policy classifies as architectural.
 - [ ] Commit with `git commit -m "test: add cross-host workflow routing evals"`.
 
-### Task EM-005.3: Execute the large-feature architecture fixture on both hosts
+### Task 3: EM-005.3 Execute the large-feature architecture fixture on both hosts
 
 **Files:**
 
@@ -78,7 +78,7 @@
 - [ ] Run final fixture integration tests and the assertion script for each host.
 - [ ] Commit with `git commit -m "test: verify architecture workflow on both hosts"`.
 
-### Task EM-005.4: Complete static, package, and clean-install validation
+### Task 4: EM-005.4 Complete static, package, and clean-install validation
 
 **Files:**
 
@@ -107,7 +107,7 @@
 - [ ] Live-eval skipping is allowed during development but makes `release-check` fail in release mode.
 - [ ] Run all static and clean-install tests to green; commit with `git commit -m "build: add reproducible cross-host release gate"`.
 
-### Task EM-005.5: Write the public README and finalize attribution
+### Task 5: EM-005.5 Write the public README and finalize attribution
 
 **Files:** Modify `README.md`, `THIRD_PARTY_NOTICES.md`, `third-party/sources.lock.json`, manifests, `FEATURES.md`, and `BACKLOG.md`.
 
@@ -118,7 +118,7 @@
 - [ ] Update `FEATURES.md` with released capabilities only after their tests pass. Mark `EM-005` and children complete only after release evidence is fresh.
 - [ ] Run README, attribution, lock, and portable validator tests; commit with `git commit -m "docs: publish plugin usage and attribution"`.
 
-### Task EM-005.6: Run the system-architect release gate
+### Task 6: EM-005.6 Run the system-architect release gate
 
 **Files:** Modify only defects found by the gate, their covering tests, `BACKLOG.md`, and final verification record.
 

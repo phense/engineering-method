@@ -85,7 +85,7 @@ class Feature:
     updated_at: str
 ```
 
-### Task EM-002.1: Add state models and safe filesystem primitives
+### Task 1: EM-002.1 Add state models and safe filesystem primitives
 
 **Files:** Create `engineering_method/{__init__,models,files}.py`, `tests/{fakes,test_models}.py`; modify `.gitignore`.
 
@@ -107,7 +107,7 @@ def require_repo_relative(path: str) -> str: ...
 - [ ] Re-run the tests. Expected: pass.
 - [ ] Commit with `git commit -m "feat: add project-state core models"`.
 
-### Task EM-002.2: Implement the canonical local backlog and archive policy
+### Task 2: EM-002.2 Implement the canonical local backlog and archive policy
 
 **Files:** Create `engineering_method/backlog.py`, `tests/test_backlog.py`, `templates/BACKLOG.md`; modify root `BACKLOG.md` only through tested rendering once compatibility with its existing IDs is proven.
 
@@ -136,7 +136,7 @@ def archive_completed_groups(document: BacklogDocument,
 - [ ] Implement parsing/rendering and update the existing root backlog without changing `EM-000` through `EM-005` identities or meanings.
 - [ ] Re-run tests and commit with `git commit -m "feat: add stable blocker-first backlog"`.
 
-### Task EM-002.3: Implement the feature inventory
+### Task 3: EM-002.3 Implement the feature inventory
 
 **Files:** Create `engineering_method/features.py`, `tests/test_features.py`, `templates/FEATURES.md`; modify root `FEATURES.md` only after parser compatibility passes.
 
@@ -155,7 +155,7 @@ def remove_feature(document: FeatureDocument, feature_id: str, *, rationale: str
 - [ ] Implement a readable inventory with hidden validated markers, preserving the honest pre-release statement until the first capability exists.
 - [ ] Re-run tests and commit with `git commit -m "feat: add feature capability inventory"`.
 
-### Task EM-002.4: Add the testable GitHub boundary
+### Task 4: EM-002.4 Add the testable GitHub boundary
 
 **Files:** Create `engineering_method/gh.py`, `tests/test_issues.py`; modify `tests/fakes.py`.
 
@@ -186,7 +186,7 @@ class GitHubIssuesGateway:
 - [ ] Run the focused test group; implement one gateway containing all current `gh` request shapes; re-run to green.
 - [ ] Commit with `git commit -m "feat: add GitHub Issues boundary"`.
 
-### Task EM-002.5: Add automatic idempotent issue migration and offline reconciliation
+### Task 5: EM-002.5 Add automatic idempotent issue migration and offline reconciliation
 
 **Files:** Create `engineering_method/issues.py`, `scripts/{backlog-to-issues,refresh-issue-cache}`; modify `engineering_method/{backlog,cli}.py`, `tests/test_issues.py`.
 
@@ -209,7 +209,7 @@ status:open  status:in-progress  status:blocked
 - [ ] Run `python3 -m unittest tests.test_issues -v`, implement migration/cache/queue behavior, and re-run to green.
 - [ ] Commit with `git commit -m "feat: synchronize backlog with GitHub Issues"`.
 
-### Task EM-002.6: Implement compact-continuity state and events
+### Task 6: EM-002.6 Implement compact-continuity state and events
 
 **Files:** Create `engineering_method/continuity.py`, `scripts/continuity-state`, `tests/test_continuity.py`; modify `engineering_method/{files,cli}.py`.
 
@@ -232,7 +232,7 @@ def recover_run(root: Path, work_id: str, *, git_probe: GitProbe,
 - [ ] Implement `continuity-state init|checkpoint|event|status|recover`, accepting JSON from an explicit file or stdin and returning only concise paths/digests.
 - [ ] Run `python3 -m unittest tests.test_continuity -v`, then commit with `git commit -m "feat: add compact continuity contract"`.
 
-### Task EM-002.7: Wire project-state commands and acceptance flow
+### Task 7: EM-002.7 Wire project-state commands and acceptance flow
 
 **Files:** Create `scripts/project-state`, `skills/project-backlog/SKILL.md`, and `tests/test_cli.py`; modify `engineering_method/cli.py`.
 

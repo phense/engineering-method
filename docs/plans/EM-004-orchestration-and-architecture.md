@@ -21,7 +21,7 @@
 - Every dispatch, slice, review, fix, long wait, and phase transition uses EM-002 checkpoints.
 - UML applies only to large features, architecture, substantial migrations, or cross-component concurrency/security/data-integrity work.
 
-### Task EM-004.1: Define model roles and host-neutral agent briefs
+### Task 1: EM-004.1 Define model roles and host-neutral agent briefs
 
 **Files:**
 
@@ -44,7 +44,7 @@
 - [ ] Define delegation economics: use fast only for fully specified mechanical work; standard for normal multi-file work/review; strong for design judgment, difficult debugging, integration, and final review. Optimize completed-task turns rather than token price alone.
 - [ ] Re-run tests and commit with `git commit -m "feat: add model roles and agent contracts"`.
 
-### Task EM-004.2: Build cohesive-slice orchestration
+### Task 2: EM-004.2 Build cohesive-slice orchestration
 
 **Files:**
 
@@ -72,7 +72,7 @@
 - [ ] Update source mappings for every adapted file and run contract plus provenance tests.
 - [ ] Commit with `git commit -m "feat: add efficient orchestrated implementation"`.
 
-### Task EM-004.3: Implement evidence-driven defect convergence
+### Task 3: EM-004.3 Implement evidence-driven defect convergence
 
 **Files:** Modify `skills/orchestrated-implementation/SKILL.md`, `shared/policies/defect-convergence.md`, agent briefs, and `tests/test_orchestrated_implementation.py`.
 
@@ -82,7 +82,7 @@
 - [ ] Define terminal conditions: all actionable findings resolved, or a recorded external blocker, missing authorization, unsafe irreversible operation, or specification contradiction that makes further action guesswork.
 - [ ] Re-run focused tests and commit with `git commit -m "feat: add evidence-driven fix convergence"`.
 
-### Task EM-004.4: Create the original architecture-modeling skill
+### Task 4: EM-004.4 Create the original architecture-modeling skill
 
 **Files:**
 
@@ -99,7 +99,7 @@
 - [ ] Before `speckit-tasks`, write findings to `docs/uml/findings.md`. After implementation, reconcile diagrams against code and record each difference as code-corrected, diagram-corrected with rationale, or unresolved defect.
 - [ ] Re-run architecture tests and commit with `git commit -m "feat: add UML architecture gate"`.
 
-### Task EM-004.5: Add system-architect integration verification
+### Task 5: EM-004.5 Add system-architect integration verification
 
 **Files:**
 
@@ -117,7 +117,7 @@
 - [ ] Assert `speckit-converge` cannot complete without as-built reconciliation, passing derived integration tests, clean final review, and fresh verification evidence.
 - [ ] Re-run the fixture and all unit tests; commit with `git commit -m "test: add architecture-led integration gate"`.
 
-### Task EM-004.6: Prove compaction and agent-lifecycle recovery
+### Task 6: EM-004.6 Prove compaction and agent-lifecycle recovery
 
 **Files:** Create `tests/test_orchestration_recovery.py`; modify orchestration/continuity contracts and `BACKLOG.md`.
 
