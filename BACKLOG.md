@@ -25,43 +25,43 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-001.3` **P0** Pin upstream revisions and implement MIT attribution controls.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-001.4","title":"Add baseline structural validation for both hosts.","status":"complete","priority":"P0","parent_id":"EM-001","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
   - ✅ `EM-001.4` **P0** Add baseline structural validation for both hosts.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-002","title":"Implement durable project state and compact continuity","status":"in_progress","priority":"P1","parent_id":null,"depends_on":["EM-001"],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-- 🔄 `EM-002` **P1** Implement durable project state and compact continuity
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-002","title":"Implement durable project state and compact continuity","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-001"],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+- ✅ `EM-002` **P1** Implement durable project state and compact continuity
   - Depends on: `EM-001`
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.1","title":"Add state models and safe filesystem primitives.","status":"in_progress","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - 🔄 `EM-002.1` **P1** Add state models and safe filesystem primitives.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.2","title":"Implement stable local backlog parsing, sorting, and archiving.","status":"open","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-002.2` **P1** Implement stable local backlog parsing, sorting, and archiving.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.3","title":"Maintain the non-duplicative `FEATURES.md` capability inventory.","status":"open","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-002.3` **P1** Maintain the non-duplicative `FEATURES.md` capability inventory.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.4","title":"Add the testable GitHub boundary.","status":"open","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-002.4` **P1** Add the testable GitHub boundary.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.5","title":"Implement idempotent issue migration, relationships, cache, and offline reconciliation.","status":"open","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-002.5` **P1** Implement idempotent issue migration, relationships, cache, and offline reconciliation.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.6","title":"Implement versioned compact-continuity checkpoints and events.","status":"open","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-002.6` **P1** Implement versioned compact-continuity checkpoints and events.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.7","title":"Wire project-state commands and the `project-backlog` skill.","status":"open","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-002.7` **P1** Wire project-state commands and the `project-backlog` skill.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-003","title":"Build the curated, non-overlapping lifecycle and quality skills","status":"in_progress","priority":"P1","parent_id":null,"depends_on":["EM-001"],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-- 🔄 `EM-003` **P1** Build the curated, non-overlapping lifecycle and quality skills
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.1","title":"Add state models and safe filesystem primitives.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.1` **P1** Add state models and safe filesystem primitives.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.2","title":"Implement stable local backlog parsing, sorting, and archiving.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.2` **P1** Implement stable local backlog parsing, sorting, and archiving.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.3","title":"Maintain the non-duplicative `FEATURES.md` capability inventory.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.3` **P1** Maintain the non-duplicative `FEATURES.md` capability inventory.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.4","title":"Add the testable GitHub boundary.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.4` **P1** Add the testable GitHub boundary.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.5","title":"Implement idempotent issue migration, relationships, cache, and offline reconciliation.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.5` **P1** Implement idempotent issue migration, relationships, cache, and offline reconciliation.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.6","title":"Implement versioned compact-continuity checkpoints and events.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.6` **P1** Implement versioned compact-continuity checkpoints and events.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002.7","title":"Wire project-state commands and the `project-backlog` skill.","status":"complete","priority":"P1","parent_id":"EM-002","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-002.7` **P1** Wire project-state commands and the `project-backlog` skill.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-003","title":"Build the curated, non-overlapping lifecycle and quality skills","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-001"],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
+- ✅ `EM-003` **P1** Build the curated, non-overlapping lifecycle and quality skills
   - Depends on: `EM-001`
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.1","title":"Define exclusive lifecycle contracts and artifact templates.","status":"in_progress","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - 🔄 `EM-003.1` **P1** Define exclusive lifecycle contracts and artifact templates.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.2","title":"Adapt Spec Kit `specify`, `plan`, `tasks`, and `converge`.","status":"open","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-003.2` **P1** Adapt Spec Kit `specify`, `plan`, `tasks`, and `converge`.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.3","title":"Adapt OpenSpec `propose`, `apply`, and `archive`.","status":"open","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-003.3` **P1** Adapt OpenSpec `propose`, `apply`, and `archive`.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.4","title":"Port Superpowers debugging, TDD, and verification.","status":"open","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-003.4` **P1** Port Superpowers debugging, TDD, and verification.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.5","title":"Port review, worktree, and parallel-dispatch support.","status":"open","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-003.5` **P1** Port review, worktree, and parallel-dispatch support.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.6","title":"Integrate project-backlog support and collision acceptance.","status":"open","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-003.6` **P1** Integrate project-backlog support and collision acceptance.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-004","title":"Add efficient subagent orchestration and the architecture gate","status":"open","priority":"P1","parent_id":null,"depends_on":["EM-002","EM-003"],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-- ⭕ `EM-004` **P1** Add efficient subagent orchestration and the architecture gate
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.1","title":"Define exclusive lifecycle contracts and artifact templates.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-003.1` **P1** Define exclusive lifecycle contracts and artifact templates.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.2","title":"Adapt Spec Kit `specify`, `plan`, `tasks`, and `converge`.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-003.2` **P1** Adapt Spec Kit `specify`, `plan`, `tasks`, and `converge`.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.3","title":"Adapt OpenSpec `propose`, `apply`, and `archive`.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-003.3` **P1** Adapt OpenSpec `propose`, `apply`, and `archive`.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.4","title":"Port Superpowers debugging, TDD, and verification.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-003.4` **P1** Port Superpowers debugging, TDD, and verification.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.5","title":"Port review, worktree, and parallel-dispatch support.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
+  - ✅ `EM-003.5` **P1** Port review, worktree, and parallel-dispatch support.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.6","title":"Integrate project-backlog support and collision acceptance.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
+  - ✅ `EM-003.6` **P1** Integrate project-backlog support and collision acceptance.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-004","title":"Add efficient subagent orchestration and the architecture gate","status":"in_progress","priority":"P1","parent_id":null,"depends_on":["EM-002","EM-003"],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
+- 🔄 `EM-004` **P1** Add efficient subagent orchestration and the architecture gate
   - Depends on: `EM-002`, `EM-003`
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.1","title":"Add shared model roles, host adapters, and agent-role briefs.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-004.1` **P1** Add shared model roles, host adapters, and agent-role briefs.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.1","title":"Add shared model roles, host adapters, and agent-role briefs.","status":"in_progress","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
+  - 🔄 `EM-004.1` **P1** Add shared model roles, host adapters, and agent-role briefs.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.2","title":"Implement cohesive-slice orchestration with targeted review and evidence-driven fix loops.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
   - ⭕ `EM-004.2` **P1** Implement cohesive-slice orchestration with targeted review and evidence-driven fix loops.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.3","title":"Implement evidence-driven defect convergence.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
