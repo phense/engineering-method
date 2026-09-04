@@ -103,6 +103,11 @@ Adapted in EM-003:
 - `skills/test-driven-development/SKILL.md` -> `skills/test-driven-development/SKILL.md`: adapted
 - `skills/test-driven-development/writing-good-tests.md` -> `skills/test-driven-development/writing-good-tests.md`: adapted
 - `skills/verification-before-completion/SKILL.md` -> `skills/verification-before-completion/SKILL.md`: adapted
+- `skills/requesting-code-review/SKILL.md` -> `skills/requesting-code-review/SKILL.md`: adapted
+- `skills/requesting-code-review/code-reviewer.md` -> `skills/requesting-code-review/code-reviewer.md`: adapted
+- `skills/receiving-code-review/SKILL.md` -> `skills/receiving-code-review/SKILL.md`: adapted
+- `skills/using-git-worktrees/SKILL.md` -> `skills/using-git-worktrees/SKILL.md`: adapted
+- `skills/dispatching-parallel-agents/SKILL.md` -> `skills/dispatching-parallel-agents/SKILL.md`: adapted
 
 MIT License
 

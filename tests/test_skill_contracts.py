@@ -473,6 +473,98 @@ class QualitySkillContractTests(unittest.TestCase):
                     self.assertNotIn(token, content)
 
 
+class CollaborationSkillContractTests(unittest.TestCase):
+    SKILLS = (
+        "requesting-code-review",
+        "receiving-code-review",
+        "using-git-worktrees",
+        "dispatching-parallel-agents",
+    )
+
+    def test_review_depth_is_risk_proportionate(self) -> None:
+        """Mechanical work may avoid extra cost while risky work gets independence."""
+        content = normalized(read("skills/requesting-code-review/SKILL.md"))
+        for phrase in (
+            "mechanical slices",
+            "coordinator review",
+            "risky or integration-bearing",
+            "independent reviewer",
+            "critical",
+            "important",
+        ):
+            self.assertIn(phrase, content)
+
+        template = headings(read("skills/requesting-code-review/code-reviewer.md"))
+        self.assertEqual(
+            {"Requirements", "Review scope", "Findings", "Verdict"},
+            {"Requirements", "Review scope", "Findings", "Verdict"} & template,
+        )
+
+    def test_received_feedback_is_verified_before_implementation(self) -> None:
+        """A plausible review suggestion must not bypass current repository evidence."""
+        content = normalized(read("skills/receiving-code-review/SKILL.md"))
+        for phrase in (
+            "verify against current code",
+            "clarify",
+            "technical pushback",
+            "one finding at a time",
+            "test-driven-development",
+            "verification-before-completion",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_worktree_isolation_prefers_native_capabilities_and_guards_fallback(self) -> None:
+        """Fallback isolation must not create phantom state or target broad paths."""
+        content = normalized(read("skills/using-git-worktrees/SKILL.md"))
+        for phrase in (
+            "resolved git directory",
+            "common git directory",
+            "submodule",
+            "detached head",
+            "native worktree",
+            "fallback",
+            "ignored",
+            "repository root",
+            "broad path",
+            "baseline tests",
+        ):
+            self.assertIn(phrase, content)
+        for command in ("git worktree add", "git checkout -b", "git branch"):
+            self.assertNotIn(command, content)
+
+    def test_parallel_dispatch_requires_proven_independence_and_safe_writes(self) -> None:
+        """Shared state or overlapping ownership must force serialized writes."""
+        content = normalized(read("skills/dispatching-parallel-agents/SKILL.md"))
+        for phrase in (
+            "independence is established",
+            "read-only investigation",
+            "parallel",
+            "disjoint ownership",
+            "safe isolation",
+            "serialize writes",
+            "full test suite",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_collaboration_skills_do_not_call_omitted_or_host_specific_controllers(self) -> None:
+        """Shared collaboration semantics must be resolved only by platform adapters."""
+        prohibited = (
+            "finishing-a-development-branch",
+            "using-superpowers",
+            "superpowers:",
+            "spawn_agent",
+            "enterworktree",
+            "/worktree",
+            "gpt-",
+            "claude-",
+        )
+        for skill in self.SKILLS:
+            with self.subTest(skill=skill):
+                content = read(f"skills/{skill}/SKILL.md").lower()
+                for token in prohibited:
+                    self.assertNotIn(token, content)
+
+
 class ProvenanceContractTests(unittest.TestCase):
     def test_mapped_source_and_destination_hashes_match_disk(self) -> None:
         """Changing an adapted file without its source-lock hash must fail provenance."""
