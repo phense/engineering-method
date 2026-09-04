@@ -47,6 +47,29 @@ DOUBLE_QUOTED_SCALAR = re.compile(
     r'^"(?:[^"\\\r\n]|\\(?:["\\/bfnrt]|u[0-9A-Fa-f]{4}))*"$'
 )
 SINGLE_QUOTED_SCALAR = re.compile(r"^'(?:[^'\r\n]|'')*'$")
+SKILL_NAME = re.compile(r"^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$")
+YAML_AMBIGUOUS_PLAIN_SCALARS = frozenset(
+    {
+        "~",
+        "null",
+        "true",
+        "false",
+        "yes",
+        "no",
+        "on",
+        "off",
+        ".nan",
+        ".inf",
+        "+.inf",
+        "-.inf",
+    }
+)
+YAML_NUMERIC_PLAIN_SCALAR = re.compile(
+    r"^[+-]?(?:(?:[0-9][0-9_]*)(?:\.[0-9_]*)?(?:[eE][+-]?[0-9_]+)?|"
+    r"\.[0-9_]+(?:[eE][+-]?[0-9_]+)?|0[xX][0-9A-Fa-f_]+|0[oO][0-7_]+|0[bB][01_]+)$"
+)
+YAML_DATE_LIKE_PLAIN_SCALAR = re.compile(r"^[0-9]{4}-[0-9]{2}-[0-9]{2}(?:[Tt \t].*)?$")
+PLAIN_SCALAR_COMMENT_OR_MAPPING = re.compile(r"(?:[ \t]#|:[ \t])")
 
 
 def _relative(root: Path, path: Path) -> str:
@@ -154,24 +177,40 @@ def _validate_codex_manifest(
             errors.append(_error(relative, f"{field} path {_relative(root, component_path)} is required"))
 
 
-def _is_supported_frontmatter_scalar(value: str) -> bool:
-    """Accept the narrow, dependency-free scalar subset used by skill metadata.
+def _parse_supported_frontmatter_scalar(value: str) -> str | None:
+    """Resolve the narrow, dependency-free string subset used by skill metadata.
 
-    A scalar is non-empty plain text without YAML control syntax, a JSON-style
-    double-quoted string, or a YAML single-quoted string. Collections, blocks,
-    tags, anchors, aliases, and nested mappings are intentionally unsupported.
+    Supported values are non-empty plain strings, JSON-style double-quoted
+    strings, and YAML single-quoted strings. Plain values that YAML might
+    resolve as null, booleans, numbers, dates, comments, or mappings are
+    intentionally unsupported, as are collections, blocks, tags, anchors, and
+    aliases.
     """
     if not value:
-        return False
+        return None
     if value.startswith('"'):
-        return bool(DOUBLE_QUOTED_SCALAR.fullmatch(value) and value[1:-1].strip())
+        if not DOUBLE_QUOTED_SCALAR.fullmatch(value):
+            return None
+        try:
+            resolved = json.loads(value)
+        except json.JSONDecodeError:
+            return None
+        return resolved if isinstance(resolved, str) and resolved.strip() else None
     if value.startswith("'"):
-        return bool(SINGLE_QUOTED_SCALAR.fullmatch(value) and value[1:-1].strip())
-    return (
-        value[0] not in PLAIN_SCALAR_START_INDICATORS
-        and ": " not in value
-        and " #" not in value
-    )
+        if not SINGLE_QUOTED_SCALAR.fullmatch(value):
+            return None
+        resolved = value[1:-1].replace("''", "'")
+        return resolved if resolved.strip() else None
+    if (
+        value[0] in PLAIN_SCALAR_START_INDICATORS
+        or value.endswith(":")
+        or PLAIN_SCALAR_COMMENT_OR_MAPPING.search(value)
+        or value.lower() in YAML_AMBIGUOUS_PLAIN_SCALARS
+        or YAML_NUMERIC_PLAIN_SCALAR.fullmatch(value)
+        or YAML_DATE_LIKE_PLAIN_SCALAR.fullmatch(value)
+    ):
+        return None
+    return value
 
 
 def _validate_skill_frontmatter(root: Path, errors: list[str]) -> None:
@@ -203,8 +242,11 @@ def _validate_skill_frontmatter(root: Path, errors: list[str]) -> None:
                 )
                 continue
             fields.add(key)
-            if not _is_supported_frontmatter_scalar(value.strip()):
+            scalar = _parse_supported_frontmatter_scalar(value.strip())
+            if scalar is None:
                 errors.append(_error(relative, f"frontmatter {key} must be a supported scalar"))
+            elif key == "name" and not SKILL_NAME.fullmatch(scalar):
+                errors.append(_error(relative, "frontmatter name must be lowercase hyphen-case"))
         for field in SKILL_FRONTMATTER_FIELDS:
             if field not in fields:
                 errors.append(_error(relative, f"frontmatter {field} is required"))

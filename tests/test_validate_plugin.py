@@ -341,8 +341,9 @@ class ValidatePluginTests(unittest.TestCase):
     def test_enforces_safe_skill_frontmatter_scalars(self) -> None:
         """Only non-empty plain or balanced quoted name and description scalars are valid."""
         valid_frontmatter = (
-            "---\nname: example\ndescription: An example workflow.\n---\n\n# Example\n",
-            "---\nname: \"example\"\ndescription: 'An example workflow.'\n---\n\n# Example\n",
+            "---\nname: example-workflow\ndescription: An example workflow.\n---\n\n# Example\n",
+            "---\nname: \"example-workflow\"\ndescription: 'An example workflow.'\n---\n\n# Example\n",
+            "---\nname: 'example-workflow'\ndescription: \"true\"\n---\n\n# Example\n",
         )
         for content in valid_frontmatter:
             with self.subTest(valid=content), tempfile.TemporaryDirectory() as directory:
@@ -382,6 +383,37 @@ class ValidatePluginTests(unittest.TestCase):
                 f"ERROR skills/example/SKILL.md: frontmatter {field} must be a supported scalar",
                 errors,
             )
+
+    def test_rejects_ambiguous_and_structural_frontmatter_scalars(self) -> None:
+        """Implicit YAML values and syntax outside the safe string grammar must fail."""
+        invalid_scalars = (
+            ("name", "null", "frontmatter name must be a supported scalar"),
+            ("description", "true", "frontmatter description must be a supported scalar"),
+            ("name", "example:", "frontmatter name must be a supported scalar"),
+            ("description", "42", "frontmatter description must be a supported scalar"),
+            ("description", "2026-09-04", "frontmatter description must be a supported scalar"),
+            ("description", "An example # comment", "frontmatter description must be a supported scalar"),
+            ("description", "An example\t# comment", "frontmatter description must be a supported scalar"),
+            ("description", "key: value", "frontmatter description must be a supported scalar"),
+            ("description", "key:\tvalue", "frontmatter description must be a supported scalar"),
+            ("name", "Example_Workflow", "frontmatter name must be lowercase hyphen-case"),
+        )
+        for field, value, message in invalid_scalars:
+            with self.subTest(field=field, value=value):
+                with tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    self.make_repository(root)
+                    (root / "skills/example/SKILL.md").write_text(
+                        "---\n"
+                        f"name: {'example-workflow' if field != 'name' else value}\n"
+                        f"description: {'An example workflow.' if field != 'description' else value}\n"
+                        "---\n\n# Example\n",
+                        encoding="utf-8",
+                    )
+
+                    errors = validate_repository(root)
+
+                self.assertIn(f"ERROR skills/example/SKILL.md: {message}", errors)
 
     def test_accepts_complete_repository(self) -> None:
         """Removing required files or validation fields from this fixture must fail validation."""
