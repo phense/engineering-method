@@ -118,14 +118,28 @@ class ValidatePluginTests(unittest.TestCase):
             self.assertIn(expected, readme)
 
         self.assertRegex(readme, r"do not imply affiliation with\s+or endorsement by")
+        self.assert_readme_avoids_unavailable_capabilities(readme)
+
+    def assert_readme_avoids_unavailable_capabilities(self, readme: str) -> None:
+        """Reject claims for functionality intentionally absent from EM-001."""
         self.assertNotRegex(
             readme.lower(),
-            r"\blifecycle skills?\s+(?:are|is)\s+(?:currently )?(?:available|implemented|working)\b",
+            r"\blifecycle skills?\s+(?:(?:are|is)\s+(?:currently )?(?:available|implemented|working)|works?)\b",
         )
         self.assertNotRegex(
             readme.lower(),
-            r"\bmarketplace installation\s+(?:is|are)\s+(?:currently )?(?:available|working)\b",
+            r"\bmarketplace installation\s+(?:(?:is|are)\s+(?:currently )?(?:available|working)|works?)\b",
         )
+
+    def test_readme_contract_rejects_direct_lifecycle_skill_claim(self) -> None:
+        """The terse sentence 'Lifecycle skills work.' must be rejected."""
+        with self.assertRaises(AssertionError):
+            self.assert_readme_avoids_unavailable_capabilities("Lifecycle skills work.")
+
+    def test_readme_contract_rejects_direct_marketplace_claim(self) -> None:
+        """The terse sentence 'Marketplace installation works.' must be rejected."""
+        with self.assertRaises(AssertionError):
+            self.assert_readme_avoids_unavailable_capabilities("Marketplace installation works.")
 
     def test_real_repository_pins_the_required_upstream_provenance(self) -> None:
         """Changing a source ID, revision, license digest, or mapping must fail."""
