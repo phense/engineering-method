@@ -106,6 +106,34 @@
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
           "destination_sha256": "74d64036a28ead4fcc3299ca3ad3561648bcfa8f0ae14116346743971781794e",
           "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/openspec-propose/SKILL.md",
+          "destination_path": "skills/openspec-propose/SKILL.md",
+          "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
+          "destination_sha256": "f4da9278a24a919cb81cee14f47590cd2b179fa1a340cac63d302edd24e37a2d",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/openspec-apply-change/SKILL.md",
+          "destination_path": "skills/openspec-apply/SKILL.md",
+          "source_sha256": "0cf1cb26935b55d83e240631500c8cee484a7b241c84a705387c0eeb88676ccf",
+          "destination_sha256": "9c4575b9ceaace547c796c40e8ce3790dcfc0bdc825829358d4dbf37c091ecc2",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/openspec-archive-change/SKILL.md",
+          "destination_path": "skills/openspec-archive/SKILL.md",
+          "source_sha256": "3ad0def4d299469fdfd5b05e4842284d65558e6b28710b5962f7f214d6153855",
+          "destination_sha256": "939b17c964dc6c53b5ed98122e00f4825da335cc44d4e95d5f2e6b99c4624cc6",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/openspec-propose/SKILL.md",
+          "destination_path": "templates/openspec/escalation.md",
+          "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
+          "destination_sha256": "5aa82727190ec7e023886f2ab35544e3eb26650194a05f592d4e6c3291ef071f",
+          "modification_status": "adapted"
         }
       ]
     },

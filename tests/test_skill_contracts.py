@@ -37,6 +37,10 @@ def headings(markdown: str) -> set[str]:
     return set(re.findall(r"^## ([^\n]+)$", markdown, flags=re.MULTILINE))
 
 
+def normalized(markdown: str) -> str:
+    return " ".join(markdown.lower().split())
+
+
 def fenced_json(relative: str) -> dict[str, object]:
     content = read(relative)
     match = re.search(r"```json\n(.*?)\n```", content, flags=re.DOTALL)
@@ -295,6 +299,96 @@ class SpecKitSkillContractTests(unittest.TestCase):
                 content = read(f"skills/{skill}/SKILL.md").lower()
                 for token in prohibited:
                     self.assertNotIn(token, content)
+
+
+class OpenSpecSkillContractTests(unittest.TestCase):
+    SKILLS = ("openspec-propose", "openspec-apply", "openspec-archive")
+
+    def test_descriptions_bound_brownfield_ownership(self) -> None:
+        """OpenSpec discovery must route defects and architecture-bearing work elsewhere."""
+        descriptions = {
+            skill: frontmatter(read(f"skills/{skill}/SKILL.md"))["description"].lower()
+            for skill in self.SKILLS
+        }
+        proposal = descriptions["openspec-propose"]
+        for term in ("bounded", "existing capability", "not for", "defect", "architecture"):
+            self.assertIn(term, proposal)
+        self.assertIn("existing change", descriptions["openspec-apply"])
+        self.assertIn("all tasks complete", descriptions["openspec-archive"])
+
+    def test_propose_is_planning_only_and_apply_is_the_only_executor(self) -> None:
+        """A proposal or archive phase must not become another Brownfield executor."""
+        propose = normalized(read("skills/openspec-propose/SKILL.md"))
+        apply = normalized(read("skills/openspec-apply/SKILL.md"))
+        archive = normalized(read("skills/openspec-archive/SKILL.md"))
+        self.assertIn("must not edit application code", propose)
+        self.assertIn("planning boundary", propose)
+        self.assertIn("sole brownfield executor", apply)
+        self.assertIn("edits application code", apply)
+        self.assertIn("must not edit application code", archive)
+
+    def test_change_artifact_layout_and_formal_escalation_are_explicit(self) -> None:
+        """A Brownfield delta must remain traceable when escalation changes lifecycle."""
+        propose = read("skills/openspec-propose/SKILL.md")
+        for relative in (
+            "openspec/changes/<change-id>/proposal.md",
+            "openspec/changes/<change-id>/design.md",
+            "openspec/changes/<change-id>/tasks.md",
+            "openspec/changes/<change-id>/specs/<capability>/spec.md",
+        ):
+            self.assertIn(relative, propose)
+
+        escalation = headings(read("templates/openspec/escalation.md"))
+        self.assertEqual(
+            {"Status", "Reason", "Preserved change", "Spec Kit handoff"},
+            {"Status", "Reason", "Preserved change", "Spec Kit handoff"} & escalation,
+        )
+        escalation_content = read("templates/openspec/escalation.md")
+        for phrase in (
+            "status: escalated",
+            "openspec/changes/<change-id>/",
+            "<stable-feature-id>",
+            "specs/<stable-feature-id>-<name>/spec.md",
+        ):
+            self.assertIn(phrase, escalation_content)
+
+        apply = normalized(read("skills/openspec-apply/SKILL.md"))
+        self.assertIn("status: escalated", apply)
+        self.assertIn("executor is inactive", apply)
+
+    def test_archive_requires_complete_tasks_and_fresh_verification(self) -> None:
+        """Archive must refuse rather than waive incomplete or failing change evidence."""
+        archive = normalized(read("skills/openspec-archive/SKILL.md"))
+        for phrase in (
+            "refuse to archive",
+            "incomplete task",
+            "fresh verification",
+            "openspec/specs/<capability>/spec.md",
+            "openspec/changes/archive/yyyy-mm-dd-<change-id>/",
+        ):
+            self.assertIn(phrase, archive)
+        self.assertNotIn("confirm", archive)
+
+    def test_openspec_skills_remove_cli_store_schema_and_dynamic_runtime_inputs(self) -> None:
+        """The shared lifecycle must work without an OpenSpec runtime controller."""
+        prohibited = (
+            "allowed-tools",
+            "requires openspec cli",
+            "store selection",
+            "profile",
+            "schema selection",
+            "instructions json",
+            "dynamic instruction",
+            "openspec status",
+            "openspec list",
+            "openspec archive ",
+        )
+        for skill in self.SKILLS:
+            with self.subTest(skill=skill):
+                content = read(f"skills/{skill}/SKILL.md").lower()
+                for token in prohibited:
+                    self.assertNotIn(token, content)
+                self.assertNotRegex(content, r"(?m)^\s*(?:\$ )?openspec\s")
 
 
 class ProvenanceContractTests(unittest.TestCase):
