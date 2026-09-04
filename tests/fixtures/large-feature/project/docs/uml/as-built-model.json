@@ -1,0 +1,19 @@
+{
+  "component": {
+    "order_requires": "InventoryPort.reserve(order_id)",
+    "inventory_provides": "Inventory.reserve(order_id)",
+    "reserve_returns": "Reservation"
+  },
+  "success_sequence": {
+    "messages": ["inventory.reserve", "payment.capture", "order.paid", "inventory.commit", "order.complete"]
+  },
+  "recovery_sequence": {
+    "failure": "inventory.commit_failed",
+    "transition": "order.compensating",
+    "compensation": ["inventory.release", "payment.reverse"],
+    "terminal": "order.failed"
+  },
+  "state": {
+    "states": ["Pending", "Reserved", "Paid", "Compensating", "Complete", "Failed"]
+  }
+}

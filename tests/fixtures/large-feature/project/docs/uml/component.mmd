@@ -1,0 +1,9 @@
+%% Purpose: Do the as-built order and inventory reserve interfaces agree?
+%% Source evidence: checkout/ports.py; checkout/order.py; checkout/inventory.py
+%% Requirement IDs: CHECKOUT-001; AF-001; T001
+%% Notation: Mermaid component view using flowchart
+%% Verified on: 2026-09-04
+flowchart LR
+    checkout["CheckoutService"] --> order["OrderService"]
+    order -->|"InventoryPort.reserve(order_id) returns Reservation"| inventory["Inventory"]
+    checkout -->|"capture/reverse PaymentReceipt"| payment["Payment"]

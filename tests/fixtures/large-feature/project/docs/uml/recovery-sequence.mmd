@@ -1,0 +1,21 @@
+%% Purpose: How does checkout compensate after payment succeeds and inventory commit fails?
+%% Source evidence: checkout/service.py; integration_tests/test_checkout.py
+%% Requirement IDs: CHECKOUT-002; AF-002; T002; IT-RECOVERY-001
+%% Notation: Mermaid sequence diagram
+%% Verified on: 2026-09-04
+sequenceDiagram
+    participant Checkout
+    participant Order
+    participant Inventory
+    participant Payment
+    Checkout->>Order: reserve(order_id)
+    Order->>Inventory: reserve(order_id)
+    Checkout->>Payment: capture(order_id)
+    Checkout->>Order: mark_paid(order_id)
+    Checkout->>Inventory: commit(reservation)
+    Inventory--xCheckout: InventoryCommitError
+    Checkout->>Order: mark_compensating(order_id)
+    Checkout->>Inventory: release(reservation)
+    Checkout->>Payment: reverse(receipt)
+    Checkout->>Order: mark_failed(order_id)
+    Checkout--xCheckout: re-raise InventoryCommitError

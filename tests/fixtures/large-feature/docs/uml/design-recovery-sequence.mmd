@@ -1,0 +1,14 @@
+%% Purpose: What restores inventory and payment after inventory commit fails?
+%% Source evidence: initial/checkout.py; initial/architecture.json
+%% Requirement IDs: CHECKOUT-002
+%% Notation: Mermaid sequence diagram
+%% Verified on: 2026-09-04
+sequenceDiagram
+    participant Checkout
+    participant Inventory
+    participant Payment
+    Checkout->>Inventory: reserve(order_id)
+    Checkout->>Payment: capture(order_id)
+    Checkout->>Inventory: commit(reservation)
+    Inventory--xCheckout: commit failure
+    Note over Checkout,Payment: AF-002 has no inventory release or payment reversal

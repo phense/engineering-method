@@ -1,0 +1,14 @@
+%% Purpose: Which as-built checkout states are successful, compensating, and terminal?
+%% Source evidence: checkout/service.py; checkout/order.py; integration_tests/test_checkout.py
+%% Requirement IDs: CHECKOUT-001; CHECKOUT-002; AF-002; T002; T003
+%% Notation: Mermaid state diagram
+%% Verified on: 2026-09-04
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Reserved: reserve returns Reservation
+    Reserved --> Paid: payment capture
+    Paid --> Complete: inventory commit succeeds
+    Paid --> Compensating: inventory commit fails
+    Compensating --> Failed: release inventory then reverse payment
+    Complete --> [*]
+    Failed --> [*]

@@ -1,0 +1,12 @@
+{
+  "as_built_reconciliation": true,
+  "derived_success_test_passed": true,
+  "derived_recovery_test_passed": true,
+  "clean_final_review": true,
+  "fresh_verification": true,
+  "reconciliation_path": "docs/uml/reconciliation.md",
+  "integration_plan_path": "docs/uml/integration-test-plan.md",
+  "review_path": "evidence/final-review.md",
+  "verification_path": "evidence/integration-results.md",
+  "verification_command": "python3 -m unittest discover -s integration_tests -v"
+}

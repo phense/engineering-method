@@ -1,0 +1,13 @@
+%% Purpose: Is payment-success and inventory-commit-failure recoverable?
+%% Source evidence: initial/checkout.py; initial/architecture.json
+%% Requirement IDs: CHECKOUT-002
+%% Notation: Mermaid state diagram
+%% Verified on: 2026-09-04
+stateDiagram-v2
+    [*] --> Pending
+    Pending --> Reserved: inventory reserve
+    Reserved --> Paid: payment capture
+    Paid --> Complete: inventory commit
+    Paid --> Failed: inventory commit failure without compensation
+    Complete --> [*]
+    Failed --> [*]

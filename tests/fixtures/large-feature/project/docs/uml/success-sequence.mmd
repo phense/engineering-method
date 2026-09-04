@@ -1,0 +1,18 @@
+%% Purpose: What is the as-built successful cross-component checkout order?
+%% Source evidence: checkout/service.py; integration_tests/test_checkout.py
+%% Requirement IDs: CHECKOUT-001; T003; IT-SUCCESS-001
+%% Notation: Mermaid sequence diagram
+%% Verified on: 2026-09-04
+sequenceDiagram
+    participant Checkout
+    participant Order
+    participant Inventory
+    participant Payment
+    Checkout->>Order: reserve(order_id)
+    Order->>Inventory: reserve(order_id)
+    Inventory-->>Order: Reservation
+    Checkout->>Payment: capture(order_id)
+    Payment-->>Checkout: PaymentReceipt
+    Checkout->>Order: mark_paid(order_id)
+    Checkout->>Inventory: commit(reservation)
+    Checkout->>Order: mark_complete(order_id)

@@ -8,6 +8,12 @@ description: "Use for design-time or as-built architecture analysis of a large c
 Create only evidence-backed models that answer named architecture questions.
 This skill is original and self-contained for the engineering method.
 
+```json
+{
+  "system_integration_gate": ["as_built_reconciliation", "derived_success_test_passed", "derived_recovery_test_passed", "clean_final_review", "fresh_verification"]
+}
+```
+
 ## Recovery preamble
 
 Before creating or reconciling an artifact:
@@ -149,6 +155,21 @@ only to satisfy this gate.
    again.
 5. Complete reconciliation before a system architect derives integration tests
    from the component, success, failure/recovery, and state views.
+
+## System-architect integration gate
+
+After as-built reconciliation, give a `strong` system architect the approved
+requirements, reconciled component and state views, critical success and
+recovery sequences, current code, and test inventory. It derives at least one
+cross-component success integration test and one rollback/recovery integration
+test using the [integration test plan
+template](../../templates/uml/integration-test-plan.md). The tests must exercise
+real collaborating components rather than restating diagram text.
+
+`speckit-converge` must refuse completion unless as-built reconciliation is
+complete, the derived success and recovery tests pass, final review is clean,
+and fresh verification evidence records the exact command, result, timestamp,
+and artifact pointers. A failed gate is an actionable finding, not a waiver.
 
 ## Findings format
 
