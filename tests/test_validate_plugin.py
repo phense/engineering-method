@@ -60,6 +60,22 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertIn("ERROR .codex-plugin/plugin.json: file is required", errors)
 
+    def test_real_repository_has_only_deferred_foundation_files_missing(self) -> None:
+        """The real checkout should become valid except for later foundation artifacts."""
+        root = Path(__file__).resolve().parents[1]
+
+        errors = validate_repository(root)
+
+        self.assertEqual(
+            [
+                "ERROR LICENSE: file is required",
+                "ERROR README.md: file is required",
+                "ERROR THIRD_PARTY_NOTICES.md: file is required",
+                "ERROR third-party/sources.lock.json: file is required",
+            ],
+            errors,
+        )
+
     def test_reports_invalid_manifest_json(self) -> None:
         """A malformed manifest must not be treated as an empty manifest."""
         with tempfile.TemporaryDirectory() as directory:

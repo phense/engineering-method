@@ -1,1 +1,7 @@
 .worktrees/
+/.engineering-method/
+.venv/
+__pycache__/
+*.py[cod]
+.coverage
+htmlcov/

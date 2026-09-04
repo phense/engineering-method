@@ -1,0 +1,36 @@
+{
+  "name": "engineering-method",
+  "version": "0.1.0",
+  "description": "Risk-proportionate engineering workflows for Codex and Claude.",
+  "author": {
+    "name": "Peter Hense"
+  },
+  "license": "MIT",
+  "keywords": [
+    "engineering",
+    "workflow",
+    "specification",
+    "testing",
+    "review"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Peter's Engineering Method",
+    "shortDescription": "Risk-proportionate workflows for engineering agents",
+    "longDescription": "A shared workflow skill set that selects lightweight or rigorous engineering practices according to the requested work and its risk.",
+    "developerName": "Peter Hense",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Plan a new multi-component feature.",
+      "Diagnose and fix this reproducible regression.",
+      "Propose a bounded change to existing behavior."
+    ],
+    "brandColor": "#0B7285",
+    "screenshots": []
+  }
+}
