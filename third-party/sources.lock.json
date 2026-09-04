@@ -38,6 +38,34 @@
           "source_sha256": "1e448e9153462e8c5b5a55231a54c756d870a82950d4dd9425a2bf5b7008a0d9",
           "destination_sha256": "fc4d17d93ea5cffe99d37980c9aafa14ec3146a479af8f8fcfe63bd7d6288f8f",
           "modification_status": "adapted"
+        },
+        {
+          "source_path": "templates/commands/specify.md",
+          "destination_path": "skills/speckit-specify/SKILL.md",
+          "source_sha256": "07de3d938def8407ccd30bd9a2c433bab8f299c10915fe86199bd10438b295ec",
+          "destination_sha256": "f43aa4f3925470461e54f3fcb4972d849a2dd0322a632f206f72fdbec26df440",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "templates/commands/plan.md",
+          "destination_path": "skills/speckit-plan/SKILL.md",
+          "source_sha256": "c77757f07025404647134ba32cfc126ddf145fe20155a787266156c9bca4ecb2",
+          "destination_sha256": "65189dfe979e6594076d81c27bf2b9ec7e335e8ff5d995a4ce96867a2f9dc556",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "templates/commands/tasks.md",
+          "destination_path": "skills/speckit-tasks/SKILL.md",
+          "source_sha256": "19d3465fdffefb95117c8de493d7f13785dff3b4ad2b8c02d18a3ca5bbc572b5",
+          "destination_sha256": "e9e84130f383f74bed799337523c07b4cd7b45e4973e2b7834ea58d44e1e8958",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "templates/commands/converge.md",
+          "destination_path": "skills/speckit-converge/SKILL.md",
+          "source_sha256": "a6dbe49b66ef34f421294e4148afce2af93ba02cb1b861bd80f72f753ee52eed",
+          "destination_sha256": "2d1a63500f4ffc9407eb52651cc05434a917115ea00e48f1a0624d7625866225",
+          "modification_status": "adapted"
         }
       ]
     },

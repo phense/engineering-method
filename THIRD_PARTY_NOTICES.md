@@ -20,6 +20,10 @@ Adapted in EM-003:
 - `templates/spec-template.md` -> `templates/spec-kit/spec.md`: adapted
 - `templates/plan-template.md` -> `templates/spec-kit/plan.md`: adapted
 - `templates/tasks-template.md` -> `templates/spec-kit/tasks.md`: adapted
+- `templates/commands/specify.md` -> `skills/speckit-specify/SKILL.md`: adapted
+- `templates/commands/plan.md` -> `skills/speckit-plan/SKILL.md`: adapted
+- `templates/commands/tasks.md` -> `skills/speckit-tasks/SKILL.md`: adapted
+- `templates/commands/converge.md` -> `skills/speckit-converge/SKILL.md`: adapted
 
 MIT License
 

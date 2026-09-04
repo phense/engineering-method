@@ -48,6 +48,19 @@ def fenced_json(relative: str) -> dict[str, object]:
     return value
 
 
+def frontmatter(markdown: str) -> dict[str, str]:
+    self_contained = re.match(r"^---\n(.*?)\n---\n", markdown, flags=re.DOTALL)
+    if self_contained is None:
+        raise AssertionError("skill must start with YAML frontmatter")
+    fields: dict[str, str] = {}
+    for line in self_contained.group(1).splitlines():
+        key, separator, value = line.partition(":")
+        if not separator:
+            raise AssertionError(f"invalid frontmatter line: {line}")
+        fields[key] = value.strip().strip('"').strip("'")
+    return fields
+
+
 class LifecycleContractTests(unittest.TestCase):
     def test_every_lifecycle_skill_exposes_the_contract_headings(self) -> None:
         """Removing a lifecycle artifact boundary must make its contract incomplete."""
@@ -179,6 +192,109 @@ class LifecycleContractTests(unittest.TestCase):
                 self.assertTrue(case["primary"])
                 self.assertIsInstance(case["supporting"], list)
                 self.assertIsInstance(case["prohibited"], list)
+
+
+class SpecKitSkillContractTests(unittest.TestCase):
+    SKILLS = ("speckit-specify", "speckit-plan", "speckit-tasks", "speckit-converge")
+
+    def test_descriptions_define_positive_and_negative_selection_boundaries(self) -> None:
+        """Weak discovery metadata must not let Spec Kit absorb defects or bounded deltas."""
+        descriptions = {
+            skill: frontmatter(read(f"skills/{skill}/SKILL.md"))["description"].lower()
+            for skill in self.SKILLS
+        }
+        self.assertTrue(descriptions["speckit-specify"].startswith("use when "))
+        for term in ("new capability", "cross-component", "architecture", "risky migration"):
+            self.assertIn(term, descriptions["speckit-specify"])
+        for term in ("not for", "defect", "bounded brownfield"):
+            self.assertIn(term, descriptions["speckit-specify"])
+        self.assertIn("existing spec", descriptions["speckit-plan"])
+        self.assertIn("plan.md", descriptions["speckit-tasks"])
+        self.assertIn("implemented", descriptions["speckit-converge"])
+
+    def test_planning_phases_cannot_edit_application_code(self) -> None:
+        """A planning request must not silently authorize implementation."""
+        for skill in ("speckit-specify", "speckit-plan", "speckit-tasks"):
+            with self.subTest(skill=skill):
+                original = read(f"skills/{skill}/SKILL.md")
+                content = original.lower()
+                self.assertIn("Planning boundary", headings(original))
+                self.assertIn("must not edit application code", content)
+
+    def test_each_phase_names_exact_artifacts_and_next_phase(self) -> None:
+        """Changing an artifact path or handoff must break lifecycle continuity."""
+        contracts = {
+            "speckit-specify": (
+                "specs/<stable-feature-id>-<name>/spec.md",
+                "speckit-plan",
+            ),
+            "speckit-plan": (
+                "specs/<stable-feature-id>-<name>/plan.md",
+                "architecture-modeling",
+            ),
+            "speckit-tasks": (
+                "specs/<stable-feature-id>-<name>/tasks.md",
+                "orchestrated-implementation",
+            ),
+            "speckit-converge": (
+                "specs/<stable-feature-id>-<name>/tasks.md",
+                "verification-before-completion",
+            ),
+        }
+        for skill, expected in contracts.items():
+            with self.subTest(skill=skill):
+                content = read(f"skills/{skill}/SKILL.md")
+                for value in expected:
+                    self.assertIn(value, content)
+
+    def test_stateful_phases_start_with_repository_validated_recovery(self) -> None:
+        """Compaction recovery must not redispatch completed work from stale state."""
+        required = (
+            "state.json",
+            "resume.md",
+            "repository evidence wins",
+            "never redispatch completed work",
+        )
+        for skill in self.SKILLS:
+            with self.subTest(skill=skill):
+                original = read(f"skills/{skill}/SKILL.md")
+                content = original.lower()
+                self.assertIn("Recovery preamble", headings(original))
+                for phrase in required:
+                    self.assertIn(phrase.lower(), content)
+
+    def test_converge_is_read_only_except_append_only_tasks(self) -> None:
+        """Convergence must report gaps instead of becoming a second executor."""
+        content = read("skills/speckit-converge/SKILL.md").lower()
+        for phrase in (
+            "read-only for application code",
+            "only allowed write",
+            "append",
+            "tasks.md",
+            "actionable findings",
+            "fresh verification",
+        ):
+            self.assertIn(phrase, content)
+
+    def test_speckit_skills_are_free_of_removed_runtime_controllers(self) -> None:
+        """A host command, hook, or omitted executor would make the shared core non-portable."""
+        prohibited = (
+            "/implement",
+            "/analyze",
+            "/clarify",
+            "execute_command",
+            ".specify/extensions",
+            "__speckit_command_",
+            "task-to-issue",
+            "create-new-feature",
+            "git checkout",
+            "git branch",
+        )
+        for skill in self.SKILLS:
+            with self.subTest(skill=skill):
+                content = read(f"skills/{skill}/SKILL.md").lower()
+                for token in prohibited:
+                    self.assertNotIn(token, content)
 
 
 class ProvenanceContractTests(unittest.TestCase):
