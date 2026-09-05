@@ -39,8 +39,24 @@ proof and the final independent release verdict remain missing. No failed gate
 has been modified or marked passed. Mermaid rendering and live GitHub task
 mutation acceptance remain outside this verification.
 
-## Publication status
+## Verified publication
 
-Local preparation is complete; remote publication and downloaded-asset checks
-are tracked by EM-006 until verified. The public repository does not make
-GitHub Issues canonical for this project.
+- Public repository: https://github.com/phense/engineering-method.
+- Pre-release: https://github.com/phense/engineering-method/releases/tag/v0.1.0-rc.1.
+- Annotated tag `v0.1.0-rc.1` resolves to commit
+  `9ff0bddeea13792de9d670337ea1c80c2987b72f`; no existing tag was overwritten.
+- GitHub read-back confirmed public visibility, default branch `main`,
+  `isPrerelease=true`, `isDraft=false`, and both uploaded assets.
+- The final tagged package contains 187 files. Reproducible build and fresh native
+  clean installation passed on both hosts. ZIP SHA-256:
+  `21b27193dadafb939503c03db06659b2156affc190438c7f1fb45b0b35e5660f`.
+- Both release assets were downloaded again; ZIP and checksum file matched the
+  originals byte for byte, and `shasum -a 256 -c SHA256SUMS` passed.
+- Documented GitHub installation, installed source bytes, update, disable and
+  removal passed for both hosts in temporary configurations. No active plugin
+  installation was changed and Superpowers was not reactivated.
+- No GitHub Issues were created or migrated. BACKLOG.md remains canonical locally.
+
+A subsequent documentation-only commit records these observed results and marks
+EM-006 complete on `main`. The release tag and its verified package remain fixed
+at the commit above. EM-005 and its outstanding technical evidence remain open.

@@ -36,3 +36,10 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Status: available
 - Summary: Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed or newly live-tested.
 - Related backlog: `EM-005.7`
+
+<!-- engineering-method:feature {"schema_version":1,"id":"F-006","name":"Public prerelease distribution and English documentation","summary":"Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Full original cross-host acceptance remains open.","status":"available","related_backlog_ids":["EM-006"],"updated_at":"2026-09-05T14:13:52Z"} -->
+## `F-006` Public prerelease distribution and English documentation
+
+- Status: available
+- Summary: Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Full original cross-host acceptance remains open.
+- Related backlog: `EM-006`

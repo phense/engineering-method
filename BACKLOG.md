@@ -1,7 +1,8 @@
 # Backlog
 <!-- engineering-method:backlog-document {"schema_version":1,"project_key":"EM","mode":"local"} -->
 
-This is the canonical local task register until GitHub Issues become writable and canonical.
+This is the canonical local task register. Publication does not migrate tasks;
+GitHub Issues become canonical only after separately authorized migration.
 Keep stable IDs unchanged. Order groups unblocker-first, then priority and dependency order.
 
 ## Status legend
@@ -91,6 +92,6 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.7","title":"Apply shared proportionality and an effort brake to every skill.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"User-approved scope correction; see docs/verification/EM-005-completion-path.md for remaining release evidence.","updated_at":"2026-09-05T13:22:56Z"} -->
   - ✅ `EM-005.7` **P2** Apply shared proportionality and an effort brake to every skill.
     - Notes: User-approved scope correction; see docs/verification/EM-005-completion-path.md for remaining release evidence.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-006","title":"Publish the documented public prerelease with bounded verification","status":"in_progress","priority":"P2","parent_id":null,"depends_on":[],"notes":"Explicitly authorized public repository, main push and prerelease; no issue migration. Original EM-005 technical acceptance remains open.","updated_at":"2026-09-05T14:02:11Z"} -->
-- 🔄 `EM-006` **P2** Publish the documented public prerelease with bounded verification
-  - Notes: Explicitly authorized public repository, main push and prerelease; no issue migration. Original EM-005 technical acceptance remains open.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-006","title":"Publish the documented public prerelease with bounded verification","status":"complete","priority":"P2","parent_id":null,"depends_on":[],"notes":"Published phense/engineering-method and v0.1.0-rc.1 at 9ff0bdd. Verified public visibility, tag, prerelease flag, downloaded ZIP/checksum and GitHub install/update/disable/removal on both hosts. EM-005 remains incomplete; no issue migration.","updated_at":"2026-09-05T14:13:52Z"} -->
+- ✅ `EM-006` **P2** Publish the documented public prerelease with bounded verification
+  - Notes: Published phense/engineering-method and v0.1.0-rc.1 at 9ff0bdd. Verified public visibility, tag, prerelease flag, downloaded ZIP/checksum and GitHub install/update/disable/removal on both hosts. EM-005 remains incomplete; no issue migration.
