@@ -16,6 +16,36 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_successful_native_content_is_not_an_authentication_diagnostic(self):
+        plugin = Path(__file__).resolve().parents[1]
+        documentation = (plugin / "shared/platform/claude.md").read_text()
+        events = [
+            {"type": "user", "message": {"content": [{"type": "tool_result", "is_error": False,
+                                                        "content": documentation}]}},
+            {"type": "item.completed", "item": {"type": "command_execution", "exit_code": 0,
+                                                  "aggregated_output": "Not logged in; OAuth failed describes a fixture"}},
+            {"type": "assistant", "message": {"content": [{"type": "text", "text": "OAuth failed is documented"}]}},
+            {"type": "result", "subtype": "success", "is_error": False,
+             "result": "Documentation says not logged in", "structured_output": {"primary": "speckit-specify", "supporting": []}},
+        ]
+        raw = "\n".join(map(json.dumps, events))
+        self.assertEqual(self.run_fake("print(" + repr(raw) + ")").strip(), raw)
+        with self.assertRaisesRegex(EvalFailure, "host_exit:7:uncategorized_native_error"):
+            self.run_fake("import sys; print(" + repr(raw) + "); sys.exit(7)")
+
+    def test_native_authentication_failures_are_classified_without_scanning_tool_content(self):
+        failures = ["Not logged in", json.dumps({"type": "result", "subtype": "error_during_execution",
+                    "is_error": True, "errors": ["OAuth authentication failed"]}),
+                    json.dumps({"type": "turn.failed", "error": {"message": "authentication required"}}),
+                    json.dumps({"type": "error", "message": "invalid API key"})]
+        for failure in failures:
+            for code in (0, 1):
+                with self.subTest(failure=failure, exit_code=code):
+                    with self.assertRaisesRegex(EvalFailure, "^authentication$"):
+                        self.run_fake("import sys; print(" + repr(failure) + "); sys.exit(" + str(code) + ")")
+        with self.assertRaisesRegex(EvalFailure, "^authentication$"):
+            self.run_fake("import sys; print('Please login: authentication required', file=sys.stderr)")
+
     def test_existing_openspec_fixture_contains_complete_approved_planning(self):
         plugin = Path(__file__).resolve().parents[1]
         case = json.loads((plugin / "evals/shared/triggers/existing-openspec.json").read_text())

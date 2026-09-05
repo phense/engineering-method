@@ -111,6 +111,27 @@ def diagnostic_events(text):
                 pass
     return records
 
+def native_failure_diagnostics(stdout, stderr):
+    """Exclude successful tool reads and model prose from error classification."""
+    diagnostics = [stderr]
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except ValueError:
+            # Native CLIs can emit a plain login failure even with exit code zero.
+            diagnostics.append(line)
+            continue
+        if not isinstance(event, dict):
+            continue
+        kind = event.get("type")
+        if kind in ("error", "turn.failed") or (
+            kind == "result" and (event.get("is_error") is True
+                                  or str(event.get("subtype", "")).startswith("error"))
+        ):
+            diagnostics.append(line)
+    return "\n".join(diagnostics)
+
+
 def execute(command, cwd, env, timeout):
     try:
         process = subprocess.Popen(command, cwd=cwd, env=env, stdout=subprocess.PIPE,
@@ -135,10 +156,11 @@ def execute(command, cwd, env, timeout):
             raise EvalFailure("timeout", stdout) from exc
     finally:
         signal.signal(signal.SIGTERM, previous_term)
-    if AUTH_ERROR.search(stdout + stderr):
+    diagnostics = native_failure_diagnostics(stdout, stderr)
+    if AUTH_ERROR.search(diagnostics):
         raise EvalFailure("authentication", stdout)
     if process.returncode:
-        raise EvalFailure(f"host_exit:{process.returncode}:" + failure_category(stdout + stderr), stdout)
+        raise EvalFailure(f"host_exit:{process.returncode}:" + failure_category(diagnostics), stdout)
     return stdout
 
 def parse_transcript(host, text):
