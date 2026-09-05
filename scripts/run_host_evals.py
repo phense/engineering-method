@@ -476,7 +476,8 @@ def main(argv=None):
     parser.add_argument("--host", required=True, choices=["codex", "claude"])
     parser.add_argument("--case")
     parser.add_argument("--output-dir", type=Path, required=True)
-    parser.add_argument("--timeout", type=float, default=120)
+    parser.add_argument("--timeout", type=float, default=240,
+                        help="maximum seconds per native routing assessment")
     parser.add_argument("--auth-home", type=Path)
     parser.add_argument("--model")
     parser.add_argument("--plugin-root", type=Path, default=ROOT)

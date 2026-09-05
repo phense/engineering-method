@@ -11,8 +11,13 @@ existing or absent run and its prescribed next action without initializing or
 mutating canonical state. The separate architecture fixture exercises operational
 phase execution. One existing-Spec-Kit evaluation timed out at 120 seconds after
 correct skill reads followed by repeated initialization-related CLI discovery;
-that failed evidence remains retained. This scope clarification does not raise
-the routing timeout or weaken required skill-read evidence.
+that failed evidence remains retained. The scope clarification preserves required
+skill-read evidence. A later architectural routing run reached the same limit
+while performing valid read-only checks; the bounded default is now 240 seconds
+per case to accommodate native response latency. Twelve cases fit within the
+4000-second release-gate budget. Timeout still fails, terminates child processes,
+and preserves available diagnostic evidence; model effort and expected decisions
+are unchanged.
 
 Adapters select the default evaluation tier: Codex routing uses fast, Claude
 routing uses standard, and architectural cases use strong. In one controlled
