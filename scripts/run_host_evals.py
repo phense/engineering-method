@@ -321,7 +321,16 @@ def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", b
         command.append(prompt)
     return command, env
 
-ROUTING_INSTRUCTION = """
+SKILL_DISCOVERY_INSTRUCTION = """
+The shared skill files are linked directly at
+.agents/skills/<skill-name>/SKILL.md in this repository. The engineering-method:
+invocation namespace is not an extra filesystem directory. Discover actual paths
+with `rg --files --hidden --follow .agents/skills -g SKILL.md`, then read the
+selected files. Ordinary searches without symlink following may miss these files;
+an invented path or empty non-following search is not evidence of a missing skill.
+"""
+
+ROUTING_INSTRUCTION = SKILL_DISCOVERY_INSTRUCTION + """
 Assess the request and current repository using the available engineering-method
 skills. Perform the first safe assessment step only; do not implement the entire
 feature or launch subagents in this routing evaluation. Open the selected skill

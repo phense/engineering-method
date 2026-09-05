@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import signal
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -11,10 +12,24 @@ import time
 import unittest
 from unittest.mock import patch
 
-from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check_routing, host_command, run_case
+from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check_routing, host_command, run_case, prepare_repo, ROUTING_INSTRUCTION
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_prompt_discovery_command_follows_actual_skill_links(self):
+        """A namespaced guess or non-following search must not hide installed skills."""
+        import re
+        command = re.search(r"`(rg --files[^`]+)`", ROUTING_INSTRUCTION)
+        self.assertIsNotNone(command, "routing prompt needs executable filesystem discovery guidance")
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "repo"
+            plugin = Path(__file__).resolve().parents[1]
+            prepare_repo(root, {"files": {}}, plugin)
+            result = subprocess.run(shlex.split(command.group(1)), cwd=root, capture_output=True, text=True, check=True)
+            self.assertIn(".agents/skills/openspec-propose/SKILL.md", result.stdout.splitlines())
+            for path in result.stdout.splitlines():
+                self.assertTrue((root / path).is_file())
+
     def test_failed_run_retains_generated_artifacts_before_temp_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)

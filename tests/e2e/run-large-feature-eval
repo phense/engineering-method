@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.run_host_evals import (EvalFailure, diagnostic_events, execute, fingerprint,
                                    host_command, parse_transcript, prepare_repo, private_transcript,
-                                   retain_project, model_policy, model_effort)
+                                   retain_project, model_policy, model_effort, SKILL_DISCOVERY_INSTRUCTION)
 from tests.e2e.assert_large_feature import assert_host_run, ARTIFACTS, PHASES
 
 def run(host, output, auth_home, timeout, plugin):
@@ -43,6 +43,7 @@ UML findings, stable tasks, cohesive owned implementation slices, independent
 reviews, reconciled as-built UML, real success/recovery integration tests,
 convergence and fresh final verification. Preserve initial/ and supplied tests.
 Use the available engineering-method skills and native tools to open them.
+{SKILL_DISCOVERY_INSTRUCTION}
 The source under contract/ supplies public interface definitions; create the
 checkout package implementing them and the supplied integration tests.
 Do not read or copy a solved project or expected evaluation answers from elsewhere.
