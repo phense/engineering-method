@@ -37,9 +37,9 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed across arbitrary prompts.
 - Related backlog: `EM-005.7`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-006","name":"Public prerelease distribution and English documentation","summary":"Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Later main 0784c79 has complete gate coverage; the older prerelease retains its original acceptance scope.","status":"available","related_backlog_ids":["EM-006"],"updated_at":"2026-09-05T19:11:37Z"} -->
-## `F-006` Public prerelease distribution and English documentation
+<!-- engineering-method:feature {"schema_version":1,"id":"F-006","name":"Stable distribution and English documentation","summary":"Stable v0.1.0 on public GitHub with English documentation, reproducible package, checksum and verified dual-host main/tag installation. Original gate coverage accepted with the documented EM-005 evidence reuse and limits; historical rc.1 remains available.","status":"available","related_backlog_ids":["EM-006","EM-007"],"updated_at":"2026-09-05T19:27:21Z"} -->
+## `F-006` Stable distribution and English documentation
 
 - Status: available
-- Summary: Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Later main 0784c79 has complete gate coverage; the older prerelease retains its original acceptance scope.
-- Related backlog: `EM-006`
+- Summary: Stable v0.1.0 on public GitHub with English documentation, reproducible package, checksum and verified dual-host main/tag installation. Original gate coverage accepted with the documented EM-005 evidence reuse and limits; historical rc.1 remains available.
+- Related backlog: `EM-006`, `EM-007`
