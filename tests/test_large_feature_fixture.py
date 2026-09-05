@@ -195,11 +195,43 @@ class AsBuiltArchitectureTests(unittest.TestCase):
         output = result.stdout + result.stderr
         self.assertIn("test_checkout_success_matches_success_sequence", output)
         self.assertIn("test_commit_failure_releases_inventory_and_reverses_payment", output)
-        self.assertIn("Ran 2 tests", output)
         self.assertIn("OK", output)
 
 
 class EvidenceMutationTests(unittest.TestCase):
+    def test_weakened_supplied_test_is_rejected_even_after_fresh_review(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(PROJECT, project)
+            path = project / "integration_tests/test_checkout.py"
+            tree = ast.parse(path.read_text())
+            for node in ast.walk(tree):
+                if isinstance(node, ast.FunctionDef) and node.name.startswith("test_"):
+                    node.body = [ast.Pass()]
+            path.write_text(ast.unparse(tree) + "\n")
+            self.refresh_review_digest(project)
+            with self.assertRaisesRegex(AssertionError, "supplied integration test"):
+                assert_large_feature(project)
+
+    def test_additional_real_integration_test_is_allowed(self) -> None:
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(PROJECT, project)
+            (project / "integration_tests/test_additional.py").write_text(
+                "import unittest\n"
+                "from checkout import CheckoutService, Inventory, OrderService, Payment\n"
+                "class AdditionalCheckoutTest(unittest.TestCase):\n"
+                "    def test_two_orders_have_distinct_reservations(self):\n"
+                "        events = []\n"
+                "        service = CheckoutService(OrderService(Inventory(events), events), Payment(events))\n"
+                "        first = service.checkout('first')\n"
+                "        second = service.checkout('second')\n"
+                "        self.assertNotEqual(first.reservation_id, second.reservation_id)\n")
+            self.refresh_review_digest(project)
+            result = assert_large_feature(project)
+            self.assertEqual(0, result["returncode"])
+            self.assertIn("test_two_orders_have_distinct_reservations", result["output"])
+
     @staticmethod
     def refresh_review_digest(project):
         path = project / "evidence/final-review.md"

@@ -73,6 +73,18 @@ class ArchitectureHostTests(unittest.TestCase):
             with self.assertRaisesRegex(EvalFailure, "final_system_architect"):
                 assert_host_run(project, without_final_review)
             self.assertEqual("passed", assert_host_run(project, transcript)["status"])
+            history_path = project / "phase-evidence.jsonl"
+            original_history = history_path.read_text()
+            rows = [json.loads(line) for line in original_history.splitlines()]
+            row = next(row for row in rows if row["phase"] == "slices")
+            row["files"]["integration_tests/test_checkout.py"] = "0" * 64
+            history_path.write_text("\n".join(json.dumps(row, sort_keys=True) for row in rows) + "\n")
+            broken = deepcopy(transcript)
+            tool = next(tool for tool in broken["tools"] if "--checkpoint slices" in tool["input"])
+            tool["output"] = json.dumps(row, sort_keys=True)
+            with self.assertRaisesRegex(EvalFailure, "supplied_integration_test"):
+                assert_host_run(project, broken)
+            history_path.write_text(original_history)
             broken = deepcopy(transcript)
             test_tool = next(tool for tool in broken["tools"] if tool["input"].startswith("python3 -m unittest"))
             test_tool["input"] = "echo " + test_tool["input"]

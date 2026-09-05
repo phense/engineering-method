@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.run_host_evals import EvalFailure
-from tests.large_feature_evidence import assert_large_feature, evidence_digest
+from tests.large_feature_evidence import assert_large_feature, evidence_digest, supplied_test_digests
 
 PHASES = ("specify", "plan", "findings", "tasks", "slices", "as-built",
           "integration", "converge", "review", "verification")
@@ -88,7 +88,10 @@ def checkpoint(project, phase):
              "stable_finding_tasks_missing")
     if phase == "verification":
         assert_large_feature(project)
-    record = {"phase": phase, "recorded_at": datetime.now(timezone.utc).isoformat(), "files": snapshot(project)}
+    files = snapshot(project)
+    need(all(files.get(relative) == digest for relative, digest in supplied_test_digests().items()),
+         "modified_or_missing_supplied_integration_test")
+    record = {"phase": phase, "recorded_at": datetime.now(timezone.utc).isoformat(), "files": files}
     with (project / "phase-evidence.jsonl").open("a") as stream:
         stream.write(json.dumps(record, sort_keys=True) + "\n")
     return record
@@ -126,6 +129,8 @@ def assert_host_run(project, transcript):
         need(not any(path.startswith("checkout/") for path in row["files"]),
              "implementation_before_findings_and_tasks")
     for row in records:
+        need(all(row["files"].get(relative) == digest for relative, digest in supplied_test_digests().items()),
+             "modified_or_missing_supplied_integration_test")
         for relative in ARTIFACTS[row["phase"]]:
             need(relative in row["files"], "missing_snapshot_artifact")
     # Approved findings/tasks must survive implementation with stable identities.

@@ -22,6 +22,15 @@ TESTS = (
 )
 
 
+def supplied_test_digests() -> dict[str, str]:
+    """The packaged acceptance tests are immutable inputs, not generated output."""
+    source = Path(__file__).resolve().parent / "fixtures/large-feature/project/integration_tests"
+    digests = {"integration_tests/" + str(path.relative_to(source)): hashlib.sha256(path.read_bytes()).hexdigest()
+               for path in sorted(source.rglob("*.py"))}
+    require(bool(digests), "packaged supplied integration tests are missing")
+    return digests
+
+
 def require(condition, message):
     if not condition:
         raise AssertionError(message)
@@ -85,6 +94,10 @@ print(json.dumps(results))
 
 
 def assert_large_feature(project: Path) -> dict:
+    for relative, digest in supplied_test_digests().items():
+        path = project / relative
+        require(path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
+                f"modified or missing supplied integration test: {relative}")
     evidence = json.loads(read(project / "evidence/convergence.json"))
     for field in ("as_built_reconciliation", "derived_success_test_passed",
                   "derived_recovery_test_passed", "clean_final_review", "fresh_verification"):
@@ -132,7 +145,6 @@ def assert_large_feature(project: Path) -> dict:
     for test in TESTS:
         require(re.search(rf"^{test} .* \.\.\. ok$", output, re.MULTILINE),
                 f"required integration test did not pass: {test}")
-    require("Ran 2 tests" in output, "unexpected integration test inventory")
     probe = subprocess.run([sys.executable, "-B", "-c", PROBE], cwd=project,
                            capture_output=True, text=True, timeout=30)
     require(probe.returncode == 0, f"runtime architecture probe failed: {probe.stderr}")
