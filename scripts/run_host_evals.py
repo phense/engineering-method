@@ -592,6 +592,10 @@ invocation namespace is not an extra filesystem directory. Discover actual paths
 with `rg --files --hidden --follow .agents/skills -g SKILL.md`, then read the
 selected files. Ordinary searches without symlink following may miss these files;
 an invented path or empty non-following search is not evidence of a missing skill.
+Read each selected SKILL.md in a separate tool call containing only
+`cat <skill-path>` (or the host's native Read tool), with complete output and a
+successful exit. Keep discovery, path resolution and repository checks in other
+calls so a later unrelated failure cannot invalidate the skill-read evidence.
 Resolve each SKILL.md symlink to its actual target before following relative links
 to supporting scripts or templates. Those links belong to the plugin containing
 that target, not to the fixture's .agents directory. Inspect the resolved path
