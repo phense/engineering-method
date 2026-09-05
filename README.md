@@ -11,9 +11,11 @@ effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
 Version `0.1.0` is distributed as **`v0.1.0-rc.1`, a pre-release** with a
-user-approved reduced acceptance scope. The full original cross-host release
-gate has **not passed**. Read the [release limits](docs/verification/EM-005-completion-path.md)
-before relying on it for unattended work. The [approved design](docs/specs/2026-09-04-engineering-method-design.md)
+user-approved reduced acceptance scope. Later main commit `0784c79` has
+[complete original gate coverage](docs/verification/EM-005-acceptance.md), using
+documented evidence reuse and corrections; this does not retroactively certify
+the older pre-release. Read the acceptance limits before relying on it for
+unattended work. The [approved design](docs/specs/2026-09-04-engineering-method-design.md)
 records the intended scope.
 
 ## Installation
@@ -159,7 +161,7 @@ separate budget authorization and are not implied by these local checks.
   change, a large feature, and recovery after compact or a new session.
 - [Contributing](CONTRIBUTING.md): local checks, provenance, packaging and review.
 - [Verification history](docs/verification/EM-005-completion-path.md): bounded
-  candidate acceptance and the still-open original release gate.
+  candidate acceptance and the [subsequent complete gate coverage](docs/verification/EM-005-acceptance.md).
 
 ## Validation scope
 

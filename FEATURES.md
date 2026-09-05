@@ -16,11 +16,11 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. The state-check command automatically migrates a local backlog when the GitHub remote is writable; it is not read-only.
 - Related backlog: `EM-002`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-003","name":"Exclusive workflow skills","summary":"Seventeen shared lifecycle and quality skills with artifact-specific handoffs. Live host routing evaluation remains part of EM-005.","status":"available","related_backlog_ids":["EM-003"],"updated_at":"2026-09-05T10:52:23Z"} -->
+<!-- engineering-method:feature {"schema_version":1,"id":"F-003","name":"Exclusive workflow skills","summary":"Seventeen shared lifecycle and quality skills with artifact-specific handoffs. All 12 routing cases passed on both hosts for 0784c79; see the EM-005 acceptance scope.","status":"available","related_backlog_ids":["EM-003"],"updated_at":"2026-09-05T19:11:37Z"} -->
 ## `F-003` Exclusive workflow skills
 
 - Status: available
-- Summary: Seventeen shared lifecycle and quality skills with artifact-specific handoffs. Live host routing evaluation remains part of EM-005.
+- Summary: Seventeen shared lifecycle and quality skills with artifact-specific handoffs. All 12 routing cases passed on both hosts for 0784c79; see the EM-005 acceptance scope.
 - Related backlog: `EM-003`
 
 <!-- engineering-method:feature {"schema_version":1,"id":"F-004","name":"Orchestration and architecture gates","summary":"Cohesive slices, protected continuity artifacts, independent review and evidence-driven fixes; relevant Mermaid views and executable checkout success/recovery acceptance. Mermaid sources are semantically checked, not rendered.","status":"available","related_backlog_ids":["EM-004"],"updated_at":"2026-09-05T10:52:23Z"} -->
@@ -30,16 +30,16 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Cohesive slices, protected continuity artifacts, independent review and evidence-driven fixes; relevant Mermaid views and executable checkout success/recovery acceptance. Mermaid sources are semantically checked, not rendered.
 - Related backlog: `EM-004`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-005","name":"Proportionate execution guidance","summary":"Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed or newly live-tested.","status":"available","related_backlog_ids":["EM-005.7"],"updated_at":"2026-09-05T13:22:56Z"} -->
+<!-- engineering-method:feature {"schema_version":1,"id":"F-005","name":"Proportionate execution guidance","summary":"Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed across arbitrary prompts.","status":"available","related_backlog_ids":["EM-005.7"],"updated_at":"2026-09-05T19:11:37Z"} -->
 ## `F-005` Proportionate execution guidance
 
 - Status: available
-- Summary: Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed or newly live-tested.
+- Summary: Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed across arbitrary prompts.
 - Related backlog: `EM-005.7`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-006","name":"Public prerelease distribution and English documentation","summary":"Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Full original cross-host acceptance remains open.","status":"available","related_backlog_ids":["EM-006"],"updated_at":"2026-09-05T14:13:52Z"} -->
+<!-- engineering-method:feature {"schema_version":1,"id":"F-006","name":"Public prerelease distribution and English documentation","summary":"Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Later main 0784c79 has complete gate coverage; the older prerelease retains its original acceptance scope.","status":"available","related_backlog_ids":["EM-006"],"updated_at":"2026-09-05T19:11:37Z"} -->
 ## `F-006` Public prerelease distribution and English documentation
 
 - Status: available
-- Summary: Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Full original cross-host acceptance remains open.
+- Summary: Public GitHub repository and v0.1.0-rc.1 with reproducible package, checksum and verified dual-host GitHub installation. Later main 0784c79 has complete gate coverage; the older prerelease retains its original acceptance scope.
 - Related backlog: `EM-006`

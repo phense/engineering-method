@@ -167,3 +167,14 @@ The local backlog was restored to canonical local mode. Read-back verified the
 retained. Automatic approval review rejected their deletion without explicit
 user approval, so remote cleanup is pending. Do not invoke state-check again in
 this project while migration remains unauthorized.
+
+## Subsequent completion — 2026-09-05
+
+The user approved deleting the accidental Issues #1–#38 and explicitly requested
+finishing the fix and full acceptance. All 38 issues were removed and absence
+verified. All nine original gate criteria are now covered for `0784c79`, with
+independent acceptance and no unresolved Critical or Important findings. See
+[the final acceptance record](EM-005-acceptance.md) for exact same-package evidence
+reuse, the Claude checkpoint supplement, one independently verified ownership
+metadata correction, and remaining fixture limits. The failed reports above
+remain failed; no single successful full release-check invocation is claimed.
