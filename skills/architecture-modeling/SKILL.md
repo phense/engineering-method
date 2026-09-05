@@ -1,6 +1,6 @@
 ---
 name: architecture-modeling
-description: "Use for design-time or as-built architecture analysis of a large cross-component feature, changed system boundary, architectural refactor, substantial migration, or cross-component concurrency, security, or data-integrity work. Not for small fixes, localized Brownfield changes, documentation, or mechanical refactors."
+description: "Use as a supporting architecture gate when an approved Spec Kit plan awaits design-time analysis before tasks, or implemented slices await as-built reconciliation before convergence. Scope must be a large cross-component feature, changed system boundary, architectural refactor, substantial migration, or cross-component concurrency, security, or data-integrity work. Not for initial feature requests, specification or planning, small fixes, localized Brownfield changes, documentation, or mechanical refactors."
 ---
 
 # Architecture Modeling

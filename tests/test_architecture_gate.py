@@ -30,6 +30,13 @@ def normalized(relative: str) -> str:
 
 
 class ArchitectureActivationTests(unittest.TestCase):
+    def test_discovery_requires_phase_artifacts_before_architecture_analysis(self):
+        """A new migration request must reach specification before the architecture gate."""
+        description = (ROOT / "skills/architecture-modeling/SKILL.md").read_text().splitlines()[2]
+        self.assertIn("approved Spec Kit plan", description)
+        self.assertIn("implemented slices", description)
+        self.assertIn("Not for initial feature requests", description)
+
     def test_gate_activates_for_exactly_the_five_approved_risk_categories(self) -> None:
         """Expanding or shrinking activation makes architecture depth disproportionate."""
         contract = fenced_json("shared/policies/architecture-gate.md")
