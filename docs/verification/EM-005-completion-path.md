@@ -54,3 +54,26 @@ do not grow that subsystem merely to obtain a green report.
 
 Main stays unchanged until acceptance is complete. No remote, GitHub issues,
 push or publication is authorized.
+
+## Completed bounded verification
+
+Candidate `cf1f5723f1e3d00f844f875eee901184368a6e3e` passed:
+
+- All 301 Python tests (including both reproduced negative controls).
+- Portable plugin validation, Python compileall and Git whitespace checks.
+- Provenance audit against all three pinned upstream checkouts; upstream
+  revisions and hashes remain unchanged.
+- Reproducible 182-file package, SHA-256
+  `1005e7dc4e8e02017becb5a8069e5c0d9f027adbd753db905582e56aa334e168`.
+- Native clean installation in disposable homes on Claude and Codex, including
+  Claude strict validation. No credentials or live model requests were used.
+
+Local package: `/tmp/em005-bounded-candidate.zip`. Clean-install evidence:
+`/tmp/em005-bounded-clean-install.json`. These complete steps 1 and 3 above for
+this candidate. This record is a documentation-only follow-up to that revision.
+
+The candidate is locally installable. Full original release acceptance remains
+unmet: current-package live architecture/reviewer evidence on Codex and the final
+independent release verdict are missing. Earlier routing and Claude architecture
+results retain their stated revision limits. Do not call the complete release
+gate passed, start another paid loop, or fast-forward main on this evidence alone.
