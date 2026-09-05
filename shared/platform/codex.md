@@ -9,6 +9,7 @@ manifests expose the same plugin-root `skills/` tree.
   "host": "codex",
   "verified_cli_version": "0.153.0",
   "coordinator": {"model": "gpt-6-astra", "effort": "medium"},
+  "evaluation_roles": {"routing": "fast", "architectural": "strong"},
   "roles": {
     "strong": [{"model": "gpt-6-astra", "effort": "medium"}, {"model": "gpt-5.6-sol", "effort": "high"}],
     "standard": [{"model": "gpt-5.6-terra", "effort": "medium"}],

@@ -408,7 +408,10 @@ def run_case(host, case, expected, output, timeout, auth_home=None, model=None, 
         staged_plugin = stage_plugin(plugin, temporary / "plugin")
         staged_sha256 = fingerprint(staged_plugin)
         prepare_repo(repo, case, staged_plugin)
-        model = model or model_policy(host, plugin)["roles"]["strong" if case.get("architectural") else "fast"][0]["model"]
+        policy = model_policy(host, plugin)
+        evaluation_kind = "architectural" if case.get("architectural") else "routing"
+        evaluation_role = policy["evaluation_roles"][evaluation_kind]
+        model = model or policy["roles"][evaluation_role][0]["model"]
         command, env = host_command(host, repo, staged_plugin, config, model, auth_home,
                                     case["prompt"] + "\n" + ROUTING_INSTRUCTION)
         stdout = ""

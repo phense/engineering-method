@@ -6,6 +6,15 @@ Routing evaluations perform the first safe assessment, produce decision.md, and
 require successful tool-backed skill loading as well as the selected workflow.
 They do not claim that a complete feature was implemented.
 
+Adapters select the default evaluation tier: Codex routing uses fast, Claude
+routing uses standard, and architectural cases use strong. In one controlled
+bounded-change comparison with identical staged access, Claude's fast candidate
+selected the wrong primary and omitted decision.md; the standard candidate passed.
+Codex's fast candidate passed that case after prerequisite guidance was corrected.
+This is limited evidence for these evaluation defaults, not a general claim about
+model capability. Earlier failures remain failures; the runner does not silently
+retry a different model or replace failed evidence.
+
 Commands verified against Codex 0.153.0 and Claude Code 2.1.259:
 
 ```bash

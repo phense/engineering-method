@@ -16,6 +16,21 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_default_evaluation_model_uses_host_routing_tier(self):
+        for host, architectural, expected_model in (("codex", False, "gpt-5.6-luna"),
+                                                    ("codex", True, "gpt-6-astra"),
+                                                    ("claude", False, "sonnet"),
+                                                    ("claude", True, "fable")):
+            with self.subTest(host=host, architectural=architectural), tempfile.TemporaryDirectory() as directory:
+                def inspect_invocation(command, cwd, env, timeout):
+                    flag = "-m" if host == "codex" else "--model"
+                    self.assertEqual(expected_model, command[command.index(flag) + 1])
+                    raise EvalFailure("checked_default_model")
+                with patch("scripts.run_host_evals.execute", inspect_invocation):
+                    with self.assertRaisesRegex(EvalFailure, "checked_default_model"):
+                        run_case(host, {"id": "default-tier", "prompt": "assess", "files": {}, "architectural": architectural},
+                                 {"primary": "native-focused-edit", "supporting": [], "prohibited": [], "artifacts": []}, Path(directory), 1)
+
     def test_claude_grants_only_staged_plugin_and_preserves_safety_flags(self):
         with tempfile.TemporaryDirectory() as directory:
             output = Path(directory)

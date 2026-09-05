@@ -9,6 +9,7 @@ resolve them against this adapter in Claude Code. The conventional plugin-root
   "host": "claude",
   "verified_cli_version": "2.1.259",
   "coordinator": {"model": "fable", "effort": "medium"},
+  "evaluation_roles": {"routing": "standard", "architectural": "strong"},
   "roles": {
     "strong": [{"model": "fable", "effort": "medium"}, {"model": "opus", "effort": "high"}],
     "standard": [{"model": "sonnet", "effort": "medium"}],
