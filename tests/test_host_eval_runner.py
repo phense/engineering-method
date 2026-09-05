@@ -12,10 +12,50 @@ import time
 import unittest
 from unittest.mock import patch
 
-from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check_routing, host_command, run_case, prepare_repo, ROUTING_INSTRUCTION
+from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check_routing, host_command, run_case, prepare_repo, ROUTING_INSTRUCTION, diagnostic_events
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_informational_string_message_is_not_an_assistant_envelope(self):
+        events = [{"type": "system", "subtype": "status", "message": "Connecting"},
+                  {"type": "result", "subtype": "success", "structured_output": {"primary": "native-focused-edit", "supporting": []}}]
+        parsed = parse_transcript("claude", "\n".join(map(json.dumps, events)))
+        self.assertEqual("native-focused-edit", parsed["decision"]["primary"])
+        self.assertEqual([], parsed["tools"])
+
+    def test_malformed_evidence_envelopes_fail_explicitly(self):
+        cases = [
+            ("claude", {"type": "assistant", "message": "invalid"}),
+            ("claude", {"type": "assistant", "message": {"content": None}}),
+            ("claude", {"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "t", "name": "Read", "input": "invalid"}]}}),
+            ("codex", {"type": "item.completed", "item": "invalid"}),
+            ("codex", {"type": "item.completed", "item": {"type": "command_execution", "exit_code": 0, "command": [], "aggregated_output": "invalid"}}),
+        ]
+        for host, event in cases:
+            with self.subTest(event=event):
+                with self.assertRaisesRegex(EvalFailure, "malformed"):
+                    parse_transcript(host, json.dumps(event))
+                self.assertIsInstance(diagnostic_events(json.dumps(event)), list)
+
+    def test_parser_crash_retains_raw_and_project_before_diagnostics(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            raw = json.dumps({"type": "assistant", "message": "invalid"})
+            def native_output(command, cwd, env, timeout):
+                (cwd / "decision.md").write_text("Native generated assessment.")
+                return raw
+            with patch("scripts.run_host_evals.execute", native_output):
+                with self.assertRaisesRegex(EvalFailure, "malformed"):
+                    run_case("claude", {"id": "parser-shape", "prompt": "assess", "files": {}},
+                             {"primary": "native-focused-edit", "supporting": [], "prohibited": [], "artifacts": []}, output, 1)
+                with patch("scripts.run_host_evals._parse_transcript", side_effect=AttributeError("private native text")):
+                    with self.assertRaisesRegex(EvalFailure, "^malformed_native_envelope:AttributeError$"):
+                        run_case("claude", {"id": "parser-shape", "prompt": "assess", "files": {}},
+                                 {"primary": "native-focused-edit", "supporting": [], "prohibited": [], "artifacts": []}, output, 1)
+            self.assertEqual(raw, (output / "parser-shape-raw.jsonl").read_text())
+            self.assertEqual(0o600, (output / "parser-shape-raw.jsonl").stat().st_mode & 0o777)
+            self.assertEqual("Native generated assessment.", (output / "parser-shape/artifacts/decision.md").read_text())
+
     def test_prompt_discovery_command_follows_actual_skill_links(self):
         """A namespaced guess or non-following search must not hide installed skills."""
         import re

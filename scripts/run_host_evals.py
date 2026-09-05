@@ -84,9 +84,12 @@ def diagnostic_events(text):
             records.append({"type": "malformed", "bytes": len(line.encode())})
             continue
         item = event.get("item", {})
+        malformed_item = not isinstance(item, dict)
+        if malformed_item:
+            item = {}
         records.append({"type": event.get("type"), "subtype": event.get("subtype"),
                         "item_type": item.get("type"), "exit_code": item.get("exit_code"),
-                        "is_error": event.get("is_error"),
+                        "is_error": event.get("is_error"), "malformed_item": malformed_item,
                         "skill_paths": sorted(set(SKILL_PATH.findall(json.dumps(event))))})
         final = item.get("text") if item.get("type") == "agent_message" else event.get("result")
         if isinstance(event.get("structured_output"), dict):
@@ -139,6 +142,20 @@ def execute(command, cwd, env, timeout):
     return stdout
 
 def parse_transcript(host, text):
+    try:
+        return _parse_transcript(host, text)
+    except EvalFailure:
+        raise
+    except Exception as exc:
+        # An unanticipated native shape is a failed evaluation, never evidence.
+        raise EvalFailure("malformed_native_envelope:" + type(exc).__name__, text) from exc
+
+def typed(value, expected, label):
+    if not isinstance(value, expected):
+        raise EvalFailure("malformed_" + label)
+    return value
+
+def _parse_transcript(host, text):
     events, skills, tools, pending, reviewers = [], set(), [], {}, []
     invoked, review_assignments = set(), {}
     final, terminal = None, False
@@ -152,21 +169,28 @@ def parse_transcript(host, text):
     except (ValueError, TypeError) as exc:
         raise EvalFailure("malformed_jsonl") from exc
     for event in events:
+        typed(event.get("type"), str, "event_type")
         if host == "codex":
             if event.get("type") in ("error", "turn.failed"):
                 raise EvalFailure("host_error")
             terminal |= event.get("type") == "turn.completed"
             item = event.get("item", {})
             if event.get("type") == "item.completed":
+                typed(item, dict, "codex_item")
+                typed(item.get("type"), str, "codex_item_type")
                 if item.get("type") in ("collab_agent_tool_call", "collab_tool_call") and item.get("status") == "completed":
-                    prompt = item.get("prompt", "")
-                    tools.append({"name": "collaboration:" + item.get("tool", "unknown"), "input": prompt,
-                                  "output": json.dumps(item.get("agents_states", item.get("agent_states", {})))})
+                    prompt = typed(item.get("prompt") or "", str, "collaboration_prompt")
+                    operation = typed(item.get("tool", "unknown"), str, "collaboration_tool")
+                    states = typed(item.get("agents_states", item.get("agent_states", {})) or {}, dict, "agent_states")
+                    identities = typed(item.get("receiver_thread_ids") or [], list, "agent_identities")
+                    tools.append({"name": "collaboration:" + operation, "input": prompt, "output": json.dumps(states)})
                     if "review" in prompt.lower() and re.search(r"read[- ]only", prompt, re.I):
-                        for identity in item.get("receiver_thread_ids", []):
+                        for identity in identities:
+                            typed(identity, str, "agent_identity")
                             review_assignments[identity] = prompt
-                    for identity, state in item.get("agents_states", item.get("agent_states", {})).items():
+                    for identity, state in states.items():
                         if identity in review_assignments and isinstance(state, dict) and state.get("status") == "completed" and state.get("message"):
+                            typed(state["message"], str, "reviewer_response")
                             reviewers.append({"id": identity, "prompt": review_assignments[identity], "output": state["message"], "tool_position": len(tools)})
                 if item.get("type") == "agent_message":
                     final = item.get("text")
@@ -174,23 +198,48 @@ def parse_transcript(host, text):
                     tools.append({"name": "mcp:" + item.get("server", "unknown") + ":" + item.get("tool", "unknown"),
                                   "input": item.get("arguments", {}), "output": "completed"})
                 if item.get("type") == "command_execution" and item.get("exit_code") == 0:
-                    command = item.get("command", "")
-                    tools.append({"name": "command", "input": command, "output": item.get("aggregated_output", "")})
+                    command = typed(item.get("command"), str, "command_input")
+                    output = typed(item.get("aggregated_output", ""), str, "command_output")
+                    tools.append({"name": "command", "input": command, "output": output})
                     # A cat/sed/read command must complete and actually return content.
                     if item.get("aggregated_output") and re.search(r"\b(cat|sed|head|read_text)\b", command):
                         skills.update(SKILL_PATH.findall(command))
         else:
-            for block in event.get("message", {}).get("content", []):
-                if not isinstance(block, dict):
-                    continue
+            # Status/system events may carry plain message strings. Only the
+            # assistant/user envelopes contain tool evidence.
+            blocks = []
+            if event["type"] in ("assistant", "user"):
+                message = typed(event.get("message"), dict, "claude_message")
+                content = message.get("content")
+                if event["type"] == "user" and isinstance(content, str):
+                    content = []  # Valid user text cannot prove a tool result.
+                blocks = typed(content, list, "claude_content")
+            for block in blocks:
+                typed(block, dict, "claude_content_block")
+                typed(block.get("type"), str, "claude_block_type")
                 if block.get("type") == "tool_use":
-                    pending[block["id"]] = block
+                    identity = typed(block.get("id"), str, "tool_identity")
+                    typed(block.get("name"), str, "tool_name")
+                    arguments = typed(block.get("input"), dict, "tool_input")
+                    for field in ("prompt", "file_path", "skill", "command"):
+                        if field in arguments:
+                            typed(arguments[field], str, "tool_input_" + field)
+                    pending[identity] = block
                 if block.get("type") == "tool_result" and not block.get("is_error"):
-                    call = pending.get(block.get("tool_use_id"), {})
+                    identity = typed(block.get("tool_use_id"), str, "tool_result_identity")
+                    if identity not in pending:
+                        raise EvalFailure("malformed_unmatched_tool_result")
+                    call = pending[identity]
                     name, arguments = call.get("name", ""), call.get("input", {})
                     result_content = block.get("content", "")
                     if isinstance(result_content, list):
-                        result_content = "\n".join(part.get("text", "") for part in result_content if isinstance(part, dict))
+                        text_parts = []
+                        for part in result_content:
+                            typed(part, dict, "tool_result_block")
+                            if "text" in part:
+                                text_parts.append(typed(part["text"], str, "tool_result_text"))
+                        result_content = "\n".join(text_parts)
+                    typed(result_content, str, "tool_result_content")
                     tools.append({"name": name, "input": arguments, "output": result_content})
                     if name in ("Agent", "Task") and "review" in arguments.get("prompt", "").lower() and re.search(r"read[- ]only", arguments.get("prompt", ""), re.I):
                         reviewers.append({"id": block.get("tool_use_id"), "prompt": arguments["prompt"], "output": result_content, "tool_position": len(tools)})
@@ -353,13 +402,15 @@ def run_case(host, case, expected, output, timeout, auth_home=None, model=None, 
         stdout = ""
         try:
             stdout = execute(command, repo, env, timeout)
+            private_transcript(output / f'{case["id"]}-raw.jsonl', stdout)
+            retain_project(repo, output / case["id"] / "artifacts")
             transcript = parse_transcript(host, stdout)
             check_routing(transcript, expected, repo)
             if fingerprint(plugin) != source_sha256:
                 raise EvalFailure("plugin_changed_during_evaluation")
         except EvalFailure as exc:
-            retain_project(repo, output / case["id"] / "artifacts")
             private_transcript(output / f'{case["id"]}-raw.jsonl', exc.transcript or stdout)
+            retain_project(repo, output / case["id"] / "artifacts")
             (output / f'{case["id"]}-events.json').write_text(json.dumps(diagnostic_events(exc.transcript or stdout), indent=2) + "\n")
             raise
         retain_project(repo, output / case["id"] / "artifacts")

@@ -115,7 +115,7 @@ def main(argv=None) -> int:
     parser.add_argument("--release", action="store_true")
     parser.add_argument("--skip-live", action="store_true")
     parser.add_argument("--assert-clean", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--timeout", type=int, default=1800, help="maximum seconds per release gate")
+    parser.add_argument("--timeout", type=int, default=4000, help="maximum seconds per release gate, including both architecture hosts")
     parser.add_argument("--codex-auth-home", type=Path)
     parser.add_argument("--claude-auth-home", type=Path)
     args = parser.parse_args(argv)
