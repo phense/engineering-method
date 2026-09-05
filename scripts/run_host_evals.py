@@ -198,6 +198,134 @@ def parse_transcript(host, text, plugin=ROOT):
         # An unanticipated native shape is a failed evaluation, never evidence.
         raise EvalFailure("malformed_native_envelope:" + type(exc).__name__, text) from exc
 
+def codex_native_events(text, *, thread_id, project):
+    """Normalize host-owned rollout events; never decode encrypted assignments.
+
+    Scope is confirmed by the completed child's own review_assignment field.
+    The returned prompt is that attestation, not a reconstructed spawn argument.
+    """
+    try:
+        rows = [json.loads(line) for line in text.splitlines() if line.strip()]
+        metadata = [r['payload'] for r in rows if r.get('type') == 'session_meta']
+        if (len(metadata) != 1 or metadata[0].get('id') != thread_id
+                or metadata[0].get('source') != 'exec'
+                or Path(metadata[0]['cwd']).resolve() != project.resolve()):
+            raise EvalFailure('native_session_mismatch')
+        events, reviewers, children, completed = [], [], {}, set()
+        tool_position = 0
+        terminal = False
+        for row in rows:
+            payload = row.get('payload', {})
+            if row.get('type') == 'event_msg':
+                if payload.get('type') == 'task_complete':
+                    terminal = True
+                if payload.get('type') != 'item_completed':
+                    continue
+                if payload.get('thread_id') != thread_id:
+                    raise EvalFailure('native_item_thread_mismatch')
+                item = payload['item']
+                kind = item['type']
+                if kind == 'SubAgentActivity':
+                    identity, author = item['agent_thread_id'], item['agent_path']
+                    if (not re.fullmatch(r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', identity)
+                            or identity == thread_id or not re.fullmatch(r'/root/[a-z0-9_]+', author)):
+                        raise EvalFailure('native_child_identity')
+                    if item['kind'] == 'started':
+                        if author in children:
+                            raise EvalFailure('native_duplicate_child')
+                        children[author] = identity
+                    elif item['kind'] == 'completed':
+                        if children.get(author) != identity or author in completed:
+                            raise EvalFailure('native_unmatched_child_completion')
+                        completed.add(author)
+                    continue
+                converted = None
+                if kind == 'CommandExecution':
+                    command = item['command']
+                    if not isinstance(command, list) or not all(isinstance(x, str) for x in command):
+                        raise EvalFailure('native_command_shape')
+                    converted = {'type': 'command_execution', 'command': shlex.join(command),
+                                 'exit_code': item.get('exit_code'), 'aggregated_output': item.get('aggregated_output', '')}
+                    tool_position += item.get('exit_code') == 0
+                elif kind == 'CollabAgentToolCall':
+                    # Preserve ordering, but only separately observed child answers are reviews.
+                    converted = {'type': 'collab_tool_call', 'tool': item['tool'], 'status': item['status']}
+                    tool_position += item['status'] == 'completed'
+                elif kind == 'AgentMessage':
+                    converted = {'type': 'agent_message', 'text': ''.join(
+                        block['text'] for block in item.get('content', []) if block.get('type') == 'Text')}
+                if converted is not None:
+                    events.append({'type': 'item.completed', 'item': converted})
+            elif row.get('type') == 'response_item' and payload.get('type') == 'agent_message':
+                author = payload.get('author')
+                if author not in completed or payload.get('recipient') != '/root':
+                    continue
+                blocks = payload.get('content', [])
+                if any(block.get('type') != 'input_text' for block in blocks):
+                    continue
+                message = ''.join(block['text'] for block in blocks)
+                prefix = f'Message Type: FINAL_ANSWER\nTask name: /root\nSender: {author}\nPayload:\n'
+                if not message.startswith(prefix):
+                    continue
+                output = message[len(prefix):]
+                match = re.search(r'```json\s*\n(.*?)\n```', output, re.DOTALL)
+                try:
+                    verdict = json.loads(match.group(1) if match else output)
+                except ValueError:
+                    continue
+                assignment = verdict.get('review_assignment', '') if isinstance(verdict, dict) else ''
+                if not isinstance(assignment, str):
+                    raise EvalFailure('native_review_assignment_shape')
+                if not ('review' in assignment.lower() and re.search(r'read[- ]only', assignment, re.I)):
+                    assignment = ''
+                reviewers.append({'id': children[author], 'prompt': assignment, 'output': output,
+                                  'tool_position': tool_position, 'assignment_source': 'native-reviewer-response'})
+                completed.remove(author)
+        if not terminal:
+            raise EvalFailure('native_incomplete_turn')
+        events.append({'type': 'turn.completed'})
+        return events, reviewers
+    except (KeyError, TypeError, ValueError, AttributeError) as error:
+        raise EvalFailure('malformed_native_rollout') from error
+
+
+def parse_codex_rollout(text, *, thread_id, project, plugin=ROOT):
+    events, reviewers = codex_native_events(text, thread_id=thread_id, project=project)
+    transcript = parse_transcript('codex', '\n'.join(map(json.dumps, events)), plugin)
+    transcript['reviewers'] = reviewers
+    return transcript
+
+
+def capture_codex_rollout(stdout, *, auth_home, project, output, plugin=ROOT):
+    """Read only the fresh exec thread identified by native stdout, never latest."""
+    identities = [json.loads(line).get('thread_id') for line in stdout.splitlines()
+                  if line.strip() and json.loads(line).get('type') == 'thread.started']
+    if len(identities) != 1 or not isinstance(identities[0], str) or not re.fullmatch(
+            r'[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}', identities[0]):
+        raise EvalFailure('native_thread_identity_missing')
+    sessions = (auth_home / 'sessions').resolve()
+    paths = list(sessions.glob('**/rollout-*-'+identities[0]+'.jsonl'))
+    if len(paths) != 1 or paths[0].is_symlink() or not paths[0].resolve().is_relative_to(sessions):
+        raise EvalFailure('native_rollout_missing_or_ambiguous')
+    # Keep only evidence envelopes, never reasoning, system instructions or encrypted tool calls.
+    selected = []
+    for line in paths[0].read_text().splitlines():
+        row = json.loads(line)
+        kind, payload = row.get('type'), row.get('payload', {})
+        if kind == 'session_meta':
+            selected.append({'type': kind, 'payload': {key: payload.get(key) for key in ('id', 'cwd', 'source')}})
+        elif kind == 'event_msg' and (payload.get('type') == 'task_complete' or (
+                payload.get('type') == 'item_completed' and payload.get('item', {}).get('type')
+                in ('CommandExecution', 'CollabAgentToolCall', 'AgentMessage', 'SubAgentActivity'))):
+            selected.append(row)
+        elif (kind == 'response_item' and payload.get('type') == 'agent_message'
+              and payload.get('recipient') == '/root' and payload.get('author') != '/root'):
+            selected.append(row)
+    captured = '\n'.join(map(json.dumps, selected)) + '\n'
+    private_transcript(output, captured)
+    return parse_codex_rollout(captured, thread_id=identities[0], project=project, plugin=plugin)
+
+
 def typed(value, expected, label):
     if not isinstance(value, expected):
         raise EvalFailure("malformed_" + label)

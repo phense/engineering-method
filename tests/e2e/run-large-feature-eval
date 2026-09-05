@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.run_host_evals import (EvalFailure, diagnostic_events, execute, fingerprint,
                                    host_command, parse_transcript, prepare_repo, private_transcript,
-                                   retain_project, model_policy, model_effort, SKILL_DISCOVERY_INSTRUCTION, stage_plugin)
+                                   retain_project, model_policy, model_effort, SKILL_DISCOVERY_INSTRUCTION, stage_plugin, capture_codex_rollout)
 from tests.e2e.assert_large_feature import assert_host_run, ARTIFACTS, PHASES
 
 def run(host, output, auth_home, timeout, plugin):
@@ -76,8 +76,9 @@ review_path, and evidence-backed root_cause. Each review is a separate file.
 Use a standalone python3 -m unittest command via tools, with no echo or chained
 commands, and copy its full output into the report. Each independent reviewer
 must return the same fenced JSON object stored in its named review_path:
-status exactly clean, actionable_findings an empty array, reviewed_files a map
-of owned file paths to their actual SHA-256 hashes. Include that review_path in
+status exactly clean, actionable_findings an empty array, review_assignment
+confirming the actual read-only review brief and its review_path, and reviewed_files
+a map of owned file paths to their actual SHA-256 hashes. Include that review_path in
 the read-only assignment. A spawned but still-running reviewer is not completion.
 The common skills and templates govern report content and review independence.
 
@@ -102,6 +103,8 @@ in the assignment. Wait for the reviewer's native completed response before
 recording the review checkpoint. Final-review.md must contain Status: clean and
 the exact fenced JSON object returned by that completed reviewer, with:
 review_kind = system-architect-final, status = clean, actionable_findings = [],
+review_assignment confirming the actual read-only system-architect assignment
+and evidence/final-review.md,
 reviewed_files mapping every code/test/UML file to SHA-256, and reviewed_sha256
 equal to the fixture evidence_digest(project). The reviewer can import
 tests.large_feature_evidence.evidence_digest from the installed plugin to compute
@@ -114,6 +117,8 @@ Actual tools and artifacts, not this final JSON, determine acceptance.
 """
         model = model_policy(host, plugin)["coordinator"]["model"]
         command, env = host_command(host, project, staged_plugin, config, model, auth_home, prompt, budget=10)
+        if host == "codex":
+            command.remove("--ephemeral")  # Retain native child responses omitted from stdout.
         stdout = ""
         target = output / host
         target.mkdir(parents=True, exist_ok=True)
@@ -121,7 +126,9 @@ Actual tools and artifacts, not this final JSON, determine acceptance.
             stdout = execute(command, project, env, timeout)
             private_transcript(target / "raw.jsonl", stdout)
             retain_project(project, target / "artifacts")
-            transcript = parse_transcript(host, stdout, plugin=staged_plugin)
+            transcript = (capture_codex_rollout(stdout, auth_home=Path(env["CODEX_HOME"]),
+                          project=project, output=target / "native-evidence.jsonl", plugin=staged_plugin)
+                          if host == "codex" else parse_transcript(host, stdout, plugin=staged_plugin))
             result = assert_host_run(project, transcript, assertion=assertion)
             if fingerprint(plugin) != source_sha256 or fingerprint(staged_plugin) != staged_sha256:
                 raise EvalFailure("plugin_changed_during_evaluation")

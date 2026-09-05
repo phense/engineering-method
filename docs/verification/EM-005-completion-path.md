@@ -90,3 +90,23 @@ record; it does not waive or pass the original technical release gate.
 `v0.1.0-rc.1` identifies that reduced-acceptance distribution of plugin `0.1.0`.
 EM-005 remains incomplete. No paid evaluation loop or issue migration is
 authorized by this publication task.
+
+## Bounded native reviewer capture correction — 2026-09-05
+
+EM-005.8 corrects the Codex architecture driver's missing reviewer replies.
+Only architecture runs retain native session evidence; routing stays ephemeral.
+The collector binds stdout's thread ID to the matching host-owned rollout and
+project, then requires matching native child start/completion and final-response
+identities. The reviewer confirms its scope in `review_assignment` in its own
+verdict; this is explicitly child-attested scope, not decrypted spawn text.
+Existing scope/hash, checkpoint and final-review ordering assertions are unchanged.
+Captured evidence is private and excludes reasoning and system/user instructions.
+
+All 305 local tests passed, including missing/wrong identity, incomplete response,
+wrong project and missing scope controls. One bounded independent read-only code
+review found no Critical or Important findings. A single native Codex probe
+(Astra medium, 90-second maximum) passed: the separate reviewer's actual reply,
+confirmed scope and independently computed file hash were captured successfully.
+A local replay also verified the final evidence filtering. No full matrix ran.
+This proves the capture correction, not complete architecture/release acceptance.
+The published pre-release tag and its assets remain unchanged.
