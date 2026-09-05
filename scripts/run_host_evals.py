@@ -382,6 +382,10 @@ invocation namespace is not an extra filesystem directory. Discover actual paths
 with `rg --files --hidden --follow .agents/skills -g SKILL.md`, then read the
 selected files. Ordinary searches without symlink following may miss these files;
 an invented path or empty non-following search is not evidence of a missing skill.
+Resolve each SKILL.md symlink to its actual target before following relative links
+to supporting scripts or templates. Those links belong to the plugin containing
+that target, not to the fixture's .agents directory. Inspect the resolved path
+before declaring a bundled resource unavailable.
 """
 
 ROUTING_INSTRUCTION = SKILL_DISCOVERY_INSTRUCTION + """
@@ -390,7 +394,10 @@ skills. Perform the first safe assessment step only; do not implement the entire
 feature or launch subagents in this routing evaluation. Open the selected skill
 instructions through tools before applying them. The assessment includes that
 skill's required prerequisite and recovery preamble checks: follow its supporting
-skill handoffs far enough to establish the current state before stopping. Do not
+skill handoffs through read-only discovery to establish whether a run exists or
+is absent and identify the prescribed next action. Do not initialize a run,
+recover or mutate canonical state, or execute workflow tasks in this routing
+assessment; record those next actions in decision.md instead. Do not
 stop merely after choosing or reading the primary skill. This does not authorize
 full lifecycle implementation or generating later-phase artifacts.
 Write decision.md explaining the
@@ -398,6 +405,9 @@ one primary workflow and necessary supporting skills, using repository evidence.
 Finish with ONLY a JSON object {"primary": "<skill-name or native-focused-edit>",
 "supporting": ["<selected supporting skill names>"]}. Report the skills actually
 applied, not every skill considered. Do not invent artifacts, live agents, or tests.
+The supporting array lists only skills whose instructions were opened and applied
+during this assessment. Mention future implementation or verification skills in
+decision.md as next steps instead; exclude future-only skills from the final JSON.
 """
 def run_case(host, case, expected, output, timeout, auth_home=None, model=None, plugin=ROOT):
     source_sha256 = fingerprint(plugin)

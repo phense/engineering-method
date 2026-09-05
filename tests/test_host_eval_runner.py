@@ -16,6 +16,18 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_existing_openspec_fixture_contains_complete_approved_planning(self):
+        plugin = Path(__file__).resolve().parents[1]
+        case = json.loads((plugin / "evals/shared/triggers/existing-openspec.json").read_text())
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory) / "repo"
+            prepare_repo(root, case, plugin)
+            change = root / "openspec/changes/export-semicolon"
+            for relative in ("proposal.md", "design.md", "tasks.md", "specs/export/spec.md"):
+                with self.subTest(artifact=relative):
+                    self.assertTrue((change / relative).is_file(), "approved apply fixture lacks required planning input")
+                    self.assertTrue((change / relative).read_text().strip())
+
     def test_default_evaluation_model_uses_host_routing_tier(self):
         for host, architectural, expected_model in (("codex", False, "gpt-5.6-luna"),
                                                     ("codex", True, "gpt-6-astra"),
@@ -103,6 +115,11 @@ class HostRunnerTests(unittest.TestCase):
             self.assertIn(".agents/skills/openspec-propose/SKILL.md", result.stdout.splitlines())
             for path in result.stdout.splitlines():
                 self.assertTrue((root / path).is_file())
+            backlog_skill = (root / ".agents/skills/project-backlog/SKILL.md").resolve()
+            for name in ("project-state", "continuity-state"):
+                self.assertTrue((backlog_skill.parent / "../../scripts" / name).resolve().is_file())
+            apply_skill = (root / ".agents/skills/openspec-propose/SKILL.md").resolve()
+            self.assertTrue((apply_skill.parent / "../../templates/openspec/design.md").resolve().is_file())
 
     def test_failed_run_retains_generated_artifacts_before_temp_cleanup(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -6,6 +6,14 @@ Routing evaluations perform the first safe assessment, produce decision.md, and
 require successful tool-backed skill loading as well as the selected workflow.
 They do not claim that a complete feature was implemented.
 
+Routing preambles stop after read-only prerequisite discovery: identify an
+existing or absent run and its prescribed next action without initializing or
+mutating canonical state. The separate architecture fixture exercises operational
+phase execution. One existing-Spec-Kit evaluation timed out at 120 seconds after
+correct skill reads followed by repeated initialization-related CLI discovery;
+that failed evidence remains retained. This scope clarification does not raise
+the routing timeout or weaken required skill-read evidence.
+
 Adapters select the default evaluation tier: Codex routing uses fast, Claude
 routing uses standard, and architectural cases use strong. In one controlled
 bounded-change comparison with identical staged access, Claude's fast candidate
