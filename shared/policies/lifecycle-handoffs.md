@@ -38,10 +38,13 @@ The following JSON is the authoritative, machine-readable handoff graph:
     {"from": "speckit-plan", "to": "architecture-modeling", "artifact": "specs/<stable-feature-id>-<name>/plan.md"},
     {"from": "architecture-modeling", "to": "speckit-tasks", "artifact": "verified design findings"},
     {"from": "speckit-tasks", "to": "orchestrated-implementation", "artifact": "specs/<stable-feature-id>-<name>/tasks.md"},
-    {"from": "orchestrated-implementation", "to": "speckit-converge", "artifact": "implementation, as-built models, integration results, and review state"},
-    {"from": "speckit-converge", "to": "verification-before-completion", "artifact": "closed or appended convergence findings"},
+    {"from": "orchestrated-implementation", "to": "speckit-converge", "artifact": "implementation, as-built models, integration results, and review state", "required_gate": "architecture-modeling:as-built"},
+    {"from": "speckit-converge", "to": "verification-before-completion", "artifact": "closed convergence findings", "completion_guard": "no actionable findings and all evidence current"},
     {"from": "openspec-propose", "to": "speckit-specify", "artifact": "openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-propose", "traceability": "escalation record preserves the change path and new feature ID"},
     {"from": "openspec-apply", "to": "speckit-specify", "artifact": "openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-apply", "traceability": "escalation record preserves completed task IDs, change path, and new feature ID"}
+  ],
+  "retry_transitions": [
+    {"from": "speckit-converge", "to": "orchestrated-implementation", "condition": "actionable findings appended as new slices", "artifact": "tasks.md append-only convergence slices", "preserves": "completed work and stable task IDs"}
   ]
 }
 ```
@@ -51,3 +54,8 @@ lifecycle before the destination becomes active and preserve the source
 evidence, stable IDs, and artifact path named by the edge. For OpenSpec,
 preserve the change and write the formal escalation record before Spec Kit
 starts.
+
+The forward phase graph remains acyclic. A convergence retry is an explicit
+return to the existing executor, never a new controller or a completion
+handoff. Before convergence, that executor invokes the architecture skill in
+as-built mode and carries its reconciliation and integration evidence forward.

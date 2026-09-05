@@ -73,7 +73,8 @@ for the current Spec Kit feature.
 ## Produces
 
 A convergence findings summary. When actionable findings exist, append one new
-numbered Convergence section with stable traceable task IDs to
+numbered Convergence section with stable traceable task IDs grouped under
+`### Slice <unique-slice-id>: <outcome>` headings to
 `specs/<stable-feature-id>-<name>/tasks.md`. When none exist, leave `tasks.md`
 byte-for-byte unchanged.
 
@@ -88,8 +89,11 @@ flows pass, review findings are resolved, and fresh verification passes.
 ## Next phase
 
 `verification-before-completion`, and only after the completion condition is
-met. If tasks were appended, the lifecycle remains in implementation and no
-handoff occurs.
+met. If tasks were appended, return explicitly to the existing
+`orchestrated-implementation` executor for the new slices. Preserve completed
+slices, checkpoint the pending slice IDs and exact next action, and repeat
+as-built reconciliation, integration verification, and convergence after the
+fixes. No final handoff occurs while findings remain.
 
 ## Supporting skills
 
@@ -112,6 +116,9 @@ and existing task content. Its only allowed write is appending missing work to
    unrequested; assign severity by user and architecture impact.
 4. Present the findings before writing.
 5. Append one task per actionable finding, preserving traceability and ordering
-   critical or high-severity work first.
+   critical or high-severity work first. Group the new tasks into extractable
+   `### Slice <unique-slice-id>: <outcome>` sections with dependencies, owned
+   paths, and verification evidence. Choose task and slice IDs unused anywhere
+   in the existing artifact; preserve all existing IDs and content.
 6. If no actionable findings exist, do not modify any file and report the
    evidence checked.

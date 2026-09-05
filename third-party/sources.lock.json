@@ -36,7 +36,7 @@
           "source_path": "templates/tasks-template.md",
           "destination_path": "templates/spec-kit/tasks.md",
           "source_sha256": "1e448e9153462e8c5b5a55231a54c756d870a82950d4dd9425a2bf5b7008a0d9",
-          "destination_sha256": "fc4d17d93ea5cffe99d37980c9aafa14ec3146a479af8f8fcfe63bd7d6288f8f",
+          "destination_sha256": "236640801d57401402ff047910f1b6663aa517c8458db4b4703113b838d94530",
           "modification_status": "adapted"
         },
         {
@@ -64,7 +64,7 @@
           "source_path": "templates/commands/converge.md",
           "destination_path": "skills/speckit-converge/SKILL.md",
           "source_sha256": "a6dbe49b66ef34f421294e4148afce2af93ba02cb1b861bd80f72f753ee52eed",
-          "destination_sha256": "50cda8f353964c11e396ee447d37c80a533daa3009f297146a98a29afa6291ef",
+          "destination_sha256": "7efea64bfa8651d0ef9bef8e5c4ce6ed0b9f4ac0ff1575e8790d07fba98607a0",
           "modification_status": "adapted"
         }
       ]
@@ -221,7 +221,7 @@
           "source_path": "skills/subagent-driven-development/SKILL.md",
           "destination_path": "skills/orchestrated-implementation/SKILL.md",
           "source_sha256": "8dd1b8e698edec3700c6d89517dbe96febd3bacd3f6ea21c1a3569c62ea104b5",
-          "destination_sha256": "af119923596400da0b04f3b7259942f9f965c631d674d69e627af12322217a80",
+          "destination_sha256": "2ea3d9ca06929be10faf926f96957203393f72e7bc08c48b3f00fba3dee343c5",
           "modification_status": "adapted"
         },
         {
@@ -263,14 +263,14 @@
           "source_path": "skills/subagent-driven-development/scripts/task-brief",
           "destination_path": "scripts/task-brief",
           "source_sha256": "d6954ef7841c7da3d77373e6ff5118b3f2f2e998606fd95d33e6527851bce044",
-          "destination_sha256": "0734a63743f36e312e5d669e9e4ac8686710b7f3f07f7ade8a0114a69790755f",
+          "destination_sha256": "cb03677f57c12010e31643320850df40790aff793a8830e608bf7230438b326f",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/subagent-driven-development/scripts/review-package",
           "destination_path": "scripts/review-package",
           "source_sha256": "fac3d4bd7f94369e8037b9ead2a8a502dca6ab333902b560b9455dbb3c450ebe",
-          "destination_sha256": "7cdbda594650fa64097f2bfad4cee0af257e9c21ccee6b006d14c5a3bc91c649",
+          "destination_sha256": "ad5c9c25ba5fb0e07a7ba1cbcdb9d8e8dd846444e516cb4c66f014ea23cf7aed",
           "modification_status": "adapted"
         },
         {

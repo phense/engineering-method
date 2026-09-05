@@ -134,7 +134,12 @@ system-architect integration gate, then hands the complete evidence to
 1. Re-read the approved tasks, findings, specification, plan, and project
    gates from disk after recovery.
 2. Build a dependency and ownership table. Record interfaces shared across
-   tasks and the integration order before grouping slices.
+   tasks and the integration order before grouping slices. Account for every
+   unchecked task, including prerequisites, final integration, and appended
+   convergence work, under a unique extractable `### Slice <id>: <outcome>`
+   heading. If any task lacks a slice, correct task generation before dispatch;
+   never silently skip unsliced tasks. Resume only pending slices after a
+   convergence return and preserve all completed task and slice IDs.
 3. Resolve the capability role through the [host-neutral routing
    policy](../../shared/policies/model-routing.md). The later platform adapter
    inspects actual availability and performs any fallback.

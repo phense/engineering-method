@@ -19,7 +19,9 @@ root=$(cd "$root" && pwd -P)
 run="$root/.engineering-method/runs/$work_id"
 [ -d "$run" ] && [ -f "$run/state.json" ] \
   || { echo "EM-002 run is not initialized: $work_id" >&2; exit 2; }
-run=$(cd "$run" && pwd -P)
+physical_run=$(cd "$run" && pwd -P)
+[ "$physical_run" = "$run" ] \
+  || { echo "work run must not be redirected by a symlink" >&2; exit 2; }
 
 base=$(git rev-parse --verify "${base}^{commit}") \
   || { echo "invalid base commit" >&2; exit 2; }
@@ -42,6 +44,14 @@ case "$out" in
   "$run"/*) ;;
   *) echo "output must stay inside the work run" >&2; exit 2 ;;
 esac
+# Reserve case aliases too: common macOS volumes are case-insensitive.
+relative_out=$(printf '%s' "${out#"$run/"}" | LC_ALL=C tr '[:upper:]' '[:lower:]')
+case "$relative_out" in
+  state.json|resume.md|decisions.md|events.jsonl|agent-reports|agent-reports/*)
+    echo "output must not overwrite canonical run state or agent reports" >&2; exit 2 ;;
+esac
+[ ! -d "$out" ] && [ ! -L "$out" ] \
+  || { echo "output must be a regular artifact path" >&2; exit 2; }
 
 result=$(mktemp "$run/.review-package.XXXXXX")
 trap 'rm -f "$result"' EXIT

@@ -139,6 +139,60 @@ class OrchestratedImplementationSkillTests(unittest.TestCase):
 
 
 class OrchestrationScriptTests(unittest.TestCase):
+    def test_helpers_preserve_canonical_run_files(self) -> None:
+        """Custom artifact outputs must not destroy continuity state or reports."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self._repo(root)
+            head = self._commit(root, "tasks.md", "### Slice S1: work\n- [ ] T001 work\n", "base")
+            run = root / ".engineering-method/runs/EM-004"
+            for relative in ("state.json", "resume.md", "decisions.md", "events.jsonl", "agent-reports/worker.md",
+                             "STATE.JSON", "RESUME.MD", "DECISIONS.MD", "EVENTS.JSONL", "AGENT-REPORTS/worker.md"):
+                target = run / relative
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("preserve this evidence\n", encoding="utf-8")
+                for command in ((str(TASK_BRIEF), "tasks.md", "EM-004", "S1"),
+                                (str(REVIEW_PACKAGE), "EM-004", head, head)):
+                    with self.subTest(helper=command[0], target=relative):
+                        result = subprocess.run((*command, str(target)), cwd=root, capture_output=True, text=True)
+                        self.assertNotEqual(0, result.returncode)
+                        self.assertEqual("preserve this evidence\n", target.read_text())
+
+    def test_helpers_reject_run_symlinks_outside_repository(self) -> None:
+        """A linked run must not redirect generated artifacts into another repository."""
+        with tempfile.TemporaryDirectory() as temporary, tempfile.TemporaryDirectory() as outside:
+            root = Path(temporary)
+            self._repo(root)
+            head = self._commit(root, "tasks.md", "### Slice S1: work\n- [ ] T001 work\n", "base")
+            run = root / ".engineering-method/runs/EM-004"
+            (run / "state.json").unlink()
+            run.rmdir()
+            run.symlink_to(outside, target_is_directory=True)
+            (Path(outside) / "state.json").write_text("{}\n", encoding="utf-8")
+            for command in ((str(TASK_BRIEF), "tasks.md", "EM-004", "S1"),
+                            (str(REVIEW_PACKAGE), "EM-004", head, head)):
+                with self.subTest(helper=command[0]):
+                    result = subprocess.run(command, cwd=root, capture_output=True, text=True)
+                    self.assertNotEqual(0, result.returncode)
+                    self.assertEqual(["state.json"], sorted(path.name for path in Path(outside).iterdir()))
+
+    def test_every_template_task_is_extractable_exactly_once(self) -> None:
+        """Prerequisite and final tasks must not disappear at the slice boundary."""
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self._repo(root)
+            tasks = read("templates/spec-kit/tasks.md")
+            (root / "tasks.md").write_text(tasks, encoding="utf-8")
+            extracted = []
+            slice_tasks = {}
+            for slice_id in re.findall(r"^### Slice ([^: ]+):", tasks, flags=re.MULTILINE):
+                result = subprocess.run((str(TASK_BRIEF), "tasks.md", "EM-004", slice_id),
+                                        cwd=root, capture_output=True, text=True, check=True)
+                slice_tasks[slice_id] = re.findall(r"^- \[ \] (T\d+)", Path(result.stdout.strip()).read_text(), flags=re.MULTILINE)
+                extracted.extend(slice_tasks[slice_id])
+            self.assertEqual(["T001", "T002", "T003", "T004", "T005", "T006", "T007"], extracted)
+            self.assertEqual(["T001", "T002", "T003", "T004"], slice_tasks["S1"])
+
     def _repo(self, root: Path) -> None:
         subprocess.run(("git", "init", "-q"), cwd=root, check=True)
         subprocess.run(("git", "config", "user.email", "test@example.com"), cwd=root, check=True)

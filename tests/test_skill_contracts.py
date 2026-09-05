@@ -114,6 +114,19 @@ def frontmatter(markdown: str) -> dict[str, str]:
 
 
 class LifecycleContractTests(unittest.TestCase):
+    def test_convergence_retry_and_as_built_gate_are_explicit(self) -> None:
+        """Open convergence findings must return to the sole executor, never verification."""
+        graph = fenced_json("shared/policies/lifecycle-handoffs.md")
+        retry = graph.get("retry_transitions", [])
+        self.assertEqual(1, len(retry))
+        self.assertEqual("speckit-converge", retry[0]["from"])
+        self.assertEqual("orchestrated-implementation", retry[0]["to"])
+        self.assertEqual("actionable findings appended as new slices", retry[0]["condition"])
+        execution = next(edge for edge in graph["edges"] if edge["from"] == "orchestrated-implementation")
+        self.assertEqual("architecture-modeling:as-built", execution.get("required_gate"))
+        completion = next(edge for edge in graph["edges"] if edge["from"] == "speckit-converge")
+        self.assertEqual("no actionable findings and all evidence current", completion.get("completion_guard"))
+
     def test_every_lifecycle_skill_exposes_the_contract_headings(self) -> None:
         """Removing a lifecycle artifact boundary must make its contract incomplete."""
         for skill in LIFECYCLE_SKILLS:
