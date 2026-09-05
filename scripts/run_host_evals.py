@@ -215,7 +215,8 @@ def observed_read_skills(command, output, plugin):
         return set()
     found = set()
     for path in (plugin / "skills").glob("*/SKILL.md"):
-        content = path.read_text()
+        # Claude's Bash result removes terminal newlines, not instruction bytes.
+        content = path.read_text().rstrip("\n")
         if content.strip() and content in output:
             found.add(path.parent.name)
     return found

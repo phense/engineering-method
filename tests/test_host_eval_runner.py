@@ -16,6 +16,19 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_claude_shell_reads_allow_only_terminal_newline_removal(self):
+        from scripts.run_host_evals import observed_read_skills
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            path = root / 'skills' / 'speckit-plan' / 'SKILL.md'
+            path.parent.mkdir(parents=True)
+            content = '# Complete skill\nRead every requirement.\n'
+            path.write_text(content)
+            command = 'cat .agents/skills/speckit-plan/SKILL.md'
+            self.assertEqual({'speckit-plan'}, observed_read_skills(command, content[:-1], root))
+            self.assertEqual(set(), observed_read_skills(command, content[:-2], root))
+            self.assertEqual(set(), observed_read_skills(command, content.replace('every ', ''), root))
+
     def setUp(self):
         # Test defaults independently of the invoking live evaluation policy.
         override = patch.dict(os.environ, {f"EM_EVAL_{host}_{field}": ""
