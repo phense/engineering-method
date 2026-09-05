@@ -48,6 +48,10 @@ Use the available engineering-method skills and native tools to open them.
 {SKILL_DISCOVERY_INSTRUCTION}
 The source under contract/ supplies public interface definitions; create the
 checkout package implementing them and the supplied integration tests.
+The fixture schema places public value models in checkout/models.py and requires
+a local InventoryPort class declaration in checkout/ports.py with
+reserve(order_id: str) -> Reservation; an imported class alias is not that declaration.
+Create these implementation files only after the findings and tasks checkpoints.
 Do not read or copy a solved project or expected evaluation answers from elsewhere.
 
 This approved bounded fixture needs no further design confirmation. Work only in
@@ -87,8 +91,11 @@ success_sequence.messages (runtime event names), recovery_sequence fields
 failure, transition, compensation, terminal, and state.states. The fixture oracle
 supports the supplied small checkout API and Mermaid notation; use its failures
 as concrete verification findings. Invoke
-python3 {assertion} --project .
-to check the current project. After integration, dispatch a separate read-only
+python3 {assertion} --project . --pre-review
+after integration and before final review. This runs the full fresh machine
+checks without requiring a completed final-review file or true completion claims;
+it does not grant acceptance. After fixing any findings, rerun these machine
+checks successfully before dispatching a separate read-only
 system-architect FINAL review covering the entire checkout/, integration_tests/,
 and docs/uml/ contents, not only a prior slice. Include evidence/final-review.md
 in the assignment. Wait for the reviewer's native completed response before

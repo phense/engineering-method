@@ -13,7 +13,7 @@ from pathlib import Path
 from unittest.mock import patch
 import sys
 
-from tests.large_feature_evidence import assert_large_feature, evidence_digest
+from tests.large_feature_evidence import assert_large_feature, evidence_digest, supplied_test_digests
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -196,6 +196,84 @@ class AsBuiltArchitectureTests(unittest.TestCase):
         self.assertIn("test_checkout_success_matches_success_sequence", output)
         self.assertIn("test_commit_failure_releases_inventory_and_reverses_payment", output)
         self.assertIn("OK", output)
+
+
+class PreReviewTests(unittest.TestCase):
+    def test_cli_pre_review_does_not_complete_or_replace_final_acceptance(self):
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(PROJECT, project)
+            review = project / "evidence/final-review.md"
+            review.unlink()
+            convergence = project / "evidence/convergence.json"
+            data = json.loads(convergence.read_text())
+            data["clean_final_review"] = False
+            convergence.write_text(json.dumps(data))
+            before = convergence.read_bytes()
+            command = [sys.executable, str(ROOT / "tests/e2e/assert_large_feature.py"),
+                       "--project", str(project)]
+            result = subprocess.run(command + ["--pre-review"], capture_output=True, text=True)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIs(json.loads(result.stdout)["acceptance"], False)
+            self.assertEqual(convergence.read_bytes(), before)
+            self.assertFalse(review.exists())
+            self.assertFalse((project / "phase-evidence.jsonl").exists())
+            result = subprocess.run(command, capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("missing completion claim", result.stderr)
+            protected = project / next(iter(supplied_test_digests()))
+            protected.write_text("# weakened supplied test\n")
+            result = subprocess.run(command + ["--pre-review"], capture_output=True, text=True)
+            self.assertNotEqual(result.returncode, 0)
+            self.assertIn("supplied integration test", result.stderr)
+
+    def test_pre_review_is_nonaccepting_and_runs_schema_and_runtime_checks(self):
+        from tests.large_feature_evidence import pre_review_large_feature
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(PROJECT, project)
+            (project / "evidence/final-review.md").unlink()
+            result = pre_review_large_feature(project)
+            self.assertEqual(result["status"], "pre_review_passed")
+            self.assertIs(result["acceptance"], False)
+            with self.assertRaisesRegex(AssertionError, "missing evidence"):
+                assert_large_feature(project)
+            ports = project / "checkout/ports.py"
+            original = ports.read_text()
+            ports.write_text(original.replace("-> Reservation", "-> bool"))
+            with self.assertRaisesRegex(AssertionError, "reserve contract"):
+                pre_review_large_feature(project)
+            ports.write_text(original)
+            diagram = project / "docs/uml/success-sequence.mmd"
+            diagram.write_text(diagram.read_text().replace("reserve(", "missing("))
+            with self.assertRaisesRegex(AssertionError, "diagram differs"):
+                pre_review_large_feature(project)
+
+    def test_reconciliation_accepts_project_and_bare_uml_paths_but_not_escapes(self):
+        from tests.large_feature_evidence import pre_review_large_feature
+        with tempfile.TemporaryDirectory() as directory:
+            project = Path(directory) / "project"
+            shutil.copytree(PROJECT, project)
+            reconciliation = project / "docs/uml/reconciliation.md"
+            original = reconciliation.read_text()
+            for path in ("component.mmd", "docs/uml/component.mmd", "checkout/ports.py",
+                         "integration_tests/test_checkout.py", "reports/proof.md"):
+                with self.subTest(path=path):
+                    if path.startswith("reports/"):
+                        (project / "reports").mkdir(exist_ok=True)
+                        (project / path).write_text("proof")
+                    if path.startswith("integration_tests/"):
+                        path = next(iter(supplied_test_digests()))
+                    reconciliation.write_text(original.replace('"component.mmd"', json.dumps(path)))
+                    pre_review_large_feature(project)
+            outside = Path(directory) / "outside.mmd"
+            outside.write_text("external")
+            (project / "docs/uml/link.mmd").symlink_to(outside)
+            for path in ("../outside.mmd", str(outside), "link.mmd", "checkout/../../outside.mmd"):
+                with self.subTest(path=path):
+                    reconciliation.write_text(original.replace('"component.mmd"', json.dumps(path)))
+                    with self.assertRaisesRegex(AssertionError, "evidence path|outside project"):
+                        pre_review_large_feature(project)
 
 
 class EvidenceMutationTests(unittest.TestCase):

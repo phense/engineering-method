@@ -93,7 +93,31 @@ print(json.dumps(results))
 '''
 
 
+def reconciliation_evidence_path(project: Path, relative: str) -> Path:
+    require(isinstance(relative, str) and bool(relative), "invalid evidence path")
+    candidate = Path(relative)
+    require(not candidate.is_absolute() and ".." not in candidate.parts, "invalid evidence path")
+    if len(candidate.parts) == 1:
+        candidate = Path("docs/uml") / candidate
+    else:
+        require(relative.startswith(("checkout/", "docs/uml/", "reports/", "integration_tests/")),
+                "invalid evidence path prefix")
+    path = (project / candidate).resolve()
+    require(path.is_relative_to(project.resolve()), "evidence outside project")
+    return path
+
+
 def assert_large_feature(project: Path) -> dict:
+    return _verify_large_feature(project, final=True)
+
+
+def pre_review_large_feature(project: Path) -> dict:
+    """Run machine checks without granting acceptance or manufacturing review."""
+    result = _verify_large_feature(project, final=False)
+    return {**result, "status": "pre_review_passed", "acceptance": False}
+
+
+def _verify_large_feature(project: Path, *, final: bool) -> dict:
     for relative, digest in supplied_test_digests().items():
         path = project / relative
         require(path.is_file() and hashlib.sha256(path.read_bytes()).hexdigest() == digest,
@@ -101,12 +125,14 @@ def assert_large_feature(project: Path) -> dict:
     evidence = json.loads(read(project / "evidence/convergence.json"))
     for field in ("as_built_reconciliation", "derived_success_test_passed",
                   "derived_recovery_test_passed", "clean_final_review", "fresh_verification"):
-        require(evidence.get(field) is True, f"missing completion claim: {field}")
+        if final:
+            require(evidence.get(field) is True, f"missing completion claim: {field}")
     paths = {}
     for field in ("reconciliation_path", "integration_plan_path", "review_path", "verification_path"):
         path = (project / evidence[field]).resolve()
         require(path.is_relative_to(project.resolve()), f"evidence outside project: {field}")
-        read(path)
+        if final or field != "review_path":
+            read(path)
         paths[field] = path
 
     reconciliation = contract(paths["reconciliation_path"])
@@ -116,8 +142,7 @@ def assert_large_feature(project: Path) -> dict:
             "incomplete reconciliation")
     for item in reconciliation["differences"]:
         for relative in item["evidence"]:
-            path = project / relative if relative.startswith("checkout/") else project / "docs/uml" / relative
-            read(path)
+            read(reconciliation_evidence_path(project, relative))
 
     plan = read(paths["integration_plan_path"])
     for test in TESTS:
@@ -128,11 +153,12 @@ def assert_large_feature(project: Path) -> dict:
         for label in ("Purpose", "Source evidence", "Requirement IDs", "Notation", "Verified on"):
             require(re.search(rf"^%% {label}: \S.+$", diagram, re.MULTILINE),
                     f"diagram missing metadata: {name}/{label}")
-    review = read(paths["review_path"])
-    require(re.search(r"^Status: clean$", review, re.MULTILINE), "final review is not clean")
     digest = evidence_digest(project)
-    require(contract(paths["review_path"])["reviewed_sha256"] == digest,
-            "final review is stale for current artifacts")
+    if final:
+        review = read(paths["review_path"])
+        require(re.search(r"^Status: clean$", review, re.MULTILINE), "final review is not clean")
+        require(contract(paths["review_path"])["reviewed_sha256"] == digest,
+                "final review is stale for current artifacts")
     require(evidence["verification_command"] == COMMAND, "incorrect verification command")
     require(f"Command: `{COMMAND}`" in read(paths["verification_path"]),
             "verification artifact does not identify the actual command")

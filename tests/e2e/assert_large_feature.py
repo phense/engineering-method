@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 from scripts.run_host_evals import EvalFailure
-from tests.large_feature_evidence import assert_large_feature, evidence_digest, supplied_test_digests
+from tests.large_feature_evidence import assert_large_feature, evidence_digest, supplied_test_digests, pre_review_large_feature
 
 PHASES = ("specify", "plan", "findings", "tasks", "slices", "as-built",
           "integration", "converge", "review", "verification")
@@ -193,9 +193,12 @@ def assert_host_run(project, transcript):
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--project", type=Path, required=True)
-    parser.add_argument("--checkpoint", choices=PHASES)
-    parser.add_argument("--transcript", type=Path)
-    parser.add_argument("--refresh-review-digest", action="store_true")
+    mode = parser.add_mutually_exclusive_group()
+    mode.add_argument("--checkpoint", choices=PHASES)
+    mode.add_argument("--transcript", type=Path)
+    mode.add_argument("--refresh-review-digest", action="store_true")
+    mode.add_argument("--pre-review", action="store_true",
+                      help="run fresh machine checks only; never grants final acceptance")
     args = parser.parse_args(argv)
     if args.refresh_review_digest:
         path = args.project / "evidence/final-review.md"
@@ -205,7 +208,9 @@ def main(argv=None):
         need(count == 1, "missing_review_digest_field")
         path.write_text(text)
         return 0
-    if args.checkpoint:
+    if args.pre_review:
+        print(json.dumps(pre_review_large_feature(args.project)))
+    elif args.checkpoint:
         print(json.dumps(checkpoint(args.project, args.checkpoint), sort_keys=True))
     elif args.transcript:
         print(json.dumps(assert_host_run(args.project, json.loads(args.transcript.read_text()))))
