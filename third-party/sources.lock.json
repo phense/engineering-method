@@ -67,7 +67,9 @@
           "destination_sha256": "7efea64bfa8651d0ef9bef8e5c4ce6ed0b9f4ac0ff1575e8790d07fba98607a0",
           "modification_status": "adapted"
         }
-      ]
+      ],
+      "copyright": "Copyright GitHub, Inc.",
+      "modification_summary": "Adapted specification, planning, task and convergence artifacts with exclusive lifecycles, host-neutral recovery, cohesive slices and append-only fix handoffs."
     },
     {
       "id": "openspec",
@@ -135,7 +137,9 @@
           "destination_sha256": "a9961495009a6b48ca90db5c5747851f77becaef09534e351a639a77f8b4c395",
           "modification_status": "adapted"
         }
-      ]
+      ],
+      "copyright": "Copyright (c) 2024 OpenSpec Contributors",
+      "modification_summary": "Adapted bounded-change proposal, delta specification, application and archival artifacts without upstream CLI dependencies; added explicit escalation and continuity."
     },
     {
       "id": "superpowers",
@@ -287,7 +291,32 @@
           "destination_sha256": "38c5b475852386d303c3c73108bec28b034ddeac781499bd197c383b5e170094",
           "modification_status": "adapted"
         }
-      ]
+      ],
+      "copyright": "Copyright (c) 2025 Jesse Vincent",
+      "modification_summary": "Curated quality practices and adapted report, brief, review and recovery mechanics for cohesive slices, proportional review and protected project-state storage."
     }
-  ]
+  ],
+  "original": {
+    "copyright": "Copyright (c) 2026 Peter Hense",
+    "license": "MIT",
+    "modification_status": "original",
+    "paths": [
+      "engineering_method/**",
+      "shared/platform/**",
+      "templates/uml/**",
+      "tests/**",
+      "evals/**",
+      "skills/architecture-modeling/SKILL.md",
+      "skills/project-backlog/SKILL.md",
+      "shared/agent-roles/system-architect.md",
+      "shared/agent-roles/debugger.md",
+      "shared/policies/architecture-gate.md",
+      "shared/policies/defect-convergence.md",
+      "shared/policies/model-routing.md",
+      "shared/policies/orchestration.md",
+      "shared/policies/lifecycle-handoffs.md",
+      "templates/openspec/escalation.md"
+    ],
+    "scope": "These paths are original implementation. All adapted destinations are enumerated separately in sources; no upstream runtime is bundled."
+  }
 }

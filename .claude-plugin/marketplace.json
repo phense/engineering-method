@@ -1,0 +1,8 @@
+{
+  "name": "engineering-method",
+  "metadata": {"description": "Shared engineering workflows for Codex and Claude Code."},
+  "owner": {"name": "Peter Hense"},
+  "plugins": [
+    {"name": "engineering-method", "source": "./"}
+  ]
+}

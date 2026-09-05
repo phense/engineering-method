@@ -1,10 +1,23 @@
 # Third-Party Notices
 
-EM-001 contains no copied workflow text. Later milestones adapt only the files
-listed below from the pinned upstream revisions. Each
+This plugin adapts only the files listed below from the pinned upstream revisions. Each
 `LICENSE -> THIRD_PARTY_NOTICES.md` mapping is `notice-only`; adapted mappings
 record both immutable source and current destination SHA-256 hashes in
 `third-party/sources.lock.json`.
+
+## Original implementation
+
+Copyright (c) 2026 Peter Hense. MIT licensed under the repository `LICENSE`.
+The Python project-state implementation, architecture-modeling and project-backlog
+skills, UML templates, host adapters, evaluation and packaging tooling, and tests
+are original. Shared orchestration policy is original except for the specific
+adapted role, report, recovery and helper mechanics mapped below. The source lock
+explicitly identifies original paths separately from adapted destinations.
+
+Modifications replace upstream runtime dependencies with shared artifact
+contracts, exclusive lifecycle boundaries, risk-proportionate depth and tested
+continuity. EM-004 additionally hardens output containment, cohesive task handoffs
+and architecture evidence. No upstream CLI or full methodology is redistributed.
 
 ## Spec Kit
 

@@ -1,0 +1,12 @@
+{
+  "name": "engineering-method",
+  "interface": {"displayName": "Engineering Method"},
+  "plugins": [
+    {
+      "name": "engineering-method",
+      "source": {"source": "local", "path": "./"},
+      "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+      "category": "Developer Tools"
+    }
+  ]
+}

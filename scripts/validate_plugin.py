@@ -423,6 +423,57 @@ def _validate_unfinished_markers(root: Path, errors: list[str]) -> None:
             )
 
 
+def _validate_platform_boundary(root: Path, errors: list[str]) -> None:
+    host_syntax = re.compile(
+        r"\bgpt-\d[\w.-]*|\bclaude-(?:fable|opus|sonnet|haiku)[\w.-]*|"
+        r"\bcollaboration\.[a-z_]+|\b(?:spawn_agent|followup_task|send_message|wait_agent|"
+        r"interrupt_agent|list_agents)\b|`Agent`|\bCLAUDE_PLUGIN_ROOT\b"
+    )
+    for tree in ("skills", "templates", "shared/policies"):
+        for path in sorted((root / tree).rglob("*")):
+            if not path.is_file() or path.suffix not in (".md", ".json", ".yaml", ".yml"):
+                continue
+            try:
+                content = path.read_text(encoding="utf-8")
+            except (OSError, UnicodeDecodeError):
+                errors.append(_error(_relative(root, path), "cannot read neutral resource"))
+                continue
+            if host_syntax.search(content):
+                errors.append(_error(_relative(root, path), "host syntax and model IDs belong in shared/platform adapters"))
+
+
+def _validate_marketplaces(root: Path, name: object, errors: list[str]) -> None:
+    for relative, host in ((".agents/plugins/marketplace.json", "codex"),
+                           (".claude-plugin/marketplace.json", "claude")):
+        data = _load_json(root, relative, errors)
+        if data is None:
+            continue
+        if data.get("name") != name:
+            errors.append(_error(relative, "marketplace name must match plugin identity"))
+        plugins = data.get("plugins")
+        if not isinstance(plugins, list) or len(plugins) != 1 or not isinstance(plugins[0], dict):
+            errors.append(_error(relative, "plugins must contain exactly one plugin object"))
+            continue
+        entry = plugins[0]
+        if entry.get("name") != name:
+            errors.append(_error(relative, "entry name must match plugin identity"))
+        expected_source = {"source": "local", "path": "./"} if host == "codex" else "./"
+        if entry.get("source") != expected_source:
+            errors.append(_error(relative, "source must resolve to the local repository root ./"))
+        if host == "codex":
+            policy = entry.get("policy")
+            if not isinstance(policy, dict) or policy.get("installation") not in (
+                "NOT_AVAILABLE", "AVAILABLE", "INSTALLED_BY_DEFAULT"
+            ) or policy.get("authentication") not in ("ON_INSTALL", "ON_USE"):
+                errors.append(_error(relative, "policy requires valid installation and authentication"))
+            if not isinstance(entry.get("category"), str) or not entry["category"].strip():
+                errors.append(_error(relative, "category is required"))
+        else:
+            owner = data.get("owner")
+            if not isinstance(owner, dict) or not isinstance(owner.get("name"), str) or not owner["name"].strip():
+                errors.append(_error(relative, "owner.name is required"))
+
+
 def validate_repository(root: Path) -> list[str]:
     """Return sorted validation errors, or an empty list."""
     root = root.resolve()
@@ -457,6 +508,8 @@ def validate_repository(root: Path) -> list[str]:
     _validate_skill_frontmatter(root, errors)
     _validate_project_backlog_contract(root, errors)
     _validate_skill_resources(root, errors)
+    _validate_marketplaces(root, codex.get("name") if codex else "engineering-method", errors)
+    _validate_platform_boundary(root, errors)
     if lock is not None:
         _validate_locked_destinations(root, lock, errors)
     _validate_unfinished_markers(root, errors)

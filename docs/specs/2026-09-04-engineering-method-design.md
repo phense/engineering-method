@@ -213,15 +213,14 @@ The shared workflow uses capability roles rather than hard-coded provider names:
 | `standard` | Multi-file implementation with clear interfaces, ordinary code review |
 | `fast` | Mechanical edits, fully specified isolated functions, targeted test execution |
 
-Initial platform mappings:
+Concrete platform mappings and effort approval boundaries are versioned in the
+[Codex adapter](../../shared/platform/codex.md) and
+[Claude adapter](../../shared/platform/claude.md). The 2026-09-05 user model-policy
+update supersedes the initial illustrative model table. Keep provider-specific
+identifiers and effort defaults in those adapters rather than duplicating them
+throughout the design and skills.
 
-| Role | Codex | Claude |
-|---|---|---|
-| `strong` | `gpt-5.6-sol` | `claude-fable-5-1`, then `claude-opus-5` |
-| `standard` | `gpt-5.6-terra` | `claude-sonnet-5` |
-| `fast` | `gpt-5.6-luna` | `claude-haiku-4-5-20251001` |
-
-Adapters resolve availability at runtime and fall back to the strongest available lower tier without asking the user to choose a method. Model mappings are versioned configuration, not duplicated throughout skills.
+Adapters resolve availability at runtime and fall back to the strongest available lower tier without asking the user to choose a method.
 
 ### 8.3 Decomposition and concurrency
 

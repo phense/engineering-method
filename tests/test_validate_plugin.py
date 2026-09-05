@@ -64,6 +64,17 @@ class ValidatePluginTests(unittest.TestCase):
         }
         self.write_json(root / ".codex-plugin/plugin.json", codex)
         self.write_json(root / ".claude-plugin/plugin.json", claude)
+        self.write_json(root / ".agents/plugins/marketplace.json", {
+            "name": "engineering-method", "plugins": [{
+                "name": "engineering-method", "source": {"source": "local", "path": "./"},
+                "policy": {"installation": "AVAILABLE", "authentication": "ON_INSTALL"},
+                "category": "Developer Tools",
+            }],
+        })
+        self.write_json(root / ".claude-plugin/marketplace.json", {
+            "name": "engineering-method", "owner": {"name": "Peter Hense"},
+            "plugins": [{"name": "engineering-method", "source": "./"}],
+        })
         (root / "skills/example").mkdir(parents=True)
         (root / "skills/example/SKILL.md").write_text(
             "---\nname: example\ndescription: An example workflow.\n---\n\n# Example\n",
@@ -76,6 +87,34 @@ class ValidatePluginTests(unittest.TestCase):
     def write_json(self, path: Path, value: object) -> None:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(value), encoding="utf-8")
+
+    def test_marketplaces_reject_wrong_identity_source_and_policy(self) -> None:
+        for host_path in (".agents/plugins/marketplace.json", ".claude-plugin/marketplace.json"):
+            for mutation in ("identity", "source", "missing", "duplicate"):
+                with self.subTest(host=host_path, mutation=mutation), tempfile.TemporaryDirectory() as directory:
+                    root = Path(directory)
+                    self.make_repository(root)
+                    path = root / host_path
+                    data = json.loads(path.read_text())
+                    if mutation == "identity":
+                        data["plugins"][0]["name"] = "another-plugin"
+                    elif mutation == "source":
+                        data["plugins"][0]["source"] = "../outside"
+                    elif mutation == "duplicate":
+                        data["plugins"].append(data["plugins"][0].copy())
+                    else:
+                        path.unlink()
+                    if mutation != "missing":
+                        self.write_json(path, data)
+                    self.assertTrue(any(host_path in error for error in validate_repository(root)))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            path = root / ".agents/plugins/marketplace.json"
+            data = json.loads(path.read_text())
+            del data["plugins"][0]["policy"]
+            self.write_json(path, data)
+            self.assertTrue(any("policy" in error for error in validate_repository(root)))
 
     def test_reports_missing_codex_manifest_with_exact_diagnostic(self) -> None:
         """Removing the primary manifest must be reported at its repository path."""
@@ -92,8 +131,8 @@ class ValidatePluginTests(unittest.TestCase):
 
         self.assertEqual([], errors)
 
-    def test_readme_describes_only_the_verified_foundation(self) -> None:
-        """A missing disclosure or premature capability claim must fail the README contract."""
+    def test_readme_identifies_candidate_and_verification_commands(self) -> None:
+        """The public README must distinguish candidate scope from release evidence."""
         root = Path(__file__).resolve().parents[1]
         readme_path = root / "README.md"
 
@@ -103,7 +142,7 @@ class ValidatePluginTests(unittest.TestCase):
         readme = readme_path.read_text(encoding="utf-8")
 
         for expected in (
-            "risk-proportionate engineering workflows",
+            "Risk-proportionate engineering workflows",
             "0.1.0",
             "pre-release",
             "docs/specs/2026-09-04-engineering-method-design.md",
@@ -195,7 +234,8 @@ class ValidatePluginTests(unittest.TestCase):
             return
         notices = notice_path.read_text(encoding="utf-8")
 
-        self.assertIn("EM-001 contains no copied workflow text.", notices)
+        self.assertIn("This plugin adapts only the files listed below", notices)
+        self.assertIn("## Original implementation", notices)
         for source in PROVENANCE_SOURCES:
             for value in (
                 source["project"],
