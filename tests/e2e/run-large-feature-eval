@@ -85,12 +85,20 @@ failure, transition, compensation, terminal, and state.states. The fixture oracl
 supports the supplied small checkout API and Mermaid notation; use its failures
 as concrete verification findings. Invoke
 python3 {assertion} --project .
-to check the current project. Final-review.md must have Status: clean and a
-fenced JSON reviewed_sha256 string covering current code/tests/UML. Only after
-independent review, bind its reviewed content with
-python3 {assertion} --project . --refresh-review-digest
-(the existing field can start with a zero). Never refresh a digest to hide a
-review finding. Re-run review after changing reviewed implementation.
+to check the current project. After integration, dispatch a separate read-only
+system-architect FINAL review covering the entire checkout/, integration_tests/,
+and docs/uml/ contents, not only a prior slice. Include evidence/final-review.md
+in the assignment. Wait for the reviewer's native completed response before
+recording the review checkpoint. Final-review.md must contain Status: clean and
+the exact fenced JSON object returned by that completed reviewer, with:
+review_kind = system-architect-final, status = clean, actionable_findings = [],
+reviewed_files mapping every code/test/UML file to SHA-256, and reviewed_sha256
+equal to the fixture evidence_digest(project). The reviewer can import
+tests.large_feature_evidence.evidence_digest from the installed plugin to compute
+the digest after inspection. A coordinator-refreshed digest or a clean slice
+review cannot substitute for the independent final response. Re-run final review
+after changing any reviewed file; keep the reviewed artifact unchanged through
+the final verification checkpoint.
 Finish with ONLY JSON {{"primary":"orchestrated-implementation","supporting":[]}}.
 Actual tools and artifacts, not this final JSON, determine acceptance.
 """

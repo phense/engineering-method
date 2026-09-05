@@ -169,3 +169,10 @@ class HostRunnerTests(unittest.TestCase):
                   {"type": "item.completed", "item": {"type": "agent_message", "text": '{"primary":"orchestrated-implementation","supporting":[]}'}},
                   {"type": "turn.completed"}]
         self.assertEqual([], parse_transcript("codex", "\n".join(map(json.dumps, events)))["reviewers"])
+        response = '{"review_kind":"system-architect-final","status":"clean","actionable_findings":[]}'
+        events.insert(1, {"type": "item.completed", "item": {"type": "collab_agent_tool_call", "tool": "wait",
+                         "status": "completed", "agents_states": {"reviewer-running": {"status": "completed", "message": response}}}})
+        reviewers = parse_transcript("codex", "\n".join(map(json.dumps, events)))["reviewers"]
+        self.assertEqual(1, len(reviewers))
+        self.assertEqual(response, reviewers[0]["output"])
+        self.assertEqual("reviewer-running", reviewers[0]["id"])

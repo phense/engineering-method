@@ -47,12 +47,17 @@ to those resolved absolute paths.
 
 ## Recovery gate
 
-1. Obtain the host-observed live agent IDs through the platform capability seam.
-   If the host cannot observe agent state, stop before mutation.
-2. Discover an active run for the stable work ID. For every existing run, pass
-   the observation explicitly to `continuity-state recover --live-agents`. Use
-   an explicit empty observation only when the host confirms none are live;
-   never omit the option. If no run exists, verify and record that absence.
+1. Perform read-only discovery for the stable work ID before requesting agent
+   status. Inspect `.engineering-method/runs/<work-id>` and its parents. A
+   verified absent directory is distinct from missing state inside an existing
+   run. A symlink, unreadable path, partial run, or failed status command does
+   not prove absence. Do not initialize over any such evidence.
+2. For an existing ordinary run obtain host-observed live agent IDs through the
+   platform capability seam and call `continuity-state recover --live-agents`.
+   Use an explicit empty observation only when the host confirms none are live.
+   If observation is unavailable, use `continuity-state recover --coordinator-only`
+   only for persisted coordinator-only provenance with no saved agent activity;
+   otherwise stop before mutation. Never fabricate observed IDs.
 3. Complete recovery, or the verified no-run result, before any canonical or
    backlog mutation, including state check, migration, refresh, queue replay,
    status changes, dependency changes, and feature updates.
@@ -62,6 +67,24 @@ to those resolved absolute paths.
    unavailable saved agents as redispatchable.
 
 Repository and remote evidence wins over stale checkpoint or memory data.
+
+The new-run-only enrollment exception applies when the host has no delegation
+or status capability and the run is verified absent. Initialize with
+`"coordination_mode": "coordinator-only"` in the supplied run JSON and empty
+`active_agent_ids` and `completed_agent_ids`; record the missing capability and
+sequential next action in the resume brief. This value records no delegation,
+not an observation of live agents. Missing mode defaults to `observed`, so
+legacy runs do not qualify. The mode is immutable across checkpoints and cannot
+be added to an existing run by reset. Once enrolled, sequential phase checkpoints
+and future `recover --coordinator-only` calls remain supported without status.
+
+Coordinator-only recovery still validates the complete run tree, Git, artifacts,
+and canonical state. It rejects saved agent identities, dispatch/completion
+events, ambiguous agent event metadata, or any agent report. Do not delegate
+from this mode; state, event, and report APIs reject agent activity. Ordinary,
+partial, active-agent, or uncertain runs still require actual observation.
+This exception never waives a required independent review: record that blocker
+when no permitted independent reviewer is available.
 
 ## State and local work
 

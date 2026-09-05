@@ -12,17 +12,23 @@ dependency-ordered tasks grouped as cohesive implementation slices.
 
 Before creating or updating an artifact:
 
-1. Obtain host-observed live agent IDs through the platform capability seam. If
-   the host cannot observe agent state, stop before mutation.
-2. Invoke `project-backlog` to discover an active run and pass the observation
-   explicitly to `continuity-state recover --live-agents`. Use an explicit
-   empty observation only when the host confirms none are live; never omit it.
-3. Complete recovery, or verify that no run exists, before any canonical or
-   backlog mutation.
-4. Read the run's `state.json` and `resume.md`.
+1. Invoke `project-backlog` for read-only discovery: discover an active run
+   for the stable work ID before requesting agent status. Only a verified absent
+   run may enroll in the new-run-only coordinator-only mode described there.
+2. For an existing ordinary run, obtain host-observed live agent IDs through
+   the platform capability seam and call `continuity-state recover --live-agents`.
+   Use an explicit empty observation only when the host confirms none are live.
+   With no observation, only verified coordinator-only provenance permits
+   `continuity-state recover --coordinator-only`; saved or uncertain agent
+   activity remains blocked. Never fabricate observed IDs.
+3. Complete recovery, or verified absent-run initialization, before any canonical
+   or backlog mutation. The coordinator-only mode permits sequential continuity
+   across phase handoffs, not delegation or bypass of independent-review gates.
+4. Read the run's `state.json` and `resume.md` when a run exists.
 5. Check recorded commits, worktree, artifacts, and canonical backlog or issue
    state against current reality.
-6. Reconcile saved agent identities with agents still available from the host.
+6. Reconcile saved agent identities with agents still available from the host;
+   coordinator-only recovery must verify that no saved agent history exists.
 7. Preserve validated completed work and never redispatch completed work after
    compaction or resumption.
 8. Reconstruct stale state from git and canonical artifacts when they disagree.

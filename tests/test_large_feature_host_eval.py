@@ -52,9 +52,26 @@ class ArchitectureHostTests(unittest.TestCase):
                     review = project / "evidence/final-review.md"
                     review.write_text(re.sub(r'("reviewed_sha256": ")[a-f0-9]+',
                                             lambda m: m[1] + evidence_digest(project), review.read_text()))
+                if phase == "review":
+                    reviewed_files = {}
+                    for prefix in ("checkout", "integration_tests", "docs/uml"):
+                        for path in (project / prefix).rglob("*"):
+                            if path.is_file() and "__pycache__" not in path.parts:
+                                reviewed_files[str(path.relative_to(project))] = hashlib.sha256(path.read_bytes()).hexdigest()
+                    final = {"review_kind": "system-architect-final", "status": "clean", "actionable_findings": [],
+                             "reviewed_files": reviewed_files, "reviewed_sha256": evidence_digest(project)}
+                    response = "```json\n" + json.dumps(final) + "\n```"
+                    (project / "evidence/final-review.md").write_text("Status: clean\n\n" + response)
+                    transcript["reviewers"].append({"id": "final-architect", "prompt": "Read-only system-architect review; write evidence/final-review.md",
+                                                  "output": response, "tool_position": len(transcript["tools"])})
                 command = [sys.executable, str(script), "--project", str(project), "--checkpoint", phase]
                 result = subprocess.run(command, capture_output=True, text=True, check=True)
                 transcript["tools"].append({"name": "command", "input": " ".join(command), "output": result.stdout})
+            without_final_review = deepcopy(transcript)
+            without_final_review["reviewers"] = [reviewer for reviewer in transcript["reviewers"]
+                                                if "system-architect" not in reviewer["prompt"]]
+            with self.assertRaisesRegex(EvalFailure, "final_system_architect"):
+                assert_host_run(project, without_final_review)
             self.assertEqual("passed", assert_host_run(project, transcript)["status"])
             broken = deepcopy(transcript)
             test_tool = next(tool for tool in broken["tools"] if tool["input"].startswith("python3 -m unittest"))

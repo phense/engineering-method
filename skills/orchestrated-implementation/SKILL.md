@@ -33,16 +33,27 @@ cross-slice state, integration, and acceptance.
 
 Before implementation or any canonical mutation:
 
-1. Obtain host-observed live agent identities through the platform capability
-   seam. If observation is unavailable, stop before mutation; an empty set is
-   valid only when the host confirms no agents are live.
-2. Invoke `project-backlog` and its existing EM-002 `continuity-state recover`
-   interface for the supplied work ID, passing the explicit observation.
-3. Read `state.json` and `resume.md`, then validate the worktree, base and head
-   commits, task and architecture artifacts, reports, and canonical backlog or
-   issue state against current repository evidence.
-4. Preserve completed slices, retain observed active agents, make only missing
-   active agents redispatchable, and resume exactly the validated next action.
+1. Invoke `project-backlog` for read-only discovery: discover an active run
+   for the stable work ID before requesting agent status. Only a verified absent
+   run may enroll in the new-run-only coordinator-only mode described there.
+2. For an existing ordinary run, obtain host-observed live agent IDs through
+   the platform capability seam and call `continuity-state recover --live-agents`.
+   Use an explicit empty observation only when the host confirms none are live.
+   With no observation, only verified coordinator-only provenance permits
+   `continuity-state recover --coordinator-only`; saved or uncertain agent
+   activity remains blocked. Never fabricate observed IDs.
+3. Complete recovery, or verified absent-run initialization, before any canonical
+   or backlog mutation. The coordinator-only mode permits sequential continuity
+   across phase handoffs, not delegation or bypass of independent-review gates.
+4. Read the run's `state.json` and `resume.md` when a run exists.
+5. Check recorded commits, worktree, artifacts, and canonical backlog or issue
+   state against current reality.
+6. Reconcile saved agent identities with agents still available from the host;
+   coordinator-only recovery must verify that no saved agent history exists.
+7. Preserve validated completed work and never redispatch completed work after
+   compaction or resumption.
+8. Reconstruct stale state from git and canonical artifacts when they disagree.
+9. Continue from the validated next action.
 
 Repository evidence wins over stale checkpoints and recalled memory. Never
 silently restart, reclassify, or redispatch completed work.

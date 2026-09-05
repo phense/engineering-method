@@ -167,7 +167,7 @@ def parse_transcript(host, text):
                             review_assignments[identity] = prompt
                     for identity, state in item.get("agents_states", item.get("agent_states", {})).items():
                         if identity in review_assignments and isinstance(state, dict) and state.get("status") == "completed" and state.get("message"):
-                            reviewers.append({"id": identity, "prompt": review_assignments[identity], "output": state["message"]})
+                            reviewers.append({"id": identity, "prompt": review_assignments[identity], "output": state["message"], "tool_position": len(tools)})
                 if item.get("type") == "agent_message":
                     final = item.get("text")
                 if item.get("type") == "mcp_tool_call" and item.get("status") == "completed":
@@ -193,7 +193,7 @@ def parse_transcript(host, text):
                         result_content = "\n".join(part.get("text", "") for part in result_content if isinstance(part, dict))
                     tools.append({"name": name, "input": arguments, "output": result_content})
                     if name in ("Agent", "Task") and "review" in arguments.get("prompt", "").lower() and re.search(r"read[- ]only", arguments.get("prompt", ""), re.I):
-                        reviewers.append({"id": block.get("tool_use_id"), "prompt": arguments["prompt"], "output": result_content})
+                        reviewers.append({"id": block.get("tool_use_id"), "prompt": arguments["prompt"], "output": result_content, "tool_position": len(tools)})
                     if name == "Read" and block.get("content"):
                         skills.update(SKILL_PATH.findall(arguments.get("file_path", "")))
                     if name == "Skill" and block.get("content"):

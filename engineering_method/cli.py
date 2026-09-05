@@ -258,13 +258,14 @@ Action:
 Options:
   work-id  Stable run identifier.
   --help   Show this help.""",
-    ("continuity-state", "recover"): """Usage: continuity-state recover <work-id> --live-agents IDS
+    ("continuity-state", "recover"): """Usage: continuity-state recover <work-id> (--live-agents IDS | --coordinator-only)
 
 Action:
   Reconcile the run with git, artifacts, canonical task state, and observed agents.
 
 Options:
   --live-agents IDS  Required comma-separated host-observed IDs; empty means confirmed none.
+  --coordinator-only  No observation; requires immutable no-delegation provenance and no agent history.
   --help             Show this help.""",
 }
 
@@ -746,9 +747,9 @@ def _continuity_command(
         return f".engineering-method/runs/{work_id}"
 
     positionals, options, flags = _parse(
-        rest, value_options=frozenset({"--live-agents"})
+        rest, value_options=frozenset({"--live-agents"}), flags=frozenset({"--coordinator-only"})
     )
-    if flags or len(positionals) != 1:
+    if (flags and action != "recover") or len(positionals) != 1:
         raise ValueError(f"{action} requires one work ID")
     work_id = positionals[0]
     if action == "status":
@@ -760,9 +761,11 @@ def _continuity_command(
         unknown = set(options) - {"--live-agents"}
         if unknown:
             raise ValueError("recover received unsupported options")
-        if "--live-agents" not in options:
+        if "--coordinator-only" in flags and "--live-agents" in options:
+            raise ValueError("choose observation or coordinator-only recovery, not both")
+        if "--live-agents" not in options and "--coordinator-only" not in flags:
             raise ValueError("recover requires --live-agents from an explicit host observation")
-        live_agents = _csv(options["--live-agents"], option="--live-agents")
+        live_agents = None if "--coordinator-only" in flags else _csv(options["--live-agents"], option="--live-agents")
         backlog = load_backlog(root / "BACKLOG.md")
         canonical_probe = (
             GitHubCanonicalProbe(

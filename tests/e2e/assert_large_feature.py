@@ -161,6 +161,26 @@ def assert_host_run(project, transcript):
         need(shell_arguments(report["test_command"])[:3] in (["python3", "-m", "unittest"], [sys.executable, "-m", "unittest"])
              and any(report["test_output"].strip() == tool.get("output", "").strip() for tool in test_runs),
              "slice_tests_lack_tool_evidence")
+    final_path = project / "evidence/final-review.md"
+    final = review_object(final_path.read_text())
+    scope = {relative: digest for relative, digest in snapshot(project).items()
+             if relative.startswith(("checkout/", "integration_tests/", "docs/uml/"))}
+    need(final.get("review_kind") == "system-architect-final" and final.get("status") == "clean"
+         and final.get("actionable_findings") == [] and final.get("reviewed_files") == scope
+         and final.get("reviewed_sha256") == evidence_digest(project),
+         "missing_or_stale_final_system_architect_verdict")
+    review_position = next(i for i, tool in enumerate(transcript["tools"])
+                           if "--checkpoint review" in str(tool["input"]))
+    integration_position = next(i for i, tool in enumerate(transcript["tools"])
+                                if "--checkpoint integration" in str(tool["input"]))
+    need(any(isinstance(reviewer, dict) and "system-architect" in reviewer.get("prompt", "").lower()
+             and "evidence/final-review.md" in reviewer.get("prompt", "")
+             and review_object(reviewer.get("output", "")) == final
+             and integration_position < reviewer.get("tool_position", -1) <= review_position
+             for reviewer in transcript["reviewers"]),
+         "missing_completed_final_system_architect_review")
+    need(records[PHASES.index("review")]["files"]["evidence/final-review.md"]
+         == hashlib.sha256(final_path.read_bytes()).hexdigest(), "final_review_changed_after_checkpoint")
     fresh = assert_large_feature(project)
     return {"status": "passed", "phases": list(PHASES), "verified_sha256": fresh["verified_sha256"],
             "tests_returncode": fresh["returncode"], "completed_at": fresh["completed_at"]}

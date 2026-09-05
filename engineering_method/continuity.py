@@ -119,10 +119,15 @@ class RunState:
     verification_timestamp: str | None = None
     verification_output_digest: str | None = None
     schema_version: int = SCHEMA_VERSION
+    coordination_mode: str = "observed"
 
     def __post_init__(self) -> None:
         if self.schema_version != SCHEMA_VERSION:
             raise ValueError("invalid run schema version")
+        if self.coordination_mode not in ("observed", "coordinator-only"):
+            raise ValueError("invalid coordination mode")
+        if self.coordination_mode == "coordinator-only" and (self.active_agent_ids or self.completed_agent_ids):
+            raise ValueError("coordinator-only runs cannot contain agent identities")
         require_safe_component(self.work_id, field="work ID")
         _single_line(self.lifecycle, field="lifecycle")
         _single_line(self.phase, field="phase")
@@ -305,6 +310,8 @@ def create_run(
     reject_sensitive_content(resume_markdown, artifact="resume")
     reject_sensitive_content(decisions_markdown, artifact="decisions")
     run = _run(root, state.work_id)
+    if state.coordination_mode == "coordinator-only" and (run.exists() or run.is_symlink()):
+        raise ValueError("coordinator-only provenance requires a verified absent run")
     if run.exists() and not replace_existing:
         raise ValueError(f"run already exists: {state.work_id}")
     runs_root = require_contained_path(
@@ -430,7 +437,9 @@ def checkpoint(
     if work_id != state.work_id:
         raise ValueError("checkpoint work ID does not match state")
     run = _run(root, work_id)
-    load_run_state(root, work_id)
+    previous = load_run_state(root, work_id)
+    if state.coordination_mode != previous.coordination_mode:
+        raise ValueError("coordination mode is immutable after initialization")
     _require_complete_run_tree(root, run)
     resume_path = require_contained_path(
         root, run / "resume.md", field="continuity resume path"
@@ -510,7 +519,7 @@ def _validate_event_paths(event: Mapping[str, object]) -> None:
 def append_event(
     root: Path, work_id: str, event: Mapping[str, object]
 ) -> dict[str, object]:
-    load_run_state(root, work_id)
+    state = load_run_state(root, work_id)
     _require_complete_run_tree(root, _run(root, work_id))
     if not isinstance(event, Mapping):
         raise ValueError("event must be an object")
@@ -518,6 +527,8 @@ def append_event(
         raise ValueError("event contains producer-owned fields")
     if event.get("kind") not in EVENT_KINDS:
         raise ValueError("event kind is invalid")
+    if state.coordination_mode == "coordinator-only" and event.get("kind") in {"agent_dispatched", "agent_completed"}:
+        raise ValueError("coordinator-only runs cannot record delegation")
     reject_sensitive_content(event, artifact="event")
     _validate_event_paths(event)
     if "status" in event and event["status"] not in {
@@ -548,7 +559,8 @@ def append_event(
 
 
 def write_agent_report(root: Path, work_id: str, agent_id: str, markdown: str) -> Path:
-    load_run_state(root, work_id)
+    if load_run_state(root, work_id).coordination_mode == "coordinator-only":
+        raise ValueError("coordinator-only runs cannot record agent reports")
     _require_complete_run_tree(root, _run(root, work_id))
     require_safe_component(agent_id, field="agent ID")
     reject_sensitive_content(markdown, artifact="agent report")
@@ -595,10 +607,12 @@ def recover_run(
     *,
     git_probe: GitProbe,
     canonical_probe: CanonicalWorkProbe,
-    live_agent_ids: Collection[str],
+    live_agent_ids: Collection[str] | None,
 ) -> RecoveryResult:
     run = _run(root, work_id)
-    state = load_run_state(root, work_id, persist_upgrade=True)
+    state = load_run_state(root, work_id, persist_upgrade=live_agent_ids is not None)
+    if live_agent_ids is None and state.coordination_mode != "coordinator-only":
+        raise ValueError("ordinary runs require an explicit host observation")
     _require_complete_run_tree(root, run)
     resume = _read_recovery_text(run, "resume.md", required=True)
     _read_recovery_text(run, "decisions.md", required=False)
@@ -615,6 +629,11 @@ def recover_run(
         if not report.is_file():
             raise ValueError("run agent reports contain an unsafe entry")
         reject_sensitive_content(report.read_text(encoding="utf-8"), artifact="agent report")
+    if live_agent_ids is None:
+        events = [json.loads(line) for line in (run / "events.jsonl").read_text().splitlines() if line.strip()]
+        if any(event.get("kind") in {"agent_dispatched", "agent_completed"}
+               or any("agent" in key for key in event) for event in events) or any(reports.iterdir()):
+            raise ValueError("coordinator-only recovery found prior or ambiguous agent activity")
     _validate_recovery_artifacts(root, state)
 
     backlog_path = root / "BACKLOG.md"
@@ -641,7 +660,7 @@ def recover_run(
         raise ValueError("recovery git head is empty")
 
     canonical_status = canonical_probe.status(root, state)
-    live = set(live_agent_ids)
+    live = set(live_agent_ids) if live_agent_ids is not None else set()
     if canonical_status is TaskStatus.COMPLETE:
         completed = list(state.completed_work)
         for work in (*state.active_work, *((state.current_slice,) if state.current_slice else ())):

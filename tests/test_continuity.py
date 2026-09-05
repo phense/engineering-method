@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 from dataclasses import replace
+import contextlib
+import io
 import json
 import os
 import subprocess
@@ -84,6 +86,7 @@ class ContinuityStateTests(unittest.TestCase):
                 set(payload),
                 {
                     "schema_version",
+                    "coordination_mode",
                     "work_id",
                     "backlog_id",
                     "issue_id",
@@ -336,6 +339,75 @@ class ContinuitySafetyTests(unittest.TestCase):
 
 
 class RecoveryTests(unittest.TestCase):
+    def test_coordinator_only_bootstrap_checkpoint_and_recovery_without_observer(self):
+        from engineering_method.cli import main
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            base, head = self._git_repository(root)
+            (root / "BACKLOG.md").write_text(render_backlog(BacklogDocument("EM", "local", ())))
+            (root / "resume-input.md").write_text("No delegation capability; coordinator owns sequential work.")
+            initial = continuity.RunState("EM-002", "speckit", "specify", "Write spec",
+                                          base_commit=base, last_observed_head=head,
+                                          coordination_mode="coordinator-only")
+            self.assertFalse((root / ".engineering-method/runs/EM-002").exists())
+            with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(0, main(["continuity-state", "init", "EM-002", "--file", "-",
+                    "--resume-file", "resume-input.md"], root=root,
+                    stdin=io.StringIO(json.dumps(continuity._state_payload(initial)))))
+                following = replace(initial, phase="plan", next_action="Write plan")
+                self.assertEqual(0, main(["continuity-state", "checkpoint", "EM-002", "--file", "-"],
+                    root=root, stdin=io.StringIO(json.dumps(continuity._state_payload(following)))))
+                self.assertEqual(0, main(["continuity-state", "recover", "EM-002", "--coordinator-only"], root=root))
+            saved = continuity.load_run_state(root, "EM-002")
+            self.assertEqual("plan", saved.phase)
+            self.assertEqual((), saved.active_agent_ids)
+            self.assertEqual("Write plan", saved.next_action)
+
+    def test_no_observer_rejects_ordinary_active_and_ambiguous_saved_runs(self):
+        for scenario in ("ordinary", "active", "completed", "dispatch", "report", "partial"):
+            with self.subTest(scenario=scenario), tempfile.TemporaryDirectory() as temporary:
+                root = Path(temporary)
+                base, head = self._git_repository(root)
+                initial = continuity.RunState("EM-002", "speckit", "plan", "Write plan",
+                    base_commit=base, last_observed_head=head,
+                    coordination_mode="observed" if scenario == "ordinary" else "coordinator-only")
+                run = continuity.create_run(root, initial, "Resume sequentially")
+                if scenario in ("active", "completed"):
+                    data = json.loads((run / "state.json").read_text())
+                    data[scenario + "_agent_ids"] = ["saved-agent"]
+                    (run / "state.json").write_text(json.dumps(data))
+                elif scenario == "dispatch":
+                    event = {"schema_version": 1, "timestamp": "2026-09-05T00:00:00Z", "work_id": "EM-002",
+                             "sequence": 1, "kind": "agent_dispatched", "agent_id": "saved-agent"}
+                    (run / "events.jsonl").write_text(json.dumps(event) + "\n")
+                elif scenario == "report":
+                    (run / "agent-reports/unknown.md").write_text("Uncertain prior agent activity")
+                elif scenario == "partial":
+                    (run / "events.jsonl").unlink()
+                before = {str(p): p.read_bytes() for p in run.rglob("*") if p.is_file()}
+                with self.assertRaises(ValueError):
+                    continuity.recover_run(root, "EM-002", git_probe=continuity.SubprocessGitProbe(),
+                        canonical_probe=continuity.BacklogCanonicalProbe(), live_agent_ids=None)
+                self.assertEqual(before, {str(p): p.read_bytes() for p in run.rglob("*") if p.is_file()})
+
+    def test_coordinator_mode_cannot_be_retrofitted_or_dispatch_agents(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            normal = continuity.RunState("EM-002", "speckit", "plan", "Write plan")
+            continuity.create_run(root, normal, "Saved ordinary run")
+            isolated = replace(normal, coordination_mode="coordinator-only")
+            with self.assertRaises(ValueError):
+                continuity.checkpoint(root, "EM-002", isolated)
+            with self.assertRaises(ValueError):
+                continuity.create_run(root, isolated, "Reset", replace_existing=True)
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            continuity.create_run(root, isolated, "New sequential run")
+            with self.assertRaises(ValueError):
+                continuity.append_event(root, "EM-002", {"kind": "agent_dispatched"})
+            with self.assertRaises(ValueError):
+                continuity.write_agent_report(root, "EM-002", "agent", "Done")
+
     def _git_repository(self, root: Path) -> tuple[str, str]:
         subprocess.run(("git", "init", "-q"), cwd=root, check=True)
         subprocess.run(("git", "config", "user.email", "test@example.com"), cwd=root, check=True)

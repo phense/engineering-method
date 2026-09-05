@@ -419,8 +419,11 @@ class LifecycleContractTests(unittest.TestCase):
             with self.subTest(skill=skill):
                 items = numbered_items(section(read(f"skills/{skill}/SKILL.md"), "Recovery preamble"))
                 self.assertGreaterEqual(len(items), 3)
-                self.assertIn("platform capability seam", items[0])
-                self.assertIn("host-observed live agent ids", items[0])
+                self.assertIn("read-only", items[0])
+                self.assertIn("discover an active run", items[0])
+                self.assertIn("verified absent", items[0])
+                self.assertIn("platform capability seam", items[1])
+                self.assertIn("host-observed live agent ids", items[1])
                 self.assertIn("continuity-state recover", items[1])
                 self.assertIn("--live-agents", items[1])
                 self.assertIn("explicit empty observation", items[1])
@@ -453,13 +456,27 @@ class ProjectBacklogSkillContractTests(unittest.TestCase):
             section(read("skills/project-backlog/SKILL.md"), "Recovery gate")
         )
         self.assertGreaterEqual(len(items), 3)
-        self.assertIn("platform capability seam", items[0])
-        self.assertIn("host-observed live agent ids", items[0])
+        self.assertIn("read-only", items[0])
+        self.assertIn("verified absent", items[0])
+        self.assertIn("platform capability seam", items[1])
+        self.assertIn("host-observed live agent ids", items[1])
         self.assertIn("continuity-state recover", items[1])
         self.assertIn("--live-agents", items[1])
         self.assertIn("explicit empty observation", items[1])
         self.assertIn("host confirms none are live", items[1])
         self.assertIn("before any canonical or backlog mutation", items[2])
+
+    def test_absent_run_exception_is_shared_and_cannot_recover_saved_agents(self):
+        for skill in (*LIFECYCLE_SKILLS, "architecture-modeling", "orchestrated-implementation"):
+            with self.subTest(skill=skill):
+                recovery = normalized(section(read(f"skills/{skill}/SKILL.md"), "Recovery preamble"))
+                self.assertIn("read-only", recovery)
+                self.assertIn("verified absent", recovery)
+                self.assertIn("new-run-only", recovery)
+                self.assertIn("saved", recovery)
+        policy = normalized(section(read("skills/project-backlog/SKILL.md"), "Recovery gate"))
+        for required in ("symlink", "unreadable", "partial", "no delegation", "never fabricate", "new-run-only"):
+            self.assertIn(required, policy)
 
     def test_project_backlog_owns_state_services_but_never_methodology(self) -> None:
         """A state helper must not become a second lifecycle controller."""

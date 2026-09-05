@@ -33,7 +33,17 @@ external action with two checkpoints.
 
 ## Recovery
 
-Recover with explicit host-observed live agent IDs. Validate the recorded
+Discover the run read-only before asking for host status. A verified absent run
+may initialize with immutable `coordination_mode: coordinator-only` when no
+delegation/status capability exists. Preserve this provenance across sequential
+checkpoints and phase handoffs. `recover --coordinator-only` verifies complete
+state with no agent identities, agent events, ambiguous agent metadata, or agent
+reports; it never invents an empty observation. Existing ordinary or uncertain
+runs require explicit host-observed live agent IDs and remain blocked without
+them. Enrollment cannot retrofit an existing run, and required independent
+review remains a real gate. See the supporting state skill's recovery gate.
+
+Validate the recorded
 worktree, commits, artifacts, reports, and canonical work before continuing.
 Preserve completed slices, keep observed active agents active, and make only
 unavailable active agents redispatchable. Downstream memory may provide the
