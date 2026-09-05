@@ -86,3 +86,8 @@ mutation acceptance test.
 The existing `v0.1.0-rc.1` tag and assets remain unchanged and retain their earlier
 reduced acceptance scope. This later acceptance applies to `0784c79`; it does not
 retroactively certify that pre-release or publish a stable release.
+
+The user subsequently authorized stable version `0.1.0` and the corresponding
+documentation update. See the [stable publication record](EM-007-stable-release.md)
+for the release package and fresh publication checks; the historical scope above
+is unchanged.

@@ -63,8 +63,11 @@ alone do not prevent sensitive Git history from being published.
 
 ## Release policy
 
-`v0.1.0-rc.1` is a reduced-acceptance pre-release. Full original cross-host
-acceptance remains open in [EM-005](docs/verification/EM-005-completion-path.md).
+`v0.1.0` is the stable release following
+[independently accepted original gate coverage](docs/verification/EM-005-acceptance.md).
+The historical `v0.1.0-rc.1` retains its reduced acceptance scope. Evidence reuse
+must identify unchanged inputs, revisions and limitations; corrections must
+remain traceable to genuine native evidence. Preserve failed original reports.
 The original gate command is `python3 scripts/release-check --release
 --output-dir /tmp/em-release`; it includes paid native evaluations and is not
 part of routine documentation checks. Run it only with appropriate explicit

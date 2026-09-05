@@ -10,13 +10,16 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-Version `0.1.0` is distributed as **`v0.1.0-rc.1`, a pre-release** with a
-user-approved reduced acceptance scope. Later main commit `0784c79` has
-[complete original gate coverage](docs/verification/EM-005-acceptance.md), using
-documented evidence reuse and corrections; this does not retroactively certify
-the older pre-release. Read the acceptance limits before relying on it for
-unattended work. The [approved design](docs/specs/2026-09-04-engineering-method-design.md)
-records the intended scope.
+**[Version 0.1.0](https://github.com/phense/engineering-method/releases/tag/v0.1.0)
+is the stable release.** It follows independently accepted
+[complete original gate coverage](docs/verification/EM-005-acceptance.md), with
+documented evidence reuse and corrections. Read the acceptance limits before
+relying on it for unattended work. The
+[approved design](docs/specs/2026-09-04-engineering-method-design.md) records the
+intended scope.
+
+The earlier `v0.1.0-rc.1` pre-release remains available with its original, reduced
+acceptance scope.
 
 ## Installation
 
@@ -40,7 +43,7 @@ claude plugin install engineering-method@engineering-method
 
 Start a new host session in your target project, then describe the change you
 want. These commands follow the repository's default branch. For the fixed
-pre-release, local packages, updates, disabling and removal, see
+release, local packages, updates, disabling and removal, see
 [Installation and maintenance](docs/installation.md). Disable overlapping
 lifecycle plugins, including Superpowers, before using Engineering Method.
 Claude also supports session-only loading with `claude --plugin-dir` and an
@@ -172,10 +175,13 @@ explicit checkpoints; there is no universal compact hook. agentic-rag is optiona
 GitHub task operations have fake-boundary coverage, not live mutation acceptance.
 Mermaid validation covers semantic sources, not rendered diagrams.
 
-Earlier routing matrices passed at their recorded revisions; the Claude large
-fixture result belongs to an older package. Current-package Codex independent
-reviewer/architecture evidence and the final independent release verdict remain
-missing. This pre-release does not change failed gates or claim stable readiness.
+The accepted baseline covers 308 local tests, 24 native routing cases and the
+architecture fixture on both hosts. Acceptance reused unchanged evidence and
+included a Claude checkpoint instruction supplement and one verified report
+metadata correction. No single successful full release-check invocation is
+claimed. Native Codex recovery in the unborn fixture repository remains outside
+that live proof; continuity has script-test coverage. See the
+[acceptance record](docs/verification/EM-005-acceptance.md) for exact limits.
 
 ## License and attribution
 
