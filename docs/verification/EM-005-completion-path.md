@@ -110,3 +110,60 @@ confirmed scope and independently computed file hash were captured successfully.
 A local replay also verified the final evidence filtering. No full matrix ran.
 This proves the capture correction, not complete architecture/release acceptance.
 The published pre-release tag and its assets remain unchanged.
+
+## Low-effort full acceptance attempts — 2026-09-05
+
+The user authorized full acceptance using `gpt-6-astra` and
+`claude-fable-5-1`, both at low effort. Invocation-only overrides now select those
+models for coordinators and delegated roles without changing installed defaults.
+Two executions of the unchanged ordered release gate stopped in Codex routing:
+
+| Candidate | Result | Evidence limitation |
+| --- | --- | --- |
+| `e2c8276` | Failed after two routing cases passed | A complete `realpath; cat` skill read was not recognized. A regression-tested parser correction and retained-transcript replay resolved this shape. |
+| `eaf1a6b` | Failed after three routing cases passed | `existing-speckit` combined discovery and complete skill reads; the supporting read's command ended with an unrelated failing Git history check. The required independently successful read evidence was absent. |
+
+Both reports remain failed and not release eligible. Claude routing and both
+architecture evaluations were not reached; there is no new Fable live result.
+The second failure is an evidence-collection limitation, not an observed wrong
+workflow selection. No acceptance assertion was relaxed.
+
+Candidate `156e41ec79f0fd57907fed4db39f859168cdce12` adds a small evaluation
+instruction: read each selected skill using a standalone successful `cat` or
+native Read call. This instruction's live effectiveness is still unverified.
+All 307 Python tests, portable and Claude strict plugin validation, native clean
+installation on both hosts, deterministic packaging, clean-tree verification
+and the unchanged three-upstream provenance audit passed locally. The local
+release-check used explicit `--skip-live`, so its result is **development-only**,
+not full acceptance. Its package SHA-256 is
+`0ff1a7efbccafda6188bfcc40dfde9d6194b56e3b146017a8ba42f8824a4fb56`.
+
+One independent Astra/low reviewer reviewed the integrated changes and focused
+corrections, found no Critical or Important code findings, and explicitly refused
+full release acceptance because live evidence is incomplete. The effort brake
+stopped further model dispatch after the two unsuccessful full attempts.
+The cheapest next step is one targeted `existing-speckit` run to establish the
+prompt correction before considering another complete release gate.
+
+Private local reports (raw host transcripts are not published):
+
+| Report | SHA-256 |
+| --- | --- |
+| `/tmp/em005-release-low-e2c8276/release.json` | `2d3cbffd77ceb159e72581475cdaab7e5189166ab243c971c1df45e3b340c3ef` |
+| `/tmp/em005-release-low-eaf1a6b/release.json` | `e88266f1e80c5f9b729dc34fed11ef476ac455052e6a0f31b198ee5739819ae6` |
+| `/tmp/em005-local-156e41e/release.json` | `7c389887a19d433307370102b2bb3a5b46924dbf8edd4da062ab9551bfb0f676` |
+
+EM-005 remains incomplete. The existing public pre-release and its immutable
+tag/assets retain their original documented acceptance scope.
+
+### Accidental migration during acceptance bookkeeping
+
+The coordinator incorrectly treated `project-state backlog state-check` as
+read-only. Its implementation automatically migrates when the remote is writable.
+The invocation created Issues #1–#38 on `phense/engineering-method` between
+15:27:44 and 15:28:34 UTC, despite the user's explicit no-migration instruction.
+The local backlog was restored to canonical local mode. Read-back verified the
+38 issues' origin and absence of comments; a private before-state snapshot is
+retained. Automatic approval review rejected their deletion without explicit
+user approval, so remote cleanup is pending. Do not invoke state-check again in
+this project while migration remains unauthorized.

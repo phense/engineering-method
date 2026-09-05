@@ -13,8 +13,6 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 
 ## Tasks
 
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-000","title":"Approve and commit the consolidated plugin design (`877a7ea`).","status":"complete","priority":"P0","parent_id":null,"depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-- ✅ `EM-000` **P0** Approve and commit the consolidated plugin design (`877a7ea`).
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-001","title":"Establish the dual-host plugin foundation and provenance controls. Blocks `EM-002` through `EM-005`.","status":"complete","priority":"P0","parent_id":null,"depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
 - ✅ `EM-001` **P0** Establish the dual-host plugin foundation and provenance controls. Blocks `EM-002` through `EM-005`.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-001.1","title":"Create compatible Codex and Claude plugin manifests.","status":"complete","priority":"P0","parent_id":"EM-001","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
@@ -25,6 +23,8 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-001.3` **P0** Pin upstream revisions and implement MIT attribution controls.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-001.4","title":"Add baseline structural validation for both hosts.","status":"complete","priority":"P0","parent_id":"EM-001","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
   - ✅ `EM-001.4` **P0** Add baseline structural validation for both hosts.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-000","title":"Approve and commit the consolidated plugin design (`877a7ea`).","status":"complete","priority":"P0","parent_id":null,"depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
+- ✅ `EM-000` **P0** Approve and commit the consolidated plugin design (`877a7ea`).
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002","title":"Implement durable project state and compact continuity","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-001"],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
 - ✅ `EM-002` **P1** Implement durable project state and compact continuity
   - Depends on: `EM-001`
@@ -72,9 +72,10 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-004.5` **P1** Add the system-architect integration-test gate.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.6","title":"Verify recovery across compaction and subagent lifecycle boundaries.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
   - ✅ `EM-004.6` **P1** Verify recovery across compaction and subagent lifecycle boundaries.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"in_progress","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
-- 🔄 `EM-005` **P2** Validate, document, and package the complete plugin
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"blocked","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"Two low-effort full gates failed in Codex read evidence; 307 tests and bounded local gates passed on 156e41e. Standalone-read prompt correction needs live verification. Accidental state-check created GitHub Issues #1-38; local canonical mode restored, remote cleanup requires explicit approval. See docs/verification/EM-005-completion-path.md.","updated_at":"2026-09-05T15:31:44Z"} -->
+- ❌ `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`
+  - Notes: Two low-effort full gates failed in Codex read evidence; 307 tests and bounded local gates passed on 156e41e. Standalone-read prompt correction needs live verification. Accidental state-check created GitHub Issues #1-38; local canonical mode restored, remote cleanup requires explicit approval. See docs/verification/EM-005-completion-path.md.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.1","title":"Finalize platform adapters and marketplace metadata.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
   - ✅ `EM-005.1` **P2** Finalize platform adapters and marketplace metadata.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.2","title":"Add Codex/Claude trigger, collision, fallback, and workflow evaluations.","status":"in_progress","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->

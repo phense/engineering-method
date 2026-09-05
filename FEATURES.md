@@ -9,11 +9,11 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Shared plugin identity, MIT licensing, portable validation and pinned-source provenance controls.
 - Related backlog: `EM-001`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-002","name":"Durable project state","summary":"Blocker-first local backlog, feature inventory, tested GitHub migration and native relationships, offline queue and compact recovery. Live GitHub mutation has not been exercised.","status":"available","related_backlog_ids":["EM-002"],"updated_at":"2026-09-05T10:52:23Z"} -->
+<!-- engineering-method:feature {"schema_version":1,"id":"F-002","name":"Durable project state","summary":"Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. The state-check command automatically migrates a local backlog when the GitHub remote is writable; it is not read-only.","status":"available","related_backlog_ids":["EM-002"],"updated_at":"2026-09-05T15:31:44Z"} -->
 ## `F-002` Durable project state
 
 - Status: available
-- Summary: Blocker-first local backlog, feature inventory, tested GitHub migration and native relationships, offline queue and compact recovery. Live GitHub mutation has not been exercised.
+- Summary: Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. The state-check command automatically migrates a local backlog when the GitHub remote is writable; it is not read-only.
 - Related backlog: `EM-002`
 
 <!-- engineering-method:feature {"schema_version":1,"id":"F-003","name":"Exclusive workflow skills","summary":"Seventeen shared lifecycle and quality skills with artifact-specific handoffs. Live host routing evaluation remains part of EM-005.","status":"available","related_backlog_ids":["EM-003"],"updated_at":"2026-09-05T10:52:23Z"} -->
