@@ -4,6 +4,7 @@ import json
 import hashlib
 from copy import deepcopy
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -73,6 +74,26 @@ class ArchitectureHostTests(unittest.TestCase):
             with self.assertRaisesRegex(EvalFailure, "final_system_architect"):
                 assert_host_run(project, without_final_review)
             self.assertEqual("passed", assert_host_run(project, transcript)["status"])
+            for replacement in ("echo", "python3 /tmp/untrusted/assert_large_feature.py", "python3 -c"):
+                forged = deepcopy(transcript)
+                for tool in forged["tools"]:
+                    if "--checkpoint " in tool["input"]:
+                        tool["input"] = replacement + " --project . --checkpoint " + tool["input"].split("--checkpoint ")[1]
+                with self.assertRaisesRegex(EvalFailure, "missing_tool_checkpoint"):
+                    assert_host_run(project, forged)
+            for separator in (" ", "="):
+                wrapped = deepcopy(transcript)
+                for tool in wrapped["tools"]:
+                    if "--checkpoint " in tool["input"]:
+                        command = tool["input"].replace("--checkpoint ", "--checkpoint" + separator)
+                        tool["input"] = "/bin/zsh -lc " + shlex.quote(command)
+                self.assertEqual("passed", assert_host_run(project, wrapped)["status"])
+                wrapped["reviewers"] = []
+                with self.assertRaisesRegex(EvalFailure, "independent_reviewer"):
+                    assert_host_run(project, wrapped)
+                wrapped["tools"][-1]["output"] = "claimed checkpoint success"
+                with self.assertRaisesRegex(EvalFailure, "observed_snapshot"):
+                    assert_host_run(project, wrapped)
             history_path = project / "phase-evidence.jsonl"
             original_history = history_path.read_text()
             rows = [json.loads(line) for line in original_history.splitlines()]

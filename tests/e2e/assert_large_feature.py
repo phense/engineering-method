@@ -96,25 +96,47 @@ def checkpoint(project, phase):
         stream.write(json.dumps(record, sort_keys=True) + "\n")
     return record
 
-def assert_host_run(project, transcript):
+def is_checkpoint_command(words, phase, project, assertion):
+    if len(words) < 4 or not re.fullmatch(r"python(?:\d+(?:\.\d+)*)?", Path(words[0]).name):
+        return False
+    def resolved(value):
+        path = Path(value)
+        return (path if path.is_absolute() else project / path).resolve()
+    if resolved(words[1]) != assertion.resolve():
+        return False
+    options = {}
+    remaining = iter(words[2:])
+    for word in remaining:
+        key, separator, value = word.partition("=")
+        if key not in ("--project", "--checkpoint") or key in options:
+            return False
+        options[key] = value if separator else next(remaining, None)
+    return (options.get("--checkpoint") == phase and bool(options.get("--project"))
+            and resolved(options["--project"]) == project.resolve())
+
+def assert_host_run(project, transcript, *, assertion=None):
+    assertion = Path(assertion) if assertion is not None else Path(__file__)
     records = history(project)
     need([row["phase"] for row in records] == list(PHASES), "incomplete_phase_history")
-    commands = [tool["input"] if isinstance(tool["input"], str) else tool["input"].get("command", "")
-                for tool in transcript["tools"] if tool["name"] in ("command", "Bash")]
-    command_tools = [tool for tool in transcript["tools"] if tool["name"] in ("command", "Bash")]
+    command_positions = [i for i, tool in enumerate(transcript["tools"])
+                         if tool["name"] in ("command", "Bash")]
+    command_tools = [transcript["tools"][i] for i in command_positions]
+    arguments = [shell_arguments(tool["input"] if isinstance(tool["input"], str)
+                                 else tool["input"].get("command", "")) for tool in command_tools]
+    checkpoint_positions = {}
     cursor = 0
     for phase in PHASES:
-        matches = [i for i in range(cursor, len(commands))
-                   if re.search(r"--checkpoint(?:=|\s+)" + re.escape(phase) + r"(?:\s|$)", commands[i])]
+        matches = [i for i in range(cursor, len(arguments))
+                   if is_checkpoint_command(arguments[i], phase, project, assertion)]
         need(matches, "missing_tool_checkpoint:" + phase)
         recorded = records[PHASES.index(phase)]
         need(json.dumps(recorded, sort_keys=True) in command_tools[matches[0]].get("output", ""),
              "checkpoint_lacks_observed_snapshot:" + phase)
         cursor = matches[0] + 1
+        checkpoint_positions[phase] = command_positions[matches[0]]
     need(SKILLS.issubset(transcript["skills"]), "missing_workflow_skill_evidence")
     need(transcript.get("reviewers"), "missing_independent_reviewer_tool_evidence")
-    findings_position = next(i for i, tool in enumerate(transcript["tools"])
-                             if "--checkpoint findings" in str(tool["input"]))
+    findings_position = checkpoint_positions["findings"]
     initial_reads = [tool for tool in transcript["tools"][:findings_position]
                      if "initial/" in str(tool["input"]) and tool.get("output")
                      and (tool["name"] == "Read" or re.search(r"\b(cat|sed|read_text)\b", str(tool["input"])))]
@@ -174,10 +196,8 @@ def assert_host_run(project, transcript):
          and final.get("actionable_findings") == [] and final.get("reviewed_files") == scope
          and final.get("reviewed_sha256") == evidence_digest(project),
          "missing_or_stale_final_system_architect_verdict")
-    review_position = next(i for i, tool in enumerate(transcript["tools"])
-                           if "--checkpoint review" in str(tool["input"]))
-    integration_position = next(i for i, tool in enumerate(transcript["tools"])
-                                if "--checkpoint integration" in str(tool["input"]))
+    review_position = checkpoint_positions["review"]
+    integration_position = checkpoint_positions["integration"]
     need(any(isinstance(reviewer, dict) and "system-architect" in reviewer.get("prompt", "").lower()
              and "evidence/final-review.md" in reviewer.get("prompt", "")
              and review_object(reviewer.get("output", "")) == final

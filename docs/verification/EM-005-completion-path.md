@@ -23,11 +23,14 @@ assertion is weakened and EM-005 remains incomplete.
 
 ## Remaining evidence-tool findings
 
-Preserve the five uncommitted parser/test files separately from the policy change.
-Their review identified two reproducible acceptance gaps: a partial skill read
-can count as a full read; an echo containing checkpoint arguments can count as
-the assertion command. Neither establishes a defect in the workflow skills,
-but neither may be accepted as release proof.
+The parser review identified two reproducible acceptance gaps: a partial shell
+skill read counted as a full read; an echo containing checkpoint arguments counted
+as the assertion command. Both were reproduced with failing local controls and
+corrected: shell reads require full evaluated skill content, and checkpoints
+require Python executing the exact staged assertion path for the correct project.
+Quoted commands and batched Python reads remain supported. No new paid run was
+needed for these corrections. Full local verification also caught and corrected
+a missing visible note for the proportionality backlog entry.
 
 Codex's simplified JSON stream omits independent reviewer responses. A bounded
 non-ephemeral probe proved that its own native rollout contains genuine spawn

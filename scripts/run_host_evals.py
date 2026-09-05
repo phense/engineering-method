@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shlex
 import shutil
 import signal
 import subprocess
@@ -163,9 +164,34 @@ def execute(command, cwd, env, timeout):
         raise EvalFailure(f"host_exit:{process.returncode}:" + failure_category(diagnostics), stdout)
     return stdout
 
-def parse_transcript(host, text):
+def observed_read_skills(command, output, plugin):
+    """Dynamic paths count only with an executed read and complete package content."""
     try:
-        return _parse_transcript(host, text)
+        words = shlex.split(command)
+        if len(words) == 3 and Path(words[0]).name in ("sh", "bash", "zsh") and words[1] in ("-c", "-lc"):
+            command = words[2]
+            words = shlex.split(command)
+    except ValueError:
+        return set()
+    if not words or not output:
+        return set()
+    executable = Path(words[0]).name
+    reads = executable in ("cat", "sed", "head") or (
+        re.fullmatch(r"python(?:\d+(?:\.\d+)*)?", executable)
+        and re.search(r"\.read_text\s*\(", command))
+    if not reads:
+        return set()
+    found = set()
+    for path in (plugin / "skills").glob("*/SKILL.md"):
+        content = path.read_text()
+        if content.strip() and content in output:
+            found.add(path.parent.name)
+    return found
+
+
+def parse_transcript(host, text, plugin=ROOT):
+    try:
+        return _parse_transcript(host, text, plugin)
     except EvalFailure:
         raise
     except Exception as exc:
@@ -177,7 +203,7 @@ def typed(value, expected, label):
         raise EvalFailure("malformed_" + label)
     return value
 
-def _parse_transcript(host, text):
+def _parse_transcript(host, text, plugin=ROOT):
     events, skills, tools, pending, reviewers = [], set(), [], {}, []
     invoked, review_assignments = set(), {}
     final, terminal = None, False
@@ -224,8 +250,7 @@ def _parse_transcript(host, text):
                     output = typed(item.get("aggregated_output", ""), str, "command_output")
                     tools.append({"name": "command", "input": command, "output": output})
                     # A cat/sed/read command must complete and actually return content.
-                    if item.get("aggregated_output") and re.search(r"\b(cat|sed|head|read_text)\b", command):
-                        skills.update(SKILL_PATH.findall(command))
+                    skills.update(observed_read_skills(command, output, plugin))
         else:
             # Status/system events may carry plain message strings. Only the
             # assistant/user envelopes contain tool evidence.
@@ -273,8 +298,7 @@ def _parse_transcript(host, text):
                         invoked.add(selected_skill)
                     if name == "Bash" and block.get("content"):
                         command = arguments.get("command", "")
-                        if re.search(r"\b(cat|sed|head|read_text)\b", command):
-                            skills.update(SKILL_PATH.findall(command))
+                        skills.update(observed_read_skills(command, result_content, plugin))
             if event.get("type") == "result":
                 if event.get("is_error") or event.get("subtype") != "success":
                     raise EvalFailure("host_error")
@@ -451,7 +475,7 @@ def run_case(host, case, expected, output, timeout, auth_home=None, model=None, 
             stdout = execute(command, repo, env, timeout)
             private_transcript(output / f'{case["id"]}-raw.jsonl', stdout)
             retain_project(repo, output / case["id"] / "artifacts")
-            transcript = parse_transcript(host, stdout)
+            transcript = parse_transcript(host, stdout, plugin=staged_plugin)
             check_routing(transcript, expected, repo)
             if fingerprint(plugin) != source_sha256 or fingerprint(staged_plugin) != staged_sha256:
                 raise EvalFailure("plugin_changed_during_evaluation")

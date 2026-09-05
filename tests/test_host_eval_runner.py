@@ -16,6 +16,31 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_dynamic_batch_read_requires_actual_read_and_exact_evaluated_skill_content(self):
+        with tempfile.TemporaryDirectory() as directory:
+            plugin = Path(directory)
+            skill = plugin / "skills/speckit-plan/SKILL.md"
+            skill.parent.mkdir(parents=True)
+            skill.write_text("---\nname: speckit-plan\n---\nUnique evaluated plugin planning contract.\n")
+            read_command = "python3 - <<'PY'\nfrom pathlib import Path\nfor n in ['speckit-plan']:\n p=Path('.agents/skills')/n/'SKILL.md'\n print(p.resolve()); print(p.read_text())\nPY"
+            output = str(skill) + "\n" + skill.read_text()
+            def observed(command, content, code=0):
+                events = [{"type": "item.completed", "item": {"type": "command_execution", "command": command,
+                            "exit_code": code, "aggregated_output": content}},
+                          {"type": "item.completed", "item": {"type": "agent_message", "text": '{"primary":"speckit-plan","supporting":[]}'}},
+                          {"type": "turn.completed"}]
+                return parse_transcript("codex", "\n".join(map(json.dumps, events)), plugin=plugin)
+            self.assertEqual(["speckit-plan"], observed(read_command, output)["skills"])
+            self.assertEqual([], observed(f"head -n 1 {skill}", "---\n")["skills"])
+            self.assertEqual(["speckit-plan"], observed(f"cat {skill}", output)["skills"])
+            for command, content, code in ((read_command, output, 1), (read_command, str(skill), 0),
+                    (read_command, "Documentation mentions speckit-plan", 0),
+                    ("echo " + shlex.quote(output + " read_text"), output, 0)):
+                with self.subTest(command=command, content=content, code=code):
+                    self.assertEqual([], observed(command, content, code)["skills"])
+            skill.write_text("Updated evaluated content\n")
+            self.assertEqual([], observed(read_command, output)["skills"])
+
     def test_successful_native_content_is_not_an_authentication_diagnostic(self):
         plugin = Path(__file__).resolve().parents[1]
         documentation = (plugin / "shared/platform/claude.md").read_text()
@@ -249,7 +274,10 @@ class HostRunnerTests(unittest.TestCase):
 
     def test_successful_read_evidence_and_real_artifacts_pass(self):
         decision = {"primary": "systematic-debugging", "supporting": ["project-backlog"]}
-        events = [{"type": "item.completed", "item": {"type": "command_execution", "command": "cat skills/systematic-debugging/SKILL.md skills/project-backlog/SKILL.md", "exit_code": 0, "aggregated_output": "# Skills"}}, {"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(decision)}}, {"type": "turn.completed"}]
+        plugin = Path(__file__).resolve().parents[1]
+        contents = "\n".join((plugin / "skills" / name / "SKILL.md").read_text()
+                             for name in ("systematic-debugging", "project-backlog"))
+        events = [{"type": "item.completed", "item": {"type": "command_execution", "command": "cat skills/systematic-debugging/SKILL.md skills/project-backlog/SKILL.md", "exit_code": 0, "aggregated_output": contents}}, {"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(decision)}}, {"type": "turn.completed"}]
         transcript = parse_transcript("codex", "\n".join(map(json.dumps, events)))
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

@@ -121,8 +121,8 @@ Actual tools and artifacts, not this final JSON, determine acceptance.
             stdout = execute(command, project, env, timeout)
             private_transcript(target / "raw.jsonl", stdout)
             retain_project(project, target / "artifacts")
-            transcript = parse_transcript(host, stdout)
-            result = assert_host_run(project, transcript)
+            transcript = parse_transcript(host, stdout, plugin=staged_plugin)
+            result = assert_host_run(project, transcript, assertion=assertion)
             if fingerprint(plugin) != source_sha256 or fingerprint(staged_plugin) != staged_sha256:
                 raise EvalFailure("plugin_changed_during_evaluation")
             result.update({"host": host, "model": model, "event_count": transcript["event_count"],
