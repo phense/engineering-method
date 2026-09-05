@@ -6,6 +6,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from engineering_method.backlog import load_backlog
+
 from engineering_method.features import (
     FeatureDocument,
     load_features,
@@ -152,9 +154,16 @@ class FeatureInventoryTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "duplicate"):
             FeatureDocument(features=(feature(), feature()))
 
-    def test_loads_the_current_pre_release_features_file(self) -> None:
+    def test_current_inventory_records_verified_capabilities(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        self.assertEqual(load_features(root / "FEATURES.md"), FeatureDocument(features=()))
+        inventory = load_features(root / "FEATURES.md")
+        backlog = {item.id: item for item in load_backlog(root / "BACKLOG.md").items}
+        self.assertTrue({"F-001", "F-002", "F-003", "F-004"}.issubset(
+            {entry.id for entry in inventory.features}))
+        for entry in inventory.features:
+            for work_id in entry.related_backlog_ids:
+                self.assertIn(work_id, backlog)
+                self.assertEqual("complete", backlog[work_id].status.value)
 
 
 if __name__ == "__main__":

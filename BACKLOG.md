@@ -72,18 +72,18 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-004.5` **P1** Add the system-architect integration-test gate.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.6","title":"Verify recovery across compaction and subagent lifecycle boundaries.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
   - ✅ `EM-004.6` **P1** Verify recovery across compaction and subagent lifecycle boundaries.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"open","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-- ⭕ `EM-005` **P2** Validate, document, and package the complete plugin
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"in_progress","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
+- 🔄 `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.1","title":"Finalize platform adapters and marketplace metadata.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-005.1` **P2** Finalize platform adapters and marketplace metadata.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.2","title":"Add Codex/Claude trigger, collision, fallback, and workflow evaluations.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-005.2` **P2** Add Codex/Claude trigger, collision, fallback, and workflow evaluations.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.3","title":"Execute the large-feature architecture fixture on both hosts.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-005.3` **P2** Execute the large-feature architecture fixture on both hosts.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.4","title":"Complete static, package, and clean-install validation.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-005.4` **P2** Complete static, package, and clean-install validation.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.5","title":"Write and verify the public README and third-party notices.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-005.5` **P2** Write and verify the public README and third-party notices.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.1","title":"Finalize platform adapters and marketplace metadata.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
+  - ✅ `EM-005.1` **P2** Finalize platform adapters and marketplace metadata.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.2","title":"Add Codex/Claude trigger, collision, fallback, and workflow evaluations.","status":"in_progress","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
+  - 🔄 `EM-005.2` **P2** Add Codex/Claude trigger, collision, fallback, and workflow evaluations.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.3","title":"Execute the large-feature architecture fixture on both hosts.","status":"in_progress","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
+  - 🔄 `EM-005.3` **P2** Execute the large-feature architecture fixture on both hosts.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.4","title":"Complete static, package, and clean-install validation.","status":"in_progress","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
+  - 🔄 `EM-005.4` **P2** Complete static, package, and clean-install validation.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.5","title":"Write and verify the public README and third-party notices.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
+  - ✅ `EM-005.5` **P2** Write and verify the public README and third-party notices.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.6","title":"Run the system-architect release gate.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
   - ⭕ `EM-005.6` **P2** Run the system-architect release gate.
