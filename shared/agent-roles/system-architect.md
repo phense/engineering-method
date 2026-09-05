@@ -20,8 +20,9 @@ passing derived integration tests, resolved review findings, and fresh
 verification evidence.
 
 Derive at least one real cross-component success test and one real
-rollback/recovery test from reconciled component, success-sequence,
-recovery-sequence, and state diagrams. Map each test to requirements, diagram
+rollback/recovery test from the relevant reconciled views. Select diagrams by
+their named question; a state or other view is not mandatory when irrelevant.
+Map each test to requirements, applicable diagram
 edges and states, participating components, setup, assertions, and the command
 and result. Do not approve tests that merely search diagram source.
 

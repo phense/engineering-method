@@ -154,13 +154,15 @@ only to satisfy this gate.
 4. Update metadata verification dates and evidence pointers, then verify syntax
    again.
 5. Complete reconciliation before a system architect derives integration tests
-   from the component, success, failure/recovery, and state views.
+   from the relevant reconciled views; omit any view whose question is already
+   answered without it.
 
 ## System-architect integration gate
 
 After as-built reconciliation, give a `strong` system architect the approved
-requirements, reconciled component and state views, critical success and
-recovery sequences, current code, and test inventory. It derives at least one
+requirements, relevant reconciled views, critical success and recovery behavior,
+current code, and test inventory. Do not require a fixed diagram set at this
+gate; each supplied view must answer a relevant named question. It derives at least one
 cross-component success integration test and one rollback/recovery integration
 test using the [integration test plan
 template](../../templates/uml/integration-test-plan.md). The tests must exercise

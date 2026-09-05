@@ -2,10 +2,9 @@
 %% Source evidence: checkout/service.py; checkout/order.py; integration_tests/test_checkout.py
 %% Requirement IDs: CHECKOUT-001; CHECKOUT-002; AF-002; T002; T003
 %% Notation: Mermaid state diagram
-%% Verified on: 2026-09-04
+%% Verified on: 2026-09-05
 stateDiagram-v2
-    [*] --> Pending
-    Pending --> Reserved: reserve returns Reservation
+    [*] --> Reserved: order reserve begins
     Reserved --> Paid: payment capture
     Paid --> Complete: inventory commit succeeds
     Paid --> Compensating: inventory commit fails

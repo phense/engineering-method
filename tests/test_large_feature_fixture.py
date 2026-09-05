@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import ast
-from copy import deepcopy
 import json
 import re
 import subprocess
+import shutil
+import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+import sys
+
+from tests.large_feature_evidence import assert_large_feature, evidence_digest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -169,7 +174,7 @@ class AsBuiltArchitectureTests(unittest.TestCase):
         for name, directive in diagrams.items():
             with self.subTest(diagram=name):
                 content = fixture_read(f"project/docs/uml/{name}.mmd")
-                self.assertIn("%% Verified on: 2026-09-04", content)
+                self.assertRegex(content, r"%% Verified on: \d{4}-\d{2}-\d{2}")
                 self.assertIn(directive, content)
 
         reconciliation = fenced_json(PROJECT / "docs/uml/reconciliation.md")
@@ -194,6 +199,94 @@ class AsBuiltArchitectureTests(unittest.TestCase):
         self.assertIn("OK", output)
 
 
+class EvidenceMutationTests(unittest.TestCase):
+    @staticmethod
+    def refresh_review_digest(project):
+        path = project / "evidence/final-review.md"
+        path.write_text(re.sub(r'("reviewed_sha256": ")[a-f0-9]+',
+                               lambda match: match.group(1) + evidence_digest(project),
+                               path.read_text()))
+
+    def check_rejected(self, mutate) -> None:
+        with tempfile.TemporaryDirectory(prefix="large-feature-evidence-") as directory:
+            fixture = Path(directory) / "fixture"
+            shutil.copytree(FIXTURE, fixture)
+            project = fixture / "project"
+            mutate(project)
+            with patch.object(sys.modules[__name__], "FIXTURE", fixture), patch.object(
+                sys.modules[__name__], "PROJECT", project
+            ):
+                with self.assertRaises(AssertionError):
+                    ConvergenceGateTests().test_converge_requires_every_architecture_integration_and_review_gate()
+
+    def test_missing_artifact_rejects_convergence_despite_true_flags(self) -> None:
+        for relative in (
+            "docs/uml/reconciliation.md", "docs/uml/integration-test-plan.md",
+            "evidence/final-review.md", "evidence/integration-results.md",
+        ):
+            with self.subTest(artifact=relative):
+                self.check_rejected(lambda project: (project / relative).unlink())
+
+    def test_empty_diagram_rejects_convergence_despite_valid_header(self) -> None:
+        for name in ("component", "success-sequence", "recovery-sequence", "state"):
+            def strip(project):
+                path = project / f"docs/uml/{name}.mmd"
+                path.write_text("\n".join(line for line in path.read_text().splitlines()
+                    if line.startswith(("%%", "flowchart", "sequenceDiagram", "stateDiagram"))))
+                self.refresh_review_digest(project)
+            with self.subTest(diagram=name):
+                self.check_rejected(strip)
+
+    def test_actionable_review_rejects_convergence_despite_true_flags(self) -> None:
+        def mutate(project):
+            path = project / "evidence/final-review.md"
+            path.write_text(path.read_text().replace("Status: clean", "Status: actionable"))
+        self.check_rejected(mutate)
+
+    def test_changed_code_invalidates_old_review(self) -> None:
+        def mutate(project):
+            path = project / "checkout/service.py"
+            path.write_text(path.read_text() + "\n# Changed after review.\n")
+        self.check_rejected(mutate)
+
+    def test_semantic_drift_rejected_even_with_refreshed_review_digest(self) -> None:
+        mutations = (
+            ("docs/uml/success-sequence.mmd", "capture(order_id)", "reverse(order_id)"),
+            ("docs/uml/recovery-sequence.mmd", "release(reservation)", "commit(reservation)"),
+            ("docs/uml/state.mmd", "Paid --> Complete", "Reserved --> Complete"),
+            ("docs/uml/component.mmd", "returns Reservation", "returns bool"),
+        )
+        for relative, before, after in mutations:
+            def mutate(project):
+                path = project / relative
+                path.write_text(path.read_text().replace(before, after))
+                self.refresh_review_digest(project)
+            with self.subTest(artifact=relative):
+                self.check_rejected(mutate)
+
+    def test_fresh_integration_failure_rejected_despite_recorded_success(self) -> None:
+        def mutate(project):
+            path = project / "checkout/service.py"
+            path.write_text(path.read_text().replace("self.payment.reverse(receipt)", "pass"))
+            self.refresh_review_digest(project)
+        self.check_rejected(mutate)
+
+    def test_each_missing_gate_claim_rejects_real_evidence_validation(self) -> None:
+        for field in ("as_built_reconciliation", "derived_success_test_passed",
+                      "derived_recovery_test_passed", "clean_final_review", "fresh_verification"):
+            for missing in (False, True):
+                def mutate(project):
+                    path = project / "evidence/convergence.json"
+                    evidence = json.loads(path.read_text())
+                    if missing:
+                        del evidence[field]
+                    else:
+                        evidence[field] = False
+                    path.write_text(json.dumps(evidence))
+                with self.subTest(gate=field, missing=missing):
+                    self.check_rejected(mutate)
+
+
 class ConvergenceGateTests(unittest.TestCase):
     def test_converge_requires_every_architecture_integration_and_review_gate(self) -> None:
         """Removing any single gate must make convergence ineligible."""
@@ -213,13 +306,10 @@ class ConvergenceGateTests(unittest.TestCase):
         self.assertEqual({"success": 1, "recovery": 1}, template["minimum_derived_tests"])
 
         evidence = json.loads(fixture_read("project/evidence/convergence.json"))
+        fresh = assert_large_feature(PROJECT)
+        self.assertEqual(0, fresh["returncode"])
+        self.assertLessEqual(fresh["started_at"], fresh["completed_at"])
         self.assertTrue(all(evidence[field] is True for field in required))
-        for field in required:
-            with self.subTest(missing=field):
-                incomplete = deepcopy(evidence)
-                incomplete[field] = False
-                self.assertFalse(all(incomplete[item] is True for item in required))
-
         converge = " ".join(
             read("skills/speckit-converge/SKILL.md").lower().split()
         )

@@ -14,6 +14,6 @@
     "terminal": "order.failed"
   },
   "state": {
-    "states": ["Pending", "Reserved", "Paid", "Compensating", "Complete", "Failed"]
+    "states": ["Reserved", "Paid", "Compensating", "Complete", "Failed"]
   }
 }
