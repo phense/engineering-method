@@ -80,3 +80,13 @@ independent release verdict are missing. Earlier routing and Claude architecture
 results retain their stated revision limits. Do not call the complete release
 gate passed or start another paid loop. Local main integration and installation
 are authorized by the user's explicit reduced-scope acceptance above.
+
+## Subsequent public pre-release authorization — 2026-09-05
+
+The user explicitly authorized publishing `phense/engineering-method`, pushing
+`main`, and creating a GitHub **pre-release** after bounded local checks. This
+supersedes the earlier no-publication authorization boundary in this historical
+record; it does not waive or pass the original technical release gate.
+`v0.1.0-rc.1` identifies that reduced-acceptance distribution of plugin `0.1.0`.
+EM-005 remains incomplete. No paid evaluation loop or issue migration is
+authorized by this publication task.

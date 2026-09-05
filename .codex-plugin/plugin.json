@@ -32,5 +32,7 @@
     ],
     "brandColor": "#0B7285",
     "screenshots": []
-  }
+  },
+  "homepage": "https://github.com/phense/engineering-method",
+  "repository": "https://github.com/phense/engineering-method"
 }

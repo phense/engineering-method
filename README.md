@@ -1,4 +1,4 @@
-# Peter's Engineering Method
+# Engineering Method
 
 Risk-proportionate engineering workflows for Codex and Claude. One shared plugin
 combines selected Spec Kit, OpenSpec and Superpowers practices with durable
@@ -10,42 +10,39 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-Version `0.1.0` is a local pre-release candidate. The
-[approved design](docs/specs/2026-09-04-engineering-method-design.md) defines the
-scope; [verification records](docs/verification/EM-004-acceptance.md) distinguish
-tested behavior from outstanding host-release evidence. Nothing is published
-automatically.
+Version `0.1.0` is distributed as **`v0.1.0-rc.1`, a pre-release** with a
+user-approved reduced acceptance scope. The full original cross-host release
+gate has **not passed**. Read the [release limits](docs/verification/EM-005-completion-path.md)
+before relying on it for unattended work. The [approved design](docs/specs/2026-09-04-engineering-method-design.md)
+records the intended scope.
 
 ## Installation
 
-Requirements: Python 3.11 or newer, Git, and the supported host CLI. GitHub
-integration additionally uses the authenticated `gh` CLI. No upstream Spec Kit,
-OpenSpec or Superpowers CLI/plugin is required. Use the same plugin directory
-on both hosts. There is no public repository URL configured yet; local
-installation is the supported starting point.
+Requires Python 3.11+, Git, and Codex CLI or Claude Code with plugin support.
+GitHub task synchronization additionally requires authenticated `gh` and repository
+permissions. No upstream Spec Kit, OpenSpec or Superpowers installation is needed.
+Native installation was checked with Codex CLI 0.153.4 and Claude Code 2.1.259;
+other host versions and operating systems are not covered by that evidence.
 
-From a local checkout or extracted release package:
+Install from [phense/engineering-method](https://github.com/phense/engineering-method):
 
 ```sh
-em_plugin="$(pwd)"
-codex plugin marketplace add "$em_plugin"
+# Codex
+codex plugin marketplace add phense/engineering-method
 codex plugin add engineering-method@engineering-method
-codex plugin list --json
+
+# Claude Code
+claude plugin marketplace add phense/engineering-method
+claude plugin install engineering-method@engineering-method
 ```
 
-Start a new Codex session after installation or updating the cached plugin.
-For Claude, load the directory for the session:
-
-```sh
-claude plugin validate --strict "$em_plugin"
-claude --plugin-dir "$em_plugin"
-```
-
-Run the host in the project you want to change, retaining the absolute plugin
-path. See the [Codex adapter](shared/platform/codex.md) and
-[Claude adapter](shared/platform/claude.md) for host mechanics and reload behavior.
-Installing overlapping lifecycle plugins alongside this one can introduce
-external trigger collisions; this package contains only its curated skill tree.
+Start a new host session in your target project, then describe the change you
+want. These commands follow the repository's default branch. For the fixed
+pre-release, local packages, updates, disabling and removal, see
+[Installation and maintenance](docs/installation.md). Disable overlapping
+lifecycle plugins, including Superpowers, before using Engineering Method.
+Claude also supports session-only loading with `claude --plugin-dir` and an
+absolute plugin directory; see the installation guide.
 
 ## Automatic workflow selection
 
@@ -108,7 +105,8 @@ After migration, Issues are canonical and `BACKLOG.md` is a marked cache.
 An offline outage queues changes for reconciliation rather than creating a
 second source of truth. Migration and refresh use embedded identity markers to
 avoid duplicate issues. Current project restrictions on remote mutations still
-apply. This repository has no remote and does not create one automatically.
+apply. Publishing this repository does not migrate its backlog. Its task register remains
+local until a separate migration is explicitly authorized.
 
 ## Continuity
 
@@ -143,43 +141,39 @@ approval boundary.
 
 ## Development and verification
 
-Run from the plugin root:
+Run the inexpensive local checks from the checkout root:
 
 ```sh
 python3 -m unittest discover -s tests -t . -v
 python3 scripts/validate-plugin
 claude plugin validate --strict .
-python3 -m compileall -q engineering_method scripts tests
-git diff --check
 ```
 
-Build and check a reproducible package, test its local installation, then run
-the release gate (live evaluations require native host authentication):
+[Contributing](CONTRIBUTING.md) covers provenance, committed-source reproducible
+packaging and isolated clean installation. Full release evaluations require
+separate budget authorization and are not implied by these local checks.
 
-```sh
-python3 scripts/package-plugin --check --output /tmp/engineering-method.zip
-python3 tests/e2e/test-clean-install --package /tmp/engineering-method.zip
-python3 scripts/release-check --release --output-dir /tmp/em-release
-```
+## Examples and contributing
 
-The portable checks need no network or model credentials. Tests cover backlog
-ordering, issue reconciliation through a fake GitHub boundary, compaction
-recovery, exclusive lifecycle contracts, and actual checkout success and
-compensation behavior. Pinned-source auditing additionally takes explicit local
-upstream roots through `python3 scripts/audit-provenance --source-root ID=PATH`.
+- [Usage examples](docs/usage.md): a small edit, bug repair, a bounded existing-system
+  change, a large feature, and recovery after compact or a new session.
+- [Contributing](CONTRIBUTING.md): local checks, provenance, packaging and review.
+- [Verification history](docs/verification/EM-005-completion-path.md): bounded
+  candidate acceptance and the still-open original release gate.
 
 ## Validation scope
 
-Static contracts and deterministic fixtures establish the shared implementation.
-Live routing and full architecture runs must separately establish behavior on
-each host. Missing credentials, malformed transcripts, timeouts and absent
-evidence are failures rather than successful skipped release gates.
+Skill descriptions and artifact handoffs guide host selection; they cannot
+force every model to route correctly or follow every instruction. Delegation
+and isolation depend on tools actually exposed by the host. Continuity requires
+explicit checkpoints; there is no universal compact hook. agentic-rag is optional.
+GitHub task operations have fake-boundary coverage, not live mutation acceptance.
+Mermaid validation covers semantic sources, not rendered diagrams.
 
-Clean-install checks use temporary host configuration homes. Authenticated live
-evaluations must identify their credential context and isolate project/settings
-effects; no credentials are copied into the package or recorded in evidence.
-The release gate must pass on both hosts before release readiness is claimed.
-No live GitHub mutation test is implied by fake-boundary coverage.
+Earlier routing matrices passed at their recorded revisions; the Claude large
+fixture result belongs to an older package. Current-package Codex independent
+reviewer/architecture evidence and the final independent release verdict remain
+missing. This pre-release does not change failed gates or claim stable readiness.
 
 ## License and attribution
 

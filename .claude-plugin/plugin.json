@@ -14,5 +14,7 @@
     "testing",
     "review"
   ],
-  "displayName": "Peter's Engineering Method"
+  "displayName": "Peter's Engineering Method",
+  "homepage": "https://github.com/phense/engineering-method",
+  "repository": "https://github.com/phense/engineering-method"
 }
