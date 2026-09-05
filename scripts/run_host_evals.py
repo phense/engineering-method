@@ -185,6 +185,29 @@ def observed_read_skills(command, output, plugin):
     if not words or not output:
         return set()
     executable = Path(words[0]).name
+    if executable == "realpath":
+        lexer = shlex.shlex(command, posix=True, punctuation_chars=";&|")
+        lexer.whitespace_split = True
+        tokens = list(lexer)
+        statements, current = [], []
+        for token in tokens:
+            if token == ";":
+                statements.append(current)
+                current = []
+            else:
+                current.append(token)
+        statements.append(current)
+        if (len(statements) < 2 or len(statements[0]) != 2
+                or statements[1] != ["cat", statements[0][1]]):
+            return set()
+        resolved, _, body = output.partition("\n")
+        for path in (plugin / "skills").glob("*/SKILL.md"):
+            suffix = f"skills/{path.parent.name}/SKILL.md"
+            content = path.read_text()
+            if (statements[0][1].endswith(suffix) and resolved.endswith("/" + suffix)
+                    and content.strip() and body.startswith(content)):
+                return {path.parent.name}
+        return set()
     reads = executable in ("cat", "sed", "head") or (
         re.fullmatch(r"python(?:\d+(?:\.\d+)*)?", executable)
         and re.search(r"\.read_text\s*\(", command))

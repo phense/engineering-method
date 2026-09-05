@@ -23,6 +23,27 @@ class HostRunnerTests(unittest.TestCase):
         override.start()
         self.addCleanup(override.stop)
 
+    def test_resolved_path_then_full_cat_is_observed_without_accepting_echo_or_partial_reads(self):
+        from scripts.run_host_evals import observed_read_skills
+        with tempfile.TemporaryDirectory() as d:
+            root = Path(d)
+            skill = root / "skills/openspec-apply/SKILL.md"
+            skill.parent.mkdir(parents=True)
+            content = "---\nname: openspec-apply\n---\nComplete evaluated instructions.\n"
+            skill.write_text(content)
+            alias = ".agents/skills/openspec-apply/SKILL.md"
+            output = str(skill) + "\n" + content + "other file listing\n"
+            command = f"realpath {alias}; cat {alias}; rg --files"
+            self.assertEqual({"openspec-apply"}, observed_read_skills(command, output, root))
+            for bad_command, bad_output in (
+                (f"realpath {alias}; echo {shlex.quote(content)}", output),
+                (f"realpath {alias}; cat /dev/null; echo {shlex.quote(content)}", output),
+                (command, str(skill) + "\n---\n"),
+                (f"realpath {alias} && false && cat {alias}", output),
+            ):
+                with self.subTest(command=bad_command):
+                    self.assertEqual(set(), observed_read_skills(bad_command, bad_output, root))
+
     def test_dynamic_batch_read_requires_actual_read_and_exact_evaluated_skill_content(self):
         with tempfile.TemporaryDirectory() as directory:
             plugin = Path(directory)
