@@ -339,10 +339,15 @@ def prepare_repo(repo, case, plugin):
         if path.is_dir():
             (skills / path.name).symlink_to(path.resolve(), target_is_directory=True)
 
+def stage_plugin(plugin, destination):
+    """Native tool grants cover a disposable copy, never the caller's sources."""
+    shutil.copytree(plugin, destination, ignore=shutil.ignore_patterns(
+        ".git", ".engineering-method", ".superpowers", ".worktrees", "__pycache__"))
+    return destination
+
 def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", budget=2):
     env = os.environ.copy()
-    for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CLAUDECODE", "CLAUDE_CODE_SIMPLE",
-                "CLAUDE_CODE_SAFE_MODE", "ANTHROPIC_AUTH_TOKEN"):
+    for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CLAUDECODE", "ANTHROPIC_AUTH_TOKEN"):
         env.pop(key, None)
     effort = model_effort(host, model, plugin)
     if host == "codex":
@@ -362,7 +367,7 @@ def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", b
         command = ["claude", "-p", "--verbose", "--output-format", "stream-json",
                    "--no-session-persistence", "--setting-sources", "", "--settings", str(settings),
                    "--strict-mcp-config", "--mcp-config", '{"mcpServers":{}}', "--plugin-dir", str(plugin),
-                   "--model", model, "--permission-mode", "acceptEdits",
+                   "--add-dir", str(plugin), "--model", model, "--permission-mode", "auto",
                    "--permission-prompts", "none", "--max-budget-usd", str(budget), "--no-chrome",
                    "--json-schema", json.dumps(DECISION_SCHEMA)]
         if effort is not None:
@@ -383,7 +388,12 @@ ROUTING_INSTRUCTION = SKILL_DISCOVERY_INSTRUCTION + """
 Assess the request and current repository using the available engineering-method
 skills. Perform the first safe assessment step only; do not implement the entire
 feature or launch subagents in this routing evaluation. Open the selected skill
-instructions through tools before applying them. Write decision.md explaining the
+instructions through tools before applying them. The assessment includes that
+skill's required prerequisite and recovery preamble checks: follow its supporting
+skill handoffs far enough to establish the current state before stopping. Do not
+stop merely after choosing or reading the primary skill. This does not authorize
+full lifecycle implementation or generating later-phase artifacts.
+Write decision.md explaining the
 one primary workflow and necessary supporting skills, using repository evidence.
 Finish with ONLY a JSON object {"primary": "<skill-name or native-focused-edit>",
 "supporting": ["<selected supporting skill names>"]}. Report the skills actually
@@ -395,9 +405,11 @@ def run_case(host, case, expected, output, timeout, auth_home=None, model=None, 
         temporary = Path(directory)
         repo, config = temporary / "repo", temporary / "config"
         config.mkdir()
-        prepare_repo(repo, case, plugin)
+        staged_plugin = stage_plugin(plugin, temporary / "plugin")
+        staged_sha256 = fingerprint(staged_plugin)
+        prepare_repo(repo, case, staged_plugin)
         model = model or model_policy(host, plugin)["roles"]["strong" if case.get("architectural") else "fast"][0]["model"]
-        command, env = host_command(host, repo, plugin, config, model, auth_home,
+        command, env = host_command(host, repo, staged_plugin, config, model, auth_home,
                                     case["prompt"] + "\n" + ROUTING_INSTRUCTION)
         stdout = ""
         try:
@@ -406,7 +418,7 @@ def run_case(host, case, expected, output, timeout, auth_home=None, model=None, 
             retain_project(repo, output / case["id"] / "artifacts")
             transcript = parse_transcript(host, stdout)
             check_routing(transcript, expected, repo)
-            if fingerprint(plugin) != source_sha256:
+            if fingerprint(plugin) != source_sha256 or fingerprint(staged_plugin) != staged_sha256:
                 raise EvalFailure("plugin_changed_during_evaluation")
         except EvalFailure as exc:
             private_transcript(output / f'{case["id"]}-raw.jsonl', exc.transcript or stdout)

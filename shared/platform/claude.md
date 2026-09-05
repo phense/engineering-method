@@ -94,6 +94,15 @@ tool grants; denied required edits cause failure. Validate observed skill
 invocations, artifact changes, and the terminal result; authentication errors,
 timeouts, malformed output, and missing evidence cannot count as passes.
 
+The behavioral driver stages a disposable plugin copy beside the fixture and
+passes only that copy through `--plugin-dir` and `--add-dir`. The latter lets
+native file tools follow the fixture's skill links without granting access to
+the caller's source checkout. It uses `--permission-mode auto` so the native
+permission classifier can assess bounded tool calls when `--permission-prompts
+none` has no interactive approver. It never uses bypassPermissions and preserves
+inherited safety-mode flags and managed restrictions. A denial remains failed
+evidence. Source and staged-plugin fingerprints must remain unchanged.
+
 Clean installs use temporary configuration homes without authentication. A
 fresh home on the tested host reports not logged in. Authorized live runs may
 retain the existing authenticated home, use isolated settings and the

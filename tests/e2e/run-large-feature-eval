@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from scripts.run_host_evals import (EvalFailure, diagnostic_events, execute, fingerprint,
                                    host_command, parse_transcript, prepare_repo, private_transcript,
-                                   retain_project, model_policy, model_effort, SKILL_DISCOVERY_INSTRUCTION)
+                                   retain_project, model_policy, model_effort, SKILL_DISCOVERY_INSTRUCTION, stage_plugin)
 from tests.e2e.assert_large_feature import assert_host_run, ARTIFACTS, PHASES
 
 def run(host, output, auth_home, timeout, plugin):
@@ -25,7 +25,9 @@ def run(host, output, auth_home, timeout, plugin):
         temporary = Path(directory)
         project, config = temporary / "project", temporary / "config"
         config.mkdir()
-        prepare_repo(project, {"files": {}}, plugin)
+        staged_plugin = stage_plugin(plugin, temporary / "plugin")
+        staged_sha256 = fingerprint(staged_plugin)
+        prepare_repo(project, {"files": {}}, staged_plugin)
         fixture = ROOT / "tests/fixtures/large-feature"
         shutil.copytree(fixture / "initial", project / "initial")
         # Publish acceptance tests and interface definitions, never the solved implementation.
@@ -34,7 +36,7 @@ def run(host, output, auth_home, timeout, plugin):
         (project / "contract").mkdir()
         for name in ("models.py", "ports.py"):
             shutil.copy2(fixture / "project/checkout" / name, project / "contract" / name)
-        assertion = ROOT / "tests/e2e/assert_large_feature.py"
+        assertion = staged_plugin / "tests/e2e/assert_large_feature.py"
         prompt = f"""
 Build and verify the checkout feature in this disposable evaluation repository.
 Inspect initial/*.py to discover its cross-component interface and recovery
@@ -104,7 +106,7 @@ Finish with ONLY JSON {{"primary":"orchestrated-implementation","supporting":[]}
 Actual tools and artifacts, not this final JSON, determine acceptance.
 """
         model = model_policy(host, plugin)["coordinator"]["model"]
-        command, env = host_command(host, project, plugin, config, model, auth_home, prompt, budget=10)
+        command, env = host_command(host, project, staged_plugin, config, model, auth_home, prompt, budget=10)
         stdout = ""
         target = output / host
         target.mkdir(parents=True, exist_ok=True)
@@ -114,7 +116,7 @@ Actual tools and artifacts, not this final JSON, determine acceptance.
             retain_project(project, target / "artifacts")
             transcript = parse_transcript(host, stdout)
             result = assert_host_run(project, transcript)
-            if fingerprint(plugin) != source_sha256:
+            if fingerprint(plugin) != source_sha256 or fingerprint(staged_plugin) != staged_sha256:
                 raise EvalFailure("plugin_changed_during_evaluation")
             result.update({"host": host, "model": model, "event_count": transcript["event_count"],
                            "tool_count": len(transcript["tools"]), "skills": transcript["skills"]})

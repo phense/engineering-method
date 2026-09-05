@@ -16,6 +16,25 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def test_claude_grants_only_staged_plugin_and_preserves_safety_flags(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            def inspect_invocation(command, cwd, env, timeout):
+                self.assertEqual("auto", command[command.index("--permission-mode") + 1])
+                granted = Path(command[command.index("--add-dir") + 1])
+                self.assertEqual(cwd.parent, granted.parent)
+                self.assertEqual("plugin", granted.name)
+                self.assertEqual(granted, Path(command[command.index("--plugin-dir") + 1]))
+                self.assertTrue((cwd / ".agents/skills/openspec-propose/SKILL.md").resolve().is_relative_to(granted.resolve()))
+                self.assertEqual("1", env["CLAUDE_CODE_SAFE_MODE"])
+                self.assertEqual("1", env["CLAUDE_CODE_SIMPLE"])
+                self.assertNotIn("bypassPermissions", command)
+                raise EvalFailure("checked_invocation")
+            with patch.dict(os.environ, {"CLAUDE_CODE_SAFE_MODE": "1", "CLAUDE_CODE_SIMPLE": "1"}), patch("scripts.run_host_evals.execute", inspect_invocation):
+                with self.assertRaisesRegex(EvalFailure, "checked_invocation"):
+                    run_case("claude", {"id": "permission-scope", "prompt": "assess", "files": {}},
+                             {"primary": "native-focused-edit", "supporting": [], "prohibited": [], "artifacts": []}, output, 1)
+
     def test_informational_string_message_is_not_an_assistant_envelope(self):
         events = [{"type": "system", "subtype": "status", "message": "Connecting"},
                   {"type": "result", "subtype": "success", "structured_output": {"primary": "native-focused-edit", "supporting": []}}]
