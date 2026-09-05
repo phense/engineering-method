@@ -52,8 +52,10 @@ do not grow that subsystem merely to obtain a green report.
    cross-host release gate has not been waived. If it cannot be met from retained
    evidence, keep the candidate unreleased until that narrow next step is approved.
 
-Main stays unchanged until acceptance is complete. No remote, GitHub issues,
-push or publication is authorized.
+The user subsequently approved integrating this reduced local release-candidate
+scope into main and replacing Superpowers with Engineering Method on both hosts.
+The complete automated release gate remains deferred, not passed. No remote,
+GitHub issues, push or publication is authorized.
 
 ## Completed bounded verification
 
@@ -76,4 +78,5 @@ The candidate is locally installable. Full original release acceptance remains
 unmet: current-package live architecture/reviewer evidence on Codex and the final
 independent release verdict are missing. Earlier routing and Claude architecture
 results retain their stated revision limits. Do not call the complete release
-gate passed, start another paid loop, or fast-forward main on this evidence alone.
+gate passed or start another paid loop. Local main integration and installation
+are authorized by the user's explicit reduced-scope acceptance above.
