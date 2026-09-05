@@ -29,3 +29,10 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Status: available
 - Summary: Cohesive slices, protected continuity artifacts, independent review and evidence-driven fixes; relevant Mermaid views and executable checkout success/recovery acceptance. Mermaid sources are semantically checked, not rendered.
 - Related backlog: `EM-004`
+
+<!-- engineering-method:feature {"schema_version":1,"id":"F-005","name":"Proportionate execution guidance","summary":"Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed or newly live-tested.","status":"available","related_backlog_ids":["EM-005.7"],"updated_at":"2026-09-05T13:22:56Z"} -->
+## `F-005` Proportionate execution guidance
+
+- Status: available
+- Summary: Every skill references shared local-check-first, evidence-reuse, focused-review and effort-brake instructions. Behavioral compliance is not guaranteed or newly live-tested.
+- Related backlog: `EM-005.7`

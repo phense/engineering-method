@@ -5,6 +5,9 @@ description: "Use when a bounded intentional change to an existing capability ne
 
 # OpenSpec Propose
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Describe a contained Brownfield change as a delta from current behavior and
 produce the complete planning set needed by its one executor.
 

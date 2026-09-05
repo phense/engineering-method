@@ -5,6 +5,9 @@ description: "Use when an existing change under openspec/changes has complete pr
 
 # OpenSpec Apply
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Implement one approved bounded change task by task. This is the sole Brownfield
 executor and the only OpenSpec phase that edits application code.
 

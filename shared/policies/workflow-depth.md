@@ -3,6 +3,9 @@
 Depth follows reversibility, ambiguity, architectural reach, data or security
 risk, and integration surface.
 
+Apply [proportionality](proportionality.md) at every depth, including reviews
+and verification. Depth describes needed evidence, not an unlimited work budget.
+
 | Work shape | Required depth |
 |---|---|
 | Small reversible edit | Project gates, focused edit, targeted verification |

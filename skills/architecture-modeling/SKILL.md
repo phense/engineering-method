@@ -5,6 +5,9 @@ description: "Use as a supporting architecture gate when an approved Spec Kit pl
 
 # Architecture Modeling
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Create only evidence-backed models that answer named architecture questions.
 This skill is original and self-contained for the engineering method.
 

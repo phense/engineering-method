@@ -5,6 +5,9 @@ description: "Use as a supporting skill when engineering work needs durable back
 
 # Project Backlog
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 ## Overview
 
 Keep one canonical task history with stable IDs. `BACKLOG.md` is canonical in

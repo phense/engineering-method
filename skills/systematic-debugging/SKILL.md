@@ -5,6 +5,9 @@ description: "Use when an observed failure, test regression, build break, perfor
 
 # Systematic Debugging
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Find and demonstrate the root cause before proposing a repair. Treat each failed
 hypothesis as new evidence, not permission to stack speculative fixes.
 

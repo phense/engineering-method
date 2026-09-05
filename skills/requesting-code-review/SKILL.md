@@ -5,6 +5,9 @@ description: "Use when an implementation slice needs review against requirements
 
 # Requesting Code Review
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Review the complete change against its requirements and current repository
 evidence before defects cascade into later slices.
 

@@ -5,6 +5,9 @@ description: "Use when an implemented OpenSpec change has all tasks complete and
 
 # OpenSpec Archive
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Synchronize an accepted delta into the main capability specifications and move
 the completed change to its dated archive. Archival is an evidence gate, not a
 waiver mechanism.

@@ -5,6 +5,9 @@ description: "Use when a Spec Kit feature has been implemented and current code,
 
 # Spec Kit Converge
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Compare current implementation evidence with approved feature intent. Record
 every remaining actionable gap as append-only work; never become a second
 implementation executor.

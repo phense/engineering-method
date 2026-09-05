@@ -5,6 +5,9 @@ description: "Use when an existing Spec Kit spec.md is complete and needs an evi
 
 # Spec Kit Plan
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Translate an approved feature specification into an evidence-grounded technical
 plan while keeping requirements and implementation separate.
 

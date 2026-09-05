@@ -5,6 +5,9 @@ description: "Use when a new capability, cross-component feature, architecture c
 
 # Spec Kit Specify
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Turn a large or architecture-bearing outcome into one technology-neutral,
 testable feature specification. This phase owns requirements, not design or
 implementation.

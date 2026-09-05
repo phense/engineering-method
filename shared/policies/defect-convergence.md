@@ -65,3 +65,8 @@ when:
 For a blocker, record the precise condition, evidence and attempts, affected
 work, and exact action or decision needed next. A retry budget, elapsed time,
 agent eviction, or finding severity alone is not a terminal condition.
+
+The [proportionality effort brake](proportionality.md) still applies before
+expensive retries or escalation. Pause and reassess the completion path without
+discarding findings or declaring convergence. A stronger agent is not automatic
+authorization to exceed the user's model-effort or usage limits.

@@ -5,6 +5,9 @@ description: "Use when feature work needs isolation or parallel writes need sepa
 
 # Using Git Worktrees
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Detect existing isolation first, prefer the platform's native worktree
 capability, and use a guarded portable fallback only when necessary.
 

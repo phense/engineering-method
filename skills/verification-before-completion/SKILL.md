@@ -5,6 +5,9 @@ description: "Use when about to make any pass, fix, readiness, or completion cla
 
 # Verification Before Completion
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Evidence precedes every success claim. Confidence, prior output, a partial check,
 or another agent's report does not prove the current state.
 

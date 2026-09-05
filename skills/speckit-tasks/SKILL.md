@@ -5,6 +5,9 @@ description: Use when a Spec Kit plan.md and its design or architecture findings
 
 # Spec Kit Tasks
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Convert an approved plan and architecture findings into stable,
 dependency-ordered tasks grouped as cohesive implementation slices.
 

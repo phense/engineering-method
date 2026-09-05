@@ -5,6 +5,9 @@ description: "Use when testable behavior that is new or a confirmed defect needs
 
 # Test-Driven Development
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Choose the starting evidence from the work's intent:
 
 | Work mode | Required starting evidence |

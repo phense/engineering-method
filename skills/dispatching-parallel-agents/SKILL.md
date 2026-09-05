@@ -5,6 +5,9 @@ description: "Use when two or more work domains may be independent and concurren
 
 # Dispatching Parallel Agents
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Parallelism begins only after independence is established. Give each worker a
 bounded, self-contained domain and retain integration responsibility in the
 coordinator.

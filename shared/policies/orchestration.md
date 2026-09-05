@@ -4,6 +4,10 @@
 `tasks.md`. The coordinator retains the specification, architecture,
 cross-slice state, interface rulings, integration, and acceptance decision.
 
+Apply [proportionality](proportionality.md) before dispatch and review rounds.
+Reuse unaffected evidence and stop expensive expansion when the effort brake
+applies; preserve open findings in the checkpoint.
+
 ## Cohesive slices
 
 - Group adjacent tiny tasks only when they have the same shape and one

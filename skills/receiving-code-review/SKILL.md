@@ -5,6 +5,9 @@ description: "Use as the primary workflow for unverified review feedback, includ
 
 # Receiving Code Review
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Treat feedback as a technical hypothesis. Understand it, verify against current
 code and governing requirements, then act on evidence.
 

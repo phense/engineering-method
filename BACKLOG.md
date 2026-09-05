@@ -87,3 +87,5 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-005.5` **P2** Write and verify the public README and third-party notices.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.6","title":"Run the system-architect release gate.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
   - ⭕ `EM-005.6` **P2** Run the system-architect release gate.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.7","title":"Apply shared proportionality and an effort brake to every skill.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"User-approved scope correction; see docs/verification/EM-005-completion-path.md for remaining release evidence.","updated_at":"2026-09-05T13:22:56Z"} -->
+  - ✅ `EM-005.7` **P2** Apply shared proportionality and an effort brake to every skill.

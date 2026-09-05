@@ -5,6 +5,9 @@ description: "Use when approved Spec Kit tasks.md and architecture findings are 
 
 # Orchestrated Implementation
 
+Apply the shared [proportionality rule](../../shared/policies/proportionality.md)
+before adding work, delegating, or repeating verification.
+
 Execute one approved large-feature plan as cohesive, independently verifiable
 slices. The coordinator remains responsible for architecture, interfaces,
 cross-slice state, integration, and acceptance.

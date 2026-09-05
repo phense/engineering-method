@@ -5,6 +5,11 @@ combines selected Spec Kit, OpenSpec and Superpowers practices with durable
 project state, cohesive implementation slices and architecture verification.
 Small edits stay small; complex changes receive the evidence they need.
 
+Every skill follows a shared [proportionality rule](shared/policies/proportionality.md):
+local checks first, reuse unaffected evidence, focused review of fixes, and an
+effort brake before testing or delegation grows beyond the task. Subscription
+limits and model-effort permissions remain binding across quota resets.
+
 Version `0.1.0` is a local pre-release candidate. The
 [approved design](docs/specs/2026-09-04-engineering-method-design.md) defines the
 scope; [verification records](docs/verification/EM-004-acceptance.md) distinguish
