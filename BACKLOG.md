@@ -81,8 +81,9 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - 🔄 `EM-005.2` **P2** Add Codex/Claude trigger, collision, fallback, and workflow evaluations.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.3","title":"Execute the large-feature architecture fixture on both hosts.","status":"in_progress","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
   - 🔄 `EM-005.3` **P2** Execute the large-feature architecture fixture on both hosts.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.4","title":"Complete static, package, and clean-install validation.","status":"in_progress","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
-  - 🔄 `EM-005.4` **P2** Complete static, package, and clean-install validation.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.4","title":"Complete static, package, and clean-install validation.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"Bounded local tests, reproducible package and native clean installs passed on 2508f3e; this does not complete the original live cross-host release gate.","updated_at":"2026-09-05T14:09:49Z"} -->
+  - ✅ `EM-005.4` **P2** Complete static, package, and clean-install validation.
+    - Notes: Bounded local tests, reproducible package and native clean installs passed on 2508f3e; this does not complete the original live cross-host release gate.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.5","title":"Write and verify the public README and third-party notices.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"2026-09-05T11:04:23Z"} -->
   - ✅ `EM-005.5` **P2** Write and verify the public README and third-party notices.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.6","title":"Run the system-architect release gate.","status":"open","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
@@ -90,3 +91,6 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005.7","title":"Apply shared proportionality and an effort brake to every skill.","status":"complete","priority":"P2","parent_id":"EM-005","depends_on":[],"notes":"User-approved scope correction; see docs/verification/EM-005-completion-path.md for remaining release evidence.","updated_at":"2026-09-05T13:22:56Z"} -->
   - ✅ `EM-005.7` **P2** Apply shared proportionality and an effort brake to every skill.
     - Notes: User-approved scope correction; see docs/verification/EM-005-completion-path.md for remaining release evidence.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-006","title":"Publish the documented public prerelease with bounded verification","status":"in_progress","priority":"P2","parent_id":null,"depends_on":[],"notes":"Explicitly authorized public repository, main push and prerelease; no issue migration. Original EM-005 technical acceptance remains open.","updated_at":"2026-09-05T14:02:11Z"} -->
+- 🔄 `EM-006` **P2** Publish the documented public prerelease with bounded verification
+  - Notes: Explicitly authorized public repository, main push and prerelease; no issue migration. Original EM-005 technical acceptance remains open.
