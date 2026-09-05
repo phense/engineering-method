@@ -37,7 +37,16 @@ def normalize_skill(name):
 
 def model_policy(host, plugin=ROOT):
     text = (plugin / f"shared/platform/{host}.md").read_text()
-    return json.loads(re.search(r"```json\n(.*?)\n```", text, re.DOTALL).group(1))
+    policy = json.loads(re.search(r"```json\n(.*?)\n```", text, re.DOTALL).group(1))
+    model = os.environ.get("EM_EVAL_" + host.upper() + "_MODEL")
+    effort = os.environ.get("EM_EVAL_" + host.upper() + "_EFFORT")
+    if model or effort:
+        if not model or not re.fullmatch(r"[a-zA-Z0-9_.-]+", model) or effort not in {"low", "medium", "high"}:
+            raise EvalFailure("invalid_explicit_evaluation_model_override")
+        choice = {"model": model, "effort": effort}
+        policy["coordinator"] = choice.copy()
+        policy["roles"] = {role: [choice.copy()] for role in policy["roles"]}
+    return policy
 
 def model_effort(host, model, plugin=ROOT):
     for choices in model_policy(host, plugin)["roles"].values():
@@ -524,6 +533,10 @@ def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", b
     for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CLAUDECODE", "ANTHROPIC_AUTH_TOKEN"):
         env.pop(key, None)
     effort = model_effort(host, model, plugin)
+    if os.environ.get("EM_EVAL_" + host.upper() + "_MODEL"):
+        prompt += (f"\nExplicit user override for this evaluation: coordinator and all subagents "
+                   f"must use {model} at {effort} effort. This overrides adapter defaults and "
+                   "earlier model/effort preferences in this task. Do not raise effort or substitute models.")
     if host == "codex":
         env["CODEX_HOME"] = str(auth_home or config)
         schema = config / "decision-schema.json"

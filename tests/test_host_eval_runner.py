@@ -16,6 +16,13 @@ from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check
 
 
 class HostRunnerTests(unittest.TestCase):
+    def setUp(self):
+        # Test defaults independently of the invoking live evaluation policy.
+        override = patch.dict(os.environ, {f"EM_EVAL_{host}_{field}": ""
+                             for host in ("CODEX", "CLAUDE") for field in ("MODEL", "EFFORT")})
+        override.start()
+        self.addCleanup(override.stop)
+
     def test_dynamic_batch_read_requires_actual_read_and_exact_evaluated_skill_content(self):
         with tempfile.TemporaryDirectory() as directory:
             plugin = Path(directory)
@@ -199,6 +206,25 @@ class HostRunnerTests(unittest.TestCase):
             transcript["tools"] = [{"name": "command", "input": "gh issue create --title test"}]
             with self.assertRaisesRegex(EvalFailure, "unavailable_capability"):
                 check_routing(transcript, expected, root)
+
+    def test_explicit_evaluation_model_override_controls_roles_effort_and_native_prompt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            plugin = Path(__file__).resolve().parents[1]
+            for host, model in (("codex", "gpt-6-astra"), ("claude", "claude-fable-5-1")):
+                with self.subTest(host=host), patch.dict(os.environ, {
+                    "EM_EVAL_" + host.upper() + "_MODEL": model,
+                    "EM_EVAL_" + host.upper() + "_EFFORT": "low",
+                }):
+                    from scripts.run_host_evals import model_policy, model_effort
+                    policy = model_policy(host, plugin)
+                    self.assertEqual({"model": model, "effort": "low"}, policy["coordinator"])
+                    self.assertEqual("low", model_effort(host, model, plugin))
+                    self.assertTrue(all(v == [{"model": model, "effort": "low"}] for v in policy["roles"].values()))
+                    command, _ = host_command(host, root, plugin, root, model, prompt="Evaluate.")
+                    self.assertIn("coordinator and all subagents", command[-1])
+                    self.assertIn(model, command[-1])
+                    self.assertIn("low", command[-1])
 
     def test_model_effort_comes_from_host_adapter(self):
         with tempfile.TemporaryDirectory() as directory:

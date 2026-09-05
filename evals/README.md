@@ -66,3 +66,14 @@ These test the policy response and observed absence of prohibited operations;
 they do not simulate a provider outage or prove a live unavailable-model retry.
 Expected fallback fields remain evaluator-only. No unavailable model request,
 credential transfer, remote mutation, or global worktree change is needed.
+
+## Explicit model selection for one evaluation invocation
+
+When the user specifies models and effort for a run, set both variables per host:
+`EM_EVAL_CODEX_MODEL` / `EM_EVAL_CODEX_EFFORT` and
+`EM_EVAL_CLAUDE_MODEL` / `EM_EVAL_CLAUDE_EFFORT`. These affect evaluation roles,
+native CLI arguments, recorded model/effort and the explicit subagent instruction.
+They do not change installed plugin defaults or acceptance assertions. Model IDs
+must be available on the authenticated host; unsupported values fail the run.
+For example, use `gpt-6-astra` and `claude-fable-5-1` with effort `low` when
+explicitly requested. Unset these variables for ordinary adapter defaults.
