@@ -1,0 +1,8 @@
+{
+  "id": "new-feature",
+  "prompt": "Design a new checkout capability spanning orders, inventory reservations, and payments, with failure recovery and shared contracts. This is a new multi-component feature.",
+  "files": {
+    "README.md": "Existing application has no checkout implementation.\n"
+  },
+  "architectural": true
+}

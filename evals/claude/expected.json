@@ -1,0 +1,234 @@
+{
+"sequential-fallback": {
+  "primary": "orchestrated-implementation",
+  "supporting": [
+    "project-backlog"
+  ],
+  "prohibited": [
+    "speckit-specify",
+    "speckit-plan",
+    "speckit-tasks",
+    "speckit-converge",
+    "openspec-propose",
+    "openspec-apply",
+    "openspec-archive"
+  ],
+  "artifacts": [
+    "decision.md",
+    "fallback.json"
+  ],
+  "fallback": {
+    "selected_role": "standard",
+    "spawn_subagents": false,
+    "create_worktree": false,
+    "use_memory": false,
+    "use_github": false
+  }
+},
+"optional-integrations-fallback": {
+  "primary": "systematic-debugging",
+  "supporting": [
+    "project-backlog"
+  ],
+  "prohibited": [
+    "speckit-specify",
+    "speckit-plan",
+    "speckit-tasks",
+    "speckit-converge",
+    "openspec-propose",
+    "openspec-apply",
+    "openspec-archive"
+  ],
+  "artifacts": [
+    "decision.md",
+    "fallback.json"
+  ],
+  "fallback": {
+    "selected_role": "standard",
+    "spawn_subagents": false,
+    "create_worktree": false,
+    "use_memory": false,
+    "use_github": false,
+    "retry_authentication": false
+  }
+},
+  "trivial-edit": {
+    "primary": "native-focused-edit",
+    "supporting": [],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "reproducible-bug": {
+    "primary": "systematic-debugging",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "bounded-delta": {
+    "primary": "openspec-propose",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "new-feature": {
+    "primary": "speckit-specify",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "architecture-migration": {
+    "primary": "speckit-specify",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "existing-speckit": {
+    "primary": "speckit-plan",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "existing-openspec": {
+    "primary": "openspec-apply",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "received-review": {
+    "primary": "receiving-code-review",
+    "supporting": [],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "independent-failures": {
+    "primary": "systematic-debugging",
+    "supporting": [
+      "dispatching-parallel-agents"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "unsupported-completion": {
+    "primary": "verification-before-completion",
+    "supporting": [],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  }
+}

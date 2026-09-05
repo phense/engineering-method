@@ -1,0 +1,10 @@
+{
+  "id": "existing-openspec",
+  "prompt": "Resume the approved OpenSpec change export-semicolon. Proposal, delta specification, and tasks are complete; apply its remaining task. Preserve the active lifecycle.",
+  "files": {
+    "openspec/changes/export-semicolon/proposal.md": "# Approved: optional semicolon delimiter\n",
+    "openspec/changes/export-semicolon/specs/export/spec.md": "# MODIFIED\nOptional delimiter defaults to comma; semicolon allowed.\n",
+    "openspec/changes/export-semicolon/tasks.md": "- [ ] Add optional delimiter and tests preserving comma default.\n",
+    "exporter.py": "def export(values):\n    return ','.join(values)\n"
+  }
+}

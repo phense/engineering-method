@@ -1,0 +1,7 @@
+{
+  "id": "bounded-delta",
+  "prompt": "Change the existing CSV exporter so callers may opt into a semicolon delimiter. Default comma output must remain unchanged. This is one bounded existing capability.",
+  "files": {
+    "exporter.py": "def export(values):\n    return ','.join(values)\n"
+  }
+}

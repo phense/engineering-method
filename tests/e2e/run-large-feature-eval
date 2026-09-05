@@ -1,0 +1,153 @@
+#!/usr/bin/env python3
+"""Execute the same architecture workflow through either or both installed hosts."""
+from __future__ import annotations
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+import tempfile
+from datetime import datetime, timezone
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from scripts.run_host_evals import (EvalFailure, diagnostic_events, execute, fingerprint,
+                                   host_command, parse_transcript, prepare_repo, private_transcript,
+                                   retain_project, model_policy, model_effort)
+from tests.e2e.assert_large_feature import assert_host_run, ARTIFACTS, PHASES
+
+def run(host, output, auth_home, timeout, plugin):
+    source_sha256 = fingerprint(plugin)
+    with tempfile.TemporaryDirectory(prefix="engineering-method-architecture-") as directory:
+        temporary = Path(directory)
+        project, config = temporary / "project", temporary / "config"
+        config.mkdir()
+        prepare_repo(project, {"files": {}}, plugin)
+        fixture = ROOT / "tests/fixtures/large-feature"
+        shutil.copytree(fixture / "initial", project / "initial")
+        # Publish acceptance tests and interface definitions, never the solved implementation.
+        shutil.copytree(fixture / "project/integration_tests", project / "integration_tests",
+                        ignore=shutil.ignore_patterns("__pycache__"))
+        (project / "contract").mkdir()
+        for name in ("models.py", "ports.py"):
+            shutil.copy2(fixture / "project/checkout" / name, project / "contract" / name)
+        assertion = ROOT / "tests/e2e/assert_large_feature.py"
+        prompt = f"""
+Build and verify the checkout feature in this disposable evaluation repository.
+Inspect initial/*.py to discover its cross-component interface and recovery
+defects before implementation. Derive a specification, technical plan, relevant
+UML findings, stable tasks, cohesive owned implementation slices, independent
+reviews, reconciled as-built UML, real success/recovery integration tests,
+convergence and fresh final verification. Preserve initial/ and supplied tests.
+Use the available engineering-method skills and native tools to open them.
+The source under contract/ supplies public interface definitions; create the
+checkout package implementing them and the supplied integration tests.
+Do not read or copy a solved project or expected evaluation answers from elsewhere.
+
+This approved bounded fixture needs no further design confirmation. Work only in
+this repository. Use a strong coordinator at medium effort, cost-appropriate
+bounded subagents when supported, and independent review for integration work.
+Label the independent review assignment explicitly as read-only in its brief.
+Never claim a subagent ran if the host lacks one: report the limitation and fail
+the integration review gate rather than self-approving.
+
+After completing each phase, invoke this command via a separate tool execution:
+python3 {assertion} --project . --checkpoint PHASE
+Use this exact phase order: {', '.join(PHASES)}.
+Required phase artifact paths: {json.dumps(ARTIFACTS)}.
+Do not create checkout/*.py until findings and tasks checkpoints succeed.
+Keep findings and initial stable task identities intact after those checkpoints;
+store task completion progress separately. Record every phase when it actually
+finishes, not retroactively after implementation.
+
+reports/slices.json must be an array; each report supplies slice_id, owned_paths,
+interfaces, test_command, exact test_output copied from a successful tool result,
+review_path, and evidence-backed root_cause. Each review is a separate file.
+Use a standalone python3 -m unittest command via tools, with no echo or chained
+commands, and copy its full output into the report. Each independent reviewer
+must return the same fenced JSON object stored in its named review_path:
+status exactly clean, actionable_findings an empty array, reviewed_files a map
+of owned file paths to their actual SHA-256 hashes. Include that review_path in
+the read-only assignment. A spawned but still-running reviewer is not completion.
+The common skills and templates govern report content and review independence.
+
+The final project uses the fixture's supported evidence schema: convergence.json
+contains the five common completion booleans and reconciliation_path,
+integration_plan_path, review_path, verification_path, verification_command.
+Reconciliation uses a JSON fenced object with differences (finding_id,
+disposition, evidence paths) and unresolved_defects. The as-built model is
+docs/uml/as-built-model.json with component.reserve_returns,
+success_sequence.messages (runtime event names), recovery_sequence fields
+failure, transition, compensation, terminal, and state.states. The fixture oracle
+supports the supplied small checkout API and Mermaid notation; use its failures
+as concrete verification findings. Invoke
+python3 {assertion} --project .
+to check the current project. Final-review.md must have Status: clean and a
+fenced JSON reviewed_sha256 string covering current code/tests/UML. Only after
+independent review, bind its reviewed content with
+python3 {assertion} --project . --refresh-review-digest
+(the existing field can start with a zero). Never refresh a digest to hide a
+review finding. Re-run review after changing reviewed implementation.
+Finish with ONLY JSON {{"primary":"orchestrated-implementation","supporting":[]}}.
+Actual tools and artifacts, not this final JSON, determine acceptance.
+"""
+        model = model_policy(host, plugin)["coordinator"]["model"]
+        command, env = host_command(host, project, plugin, config, model, auth_home, prompt, budget=10)
+        stdout = ""
+        try:
+            stdout = execute(command, project, env, timeout)
+            transcript = parse_transcript(host, stdout)
+            result = assert_host_run(project, transcript)
+            if fingerprint(plugin) != source_sha256:
+                raise EvalFailure("plugin_changed_during_evaluation")
+            result.update({"host": host, "model": model, "event_count": transcript["event_count"],
+                           "tool_count": len(transcript["tools"]), "skills": transcript["skills"]})
+        except (EvalFailure, AssertionError, OSError, ValueError, KeyError) as exc:
+            result = {"host": host, "model": model, "status": "failed",
+                      "failure": str(exc) if isinstance(exc, EvalFailure) else type(exc).__name__}
+            if isinstance(exc, EvalFailure) and exc.transcript:
+                stdout = exc.transcript
+        target = output / host
+        target.mkdir(parents=True, exist_ok=True)
+        try:
+            retain_project(project, target / "artifacts")
+        except EvalFailure as exc:
+            result = {"host": host, "model": model, "status": "failed", "failure": str(exc)}
+        result["source_sha256"] = source_sha256
+        result["effort"] = model_effort(host, model, plugin)
+        private_transcript(target / "raw.jsonl", stdout)
+        (target / "events.json").write_text(json.dumps(diagnostic_events(stdout), indent=2) + "\n")
+        result["transcript_sha256"] = hashlib.sha256(stdout.encode()).hexdigest()
+        (target / "summary.json").write_text(json.dumps(result, indent=2) + "\n")
+        return result
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--host", choices=["codex", "claude", "both"], default="both")
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--codex-auth-home", type=Path)
+    parser.add_argument("--claude-auth-home", type=Path)
+    parser.add_argument("--timeout", type=float, default=600)
+    parser.add_argument("--plugin-root", type=Path, default=ROOT)
+    args = parser.parse_args(argv)
+    output = args.output_dir.resolve()
+    if output.is_relative_to(ROOT.resolve()):
+        parser.error("output must not overwrite fixture or plugin sources")
+    output.mkdir(parents=True, exist_ok=True)
+    os.chmod(output, 0o700)
+    results = []
+    for host in (("codex", "claude") if args.host == "both" else (args.host,)):
+        results.append(run(host, output, getattr(args, host + "_auth_home"), args.timeout, args.plugin_root))
+        print(json.dumps(results[-1]), flush=True)
+    commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+    summary = {"status": "passed" if all(result["status"] == "passed" for result in results) else "failed",
+               "source_commit": commit.stdout.strip(), "source_sha256": fingerprint(args.plugin_root),
+               "completed_at": datetime.now(timezone.utc).isoformat(), "results": results}
+    (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")
+    return 0 if summary["status"] == "passed" else 1
+
+if __name__ == "__main__":
+    raise SystemExit(main())

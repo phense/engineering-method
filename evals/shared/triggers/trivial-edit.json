@@ -1,0 +1,7 @@
+{
+  "id": "trivial-edit",
+  "prompt": "Fix the spelling mistake in README.md ('recieve' should be 'receive'). This documentation-only correction has no behavioral impact.",
+  "files": {
+    "README.md": "We recieve events.\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "existing-speckit",
+  "prompt": "Resume feature F-010 from its approved specification. Specification is complete; the next recorded phase is technical planning. Do not create another specification or switch lifecycle.",
+  "files": {
+    "specs/F-010-audit/spec.md": "# Approved audit export specification\nRequirement AUDIT-001: Export immutable audit rows by UTC date.\nScope: existing Python application, local output only.\nAcceptance: exact rows for inclusive day range; no source mutation.\n",
+    "resume.md": "Active feature F-010. Primary lifecycle: Spec Kit. Completed: specify. Next action: speckit-plan.\n"
+  }
+}

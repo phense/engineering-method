@@ -1,0 +1,8 @@
+{
+  "id": "architecture-migration",
+  "prompt": "Plan a zero-loss migration from one shared account database into two service-owned stores. Preserve transaction consistency and provide rollback across the changed system boundary.",
+  "files": {
+    "README.md": "Account and Billing share one SQL transaction and database today.\n"
+  },
+  "architectural": true
+}

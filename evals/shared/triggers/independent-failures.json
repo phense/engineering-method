@@ -1,0 +1,8 @@
+{
+  "id": "independent-failures",
+  "prompt": "Investigate two independent failures: parser test accepts invalid dates; unrelated renderer test returns the wrong title. Their files and interfaces are disjoint. Determine the appropriate bounded investigation workflow.",
+  "files": {
+    "parser.py": "def valid_date(value):\n    return True\n",
+    "renderer.py": "def title():\n    return 'Wrong'\n"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "id": "reproducible-bug",
+  "prompt": "Diagnose a localized reproducible bug: python3 -m unittest test_total fails because total([2, 3]) returns 6. Preserve intended addition behavior.",
+  "files": {
+    "total.py": "def total(values):\n    return sum(values) + 1\n",
+    "test_total.py": "import unittest\nfrom total import total\nclass TotalTest(unittest.TestCase):\n def test_add(self): self.assertEqual(5, total([2,3]))\n"
+  }
+}

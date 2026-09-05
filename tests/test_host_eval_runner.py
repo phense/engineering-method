@@ -1,0 +1,171 @@
+"""Host process boundaries must fail closed and require observable skill use."""
+
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import tempfile
+import time
+import unittest
+from unittest.mock import patch
+
+from scripts.run_host_evals import EvalFailure, execute, parse_transcript, check_routing, host_command, run_case
+
+
+class HostRunnerTests(unittest.TestCase):
+    def test_failed_run_retains_generated_artifacts_before_temp_cleanup(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory)
+            def failed_host(command, cwd, env, timeout):
+                (cwd / "failure.md").write_text("Actual generated diagnostic artifact.")
+                raise EvalFailure("timeout")
+            with patch("scripts.run_host_evals.execute", failed_host):
+                with self.assertRaisesRegex(EvalFailure, "timeout"):
+                    run_case("codex", {"id": "retention", "prompt": "diagnose", "files": {}},
+                             {"primary": "native-focused-edit", "supporting": [], "prohibited": [], "artifacts": []}, output, 1)
+            self.assertEqual("Actual generated diagnostic artifact.", (output / "retention/artifacts/failure.md").read_text())
+
+    def test_fallback_report_cannot_hide_prohibited_remote_or_agent_use(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            fallback = {"selected_role": "standard", "spawn_subagents": False, "use_github": False}
+            (root / "fallback.json").write_text(json.dumps(fallback))
+            expected = {"primary": "native-focused-edit", "supporting": [], "prohibited": [], "artifacts": ["fallback.json"], "fallback": fallback}
+            transcript = {"decision": {"primary": "native-focused-edit", "supporting": []}, "skills": [], "tools": []}
+            check_routing(transcript, expected, root)
+            transcript["tools"] = [{"name": "command", "input": "gh issue create --title test"}]
+            with self.assertRaisesRegex(EvalFailure, "unavailable_capability"):
+                check_routing(transcript, expected, root)
+
+    def test_model_effort_comes_from_host_adapter(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for host, model, effort in (("codex", "gpt-6-astra", "medium"), ("codex", "gpt-5.6-sol", "high"),
+                                        ("claude", "fable", "medium"), ("claude", "opus", "high")):
+                with self.subTest(model=model):
+                    command, env = host_command(host, root, Path(__file__).resolve().parents[1], root, model)
+                    if host == "codex":
+                        self.assertIn('model_reasoning_effort="' + effort + '"', command)
+                    else:
+                        self.assertEqual(effort, command[command.index("--effort") + 1])
+
+    def test_wrapper_cancellation_stops_host_descendants(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            marker = root / "orphan.txt"
+            ready = root / "ready.txt"
+            child = f"import time; from pathlib import Path; time.sleep(0.6); Path({str(marker)!r}).write_text('orphan')"
+            host = f"import subprocess,sys,time; from pathlib import Path; subprocess.Popen([sys.executable,'-c',{child!r}]); Path({str(ready)!r}).write_text('ready'); time.sleep(10)"
+            wrapper = ("import sys; from pathlib import Path; from scripts.run_host_evals import execute; "
+                       f"execute([sys.executable,'-c',{host!r}],Path({str(root)!r}),{{}},10)")
+            process = subprocess.Popen([sys.executable, "-c", wrapper], stdout=subprocess.DEVNULL,
+                                       stderr=subprocess.DEVNULL, start_new_session=True)
+            try:
+                deadline = time.monotonic() + 3
+                while not ready.exists() and time.monotonic() < deadline:
+                    time.sleep(0.01)
+                self.assertTrue(ready.exists())
+                process.send_signal(signal.SIGTERM)
+                process.wait(timeout=2)
+                time.sleep(0.7)
+                self.assertFalse(marker.exists(), "cancelled host left an executing descendant")
+            finally:
+                if process.poll() is None:
+                    os.killpg(process.pid, signal.SIGKILL)
+                    process.wait()
+
+    def test_claude_empty_mcp_configuration_has_native_schema(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            command, env = host_command("claude", root, Path(__file__).resolve().parents[1], root, "haiku")
+            self.assertEqual({"mcpServers": {}}, json.loads(command[command.index("--mcp-config") + 1]))
+
+    def run_fake(self, code, timeout=2):
+        with tempfile.TemporaryDirectory() as directory:
+            return execute([sys.executable, "-c", code], Path(directory), {}, timeout)
+
+    def test_timeout_is_a_failure(self):
+        with self.assertRaisesRegex(EvalFailure, "timeout"):
+            self.run_fake("import time; time.sleep(10)", timeout=0.05)
+
+    def test_missing_host_is_a_failure(self):
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(EvalFailure, "missing_command"):
+                execute(["/nonexistent/em-host"], Path(directory), {}, 1)
+
+    def test_auth_failure_is_not_success_even_with_zero_exit(self):
+        with self.assertRaisesRegex(EvalFailure, "authentication"):
+            self.run_fake("print('Please login: authentication required')")
+
+    def test_malformed_jsonl_is_a_failure(self):
+        with self.assertRaisesRegex(EvalFailure, "malformed"):
+            parse_transcript("codex", "not JSON\n")
+
+    def test_claim_without_tool_evidence_cannot_pass(self):
+        decision = {"primary": "systematic-debugging", "supporting": ["project-backlog"]}
+        events = [{"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(decision)}}, {"type": "turn.completed"}]
+        transcript = parse_transcript("codex", "\n".join(map(json.dumps, events)))
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(EvalFailure, "skill_evidence"):
+                check_routing(transcript, {**decision, "prohibited": [], "artifacts": []}, Path(directory))
+
+    def test_successful_read_evidence_and_real_artifacts_pass(self):
+        decision = {"primary": "systematic-debugging", "supporting": ["project-backlog"]}
+        events = [{"type": "item.completed", "item": {"type": "command_execution", "command": "cat skills/systematic-debugging/SKILL.md skills/project-backlog/SKILL.md", "exit_code": 0, "aggregated_output": "# Skills"}}, {"type": "item.completed", "item": {"type": "agent_message", "text": json.dumps(decision)}}, {"type": "turn.completed"}]
+        transcript = parse_transcript("codex", "\n".join(map(json.dumps, events)))
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "decision.md").write_text("Diagnosis begins from the failure.")
+            check_routing(transcript, {**decision, "prohibited": ["openspec-apply"], "artifacts": ["decision.md"]}, root)
+            with self.assertRaisesRegex(EvalFailure, "selection"):
+                check_routing(transcript, {**decision, "primary": "openspec-apply", "prohibited": [], "artifacts": []}, root)
+
+    def test_collision_and_missing_terminal_are_failures(self):
+        with self.assertRaisesRegex(EvalFailure, "incomplete"):
+            parse_transcript("codex", json.dumps({"type": "thread.started"}))
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(EvalFailure, "selection"):
+                check_routing({"decision": {"primary": ["openspec-apply", "speckit-plan"], "supporting": []}, "skills": []},
+                              {"primary": "openspec-apply", "supporting": [], "prohibited": [], "artifacts": []}, Path(directory))
+
+    def test_claude_requires_successful_tool_result(self):
+        decision = {"primary": "openspec-apply", "supporting": []}
+        events = [{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "r1", "name": "Read", "input": {"file_path": "/repo/skills/openspec-apply/SKILL.md"}}]}},
+                  {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "r1", "content": "skill text"}]}},
+                  {"type": "result", "subtype": "success", "is_error": False, "result": json.dumps(decision)}]
+        parsed = parse_transcript("claude", "\n".join(map(json.dumps, events)))
+        self.assertEqual(["openspec-apply"], parsed["skills"])
+        events[1]["message"]["content"][0]["is_error"] = True
+        self.assertEqual([], parse_transcript("claude", "\n".join(map(json.dumps, events)))["skills"])
+
+    def test_claude_native_structured_output_is_the_decision(self):
+        decision = {"primary": "native-focused-edit", "supporting": []}
+        transcript = json.dumps({"type": "result", "subtype": "success", "is_error": False,
+                                 "result": "Assessment complete.", "structured_output": decision})
+        self.assertEqual(decision, parse_transcript("claude", transcript)["decision"])
+
+    def test_claude_plugin_prefix_normalizes_but_foreign_namespace_fails(self):
+        event = {"type": "result", "subtype": "success", "is_error": False,
+                 "structured_output": {"primary": "native-focused-edit", "supporting": ["engineering-method:verification-before-completion"]}}
+        parsed = parse_transcript("claude", json.dumps(event))
+        self.assertEqual(["verification-before-completion"], parsed["decision"]["supporting"])
+        event["structured_output"]["supporting"] = ["other-plugin:verification-before-completion"]
+        with self.assertRaisesRegex(EvalFailure, "namespace"):
+            parse_transcript("claude", json.dumps(event))
+
+    def test_explicit_prohibited_skill_invocation_overrides_denial_in_decision(self):
+        events = [{"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "s1", "name": "Skill", "input": {"skill": "engineering-method:openspec-apply"}}]}},
+                  {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "s1", "content": "loaded"}]}},
+                  {"type": "result", "subtype": "success", "structured_output": {"primary": "native-focused-edit", "supporting": []}}]
+        parsed = parse_transcript("claude", "\n".join(map(json.dumps, events)))
+        with tempfile.TemporaryDirectory() as directory:
+            with self.assertRaisesRegex(EvalFailure, "invoked"):
+                check_routing(parsed, {"primary": "native-focused-edit", "supporting": [], "prohibited": ["openspec-apply"], "artifacts": []}, Path(directory))
+
+    def test_codex_spawn_completion_is_not_reviewer_completion(self):
+        events = [{"type": "item.completed", "item": {"type": "collab_agent_tool_call", "tool": "spawn_agent", "status": "completed", "prompt": "Read-only review of reports/S1.md", "receiver_thread_ids": ["reviewer-running"]}},
+                  {"type": "item.completed", "item": {"type": "agent_message", "text": '{"primary":"orchestrated-implementation","supporting":[]}'}},
+                  {"type": "turn.completed"}]
+        self.assertEqual([], parse_transcript("codex", "\n".join(map(json.dumps, events)))["reviewers"])

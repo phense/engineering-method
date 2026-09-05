@@ -1,0 +1,7 @@
+{
+  "id": "received-review",
+  "prompt": "Review feedback says exporter.py drops empty values. Verify this feedback against the code before deciding whether to change it; avoid blindly applying the suggestion.",
+  "files": {
+    "exporter.py": "def export(values):\n    return ','.join(values)\n"
+  }
+}
