@@ -57,21 +57,21 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-003.5` **P1** Port review, worktree, and parallel-dispatch support.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-003.6","title":"Integrate project-backlog support and collision acceptance.","status":"complete","priority":"P1","parent_id":"EM-003","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
   - ✅ `EM-003.6` **P1** Integrate project-backlog support and collision acceptance.
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-004","title":"Add efficient subagent orchestration and the architecture gate","status":"in_progress","priority":"P1","parent_id":null,"depends_on":["EM-002","EM-003"],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
-- 🔄 `EM-004` **P1** Add efficient subagent orchestration and the architecture gate
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-004","title":"Add efficient subagent orchestration and the architecture gate","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-002","EM-003"],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+- ✅ `EM-004` **P1** Add efficient subagent orchestration and the architecture gate
   - Depends on: `EM-002`, `EM-003`
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.1","title":"Add shared model roles, host adapters, and agent-role briefs.","status":"in_progress","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-04T14:43:51Z"} -->
-  - 🔄 `EM-004.1` **P1** Add shared model roles, host adapters, and agent-role briefs.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.2","title":"Implement cohesive-slice orchestration with targeted review and evidence-driven fix loops.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-004.2` **P1** Implement cohesive-slice orchestration with targeted review and evidence-driven fix loops.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.3","title":"Implement evidence-driven defect convergence.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-004.3` **P1** Implement evidence-driven defect convergence.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.4","title":"Implement design-time and as-built UML analysis under `docs/uml/`.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-004.4` **P1** Implement design-time and as-built UML analysis under `docs/uml/`.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.5","title":"Add the system-architect integration-test gate.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-004.5` **P1** Add the system-architect integration-test gate.
-  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.6","title":"Verify recovery across compaction and subagent lifecycle boundaries.","status":"open","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
-  - ⭕ `EM-004.6` **P1** Verify recovery across compaction and subagent lifecycle boundaries.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.1","title":"Add shared model roles, host adapters, and agent-role briefs.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+  - ✅ `EM-004.1` **P1** Add shared model roles, host adapters, and agent-role briefs.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.2","title":"Implement cohesive-slice orchestration with targeted review and evidence-driven fix loops.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+  - ✅ `EM-004.2` **P1** Implement cohesive-slice orchestration with targeted review and evidence-driven fix loops.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.3","title":"Implement evidence-driven defect convergence.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+  - ✅ `EM-004.3` **P1** Implement evidence-driven defect convergence.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.4","title":"Implement design-time and as-built UML analysis under `docs/uml/`.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+  - ✅ `EM-004.4` **P1** Implement design-time and as-built UML analysis under `docs/uml/`.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.5","title":"Add the system-architect integration-test gate.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+  - ✅ `EM-004.5` **P1** Add the system-architect integration-test gate.
+  <!-- engineering-method:backlog {"schema_version":1,"id":"EM-004.6","title":"Verify recovery across compaction and subagent lifecycle boundaries.","status":"complete","priority":"P1","parent_id":"EM-004","depends_on":[],"notes":"","updated_at":"2026-09-05T10:52:23Z"} -->
+  - ✅ `EM-004.6` **P1** Verify recovery across compaction and subagent lifecycle boundaries.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"open","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
 - ⭕ `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`
