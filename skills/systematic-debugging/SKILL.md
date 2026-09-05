@@ -1,6 +1,6 @@
 ---
 name: systematic-debugging
-description: "Use when an observed failure, test regression, build break, performance problem, or unexplained behavior needs diagnosis before repair. Not for a deliberate behavior change with no defect evidence."
+description: "Use when an observed failure, test regression, build break, performance problem, or unexplained behavior needs diagnosis before repair. Not for unverified review feedback: use receiving-code-review first. Not for a deliberate behavior change with no defect evidence."
 ---
 
 # Systematic Debugging
@@ -60,8 +60,15 @@ Use for an observed technical failure: a repeatable bug, test regression, build
 or integration break, performance regression, or unexplained behavior. Capture
 the exact symptom before diagnosis.
 
+An incoming review allegation is not an observed failure. Let
+`receiving-code-review` verify it first; enter debugging only after current
+evidence confirms a failure whose cause still needs diagnosis.
+
 ## Do not use for
 
+- Unverified incoming review feedback, including a claimed bug. Its verification
+  and disposition belong to `receiving-code-review`; a disproved allegation does
+  not create a debugging task.
 - A desired intentional behavior change with no evidence that current behavior
   is defective; use `openspec-propose` or `speckit-specify` by scope.
 - General code improvement without a failing or unexplained outcome.

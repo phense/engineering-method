@@ -1092,6 +1092,18 @@ class CollaborationSkillContractTests(unittest.TestCase):
         "dispatching-parallel-agents",
     )
 
+    def test_unverified_review_feedback_has_exclusive_entry_boundary(self) -> None:
+        """A review allegation must not become a confirmed bug merely by being reported."""
+        receiving = read("skills/receiving-code-review/SKILL.md")
+        debugging = read("skills/systematic-debugging/SKILL.md")
+        receiving_description = frontmatter(receiving)["description"].lower()
+        debugging_description = frontmatter(debugging)["description"].lower()
+        self.assertIn("unverified review feedback", receiving_description)
+        self.assertIn("not for unverified review feedback", debugging_description)
+        self.assertIn("receiving-code-review", debugging_description)
+        self.assertIn("confirmed failure", normalized(receiving))
+        self.assertIn("remains primary", normalized(receiving))
+
     def test_review_depth_is_risk_proportionate(self) -> None:
         """Mechanical work may avoid extra cost while risky work gets independence."""
         content = normalized(read("skills/requesting-code-review/SKILL.md"))

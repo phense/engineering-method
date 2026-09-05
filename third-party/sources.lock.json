@@ -162,7 +162,7 @@
           "source_path": "skills/systematic-debugging/SKILL.md",
           "destination_path": "skills/systematic-debugging/SKILL.md",
           "source_sha256": "808fc5717aa88ad65efff312b11c186294d3e6ee301afb584e2f86599b137787",
-          "destination_sha256": "64068985be6f5076bf7ff55cb221668a0fd9bf07de1ba0090d7a528c9ab36a97",
+          "destination_sha256": "878ef948ce75b8fdc389ef2cd7fd83506ff22b1ec4402ce4e48134842398b79d",
           "modification_status": "adapted"
         },
         {
@@ -204,7 +204,7 @@
           "source_path": "skills/receiving-code-review/SKILL.md",
           "destination_path": "skills/receiving-code-review/SKILL.md",
           "source_sha256": "091df1629510af1b92fc4abd6f96732ebedb4cb2c0f3457e8f2740b0504a2438",
-          "destination_sha256": "cc98777913f4393427820882b8d1551e2892d37f8d4263e187ee2c16cd61c6be",
+          "destination_sha256": "a5088fed37c3e4c42537a41cbbab1233216db9dbebe541ca6a56b499b5f5aa46",
           "modification_status": "adapted"
         },
         {

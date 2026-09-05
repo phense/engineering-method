@@ -1,12 +1,19 @@
 ---
 name: receiving-code-review
-description: "Use when review feedback is received and must be understood, checked against the current repository, and resolved. Not for blindly implementing suggestions or accepting a verdict without evidence."
+description: "Use as the primary workflow for unverified review feedback, including claimed bugs, until checked against the current repository and dispositioned. Not for blindly implementing suggestions or accepting a verdict without evidence."
 ---
 
 # Receiving Code Review
 
 Treat feedback as a technical hypothesis. Understand it, verify against current
 code and governing requirements, then act on evidence.
+
+This workflow remains primary while checking an incoming allegation, even when
+that check runs code or tests. If the allegation is disproved, record the evidence
+and reject it without entering a debugging lifecycle. Transfer to
+`systematic-debugging` only for a confirmed failure whose cause still needs
+diagnosis; the review finding retains its identity and returns here for its
+final disposition after diagnosis and repair.
 
 ## Evaluate first
 
