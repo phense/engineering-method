@@ -3,8 +3,8 @@
 ## Stable work ID
 
 - Change ID: `<change-id>`
-- Proposal: `openspec/changes/<change-id>/proposal.md`
-- Artifact path: `openspec/changes/<change-id>/tasks.md`
+- Proposal: `docs/openspec/changes/<change-id>/proposal.md`
+- Artifact path: `docs/openspec/changes/<change-id>/tasks.md`
 
 Each checked item represents fully implemented behavior with its required
 evidence. Keep task IDs stable when ordering changes.

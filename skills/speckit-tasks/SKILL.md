@@ -71,15 +71,15 @@ before implementation starts.
 
 ## Consumes
 
-- `specs/<stable-feature-id>-<name>/spec.md`.
-- `specs/<stable-feature-id>-<name>/plan.md`.
+- `docs/specs/<stable-feature-id>-<name>/spec.md`.
+- `docs/specs/<stable-feature-id>-<name>/plan.md`.
 - Justified `research.md`, `data-model.md`, `contracts/`, and `quickstart.md`
   artifacts when present.
 - Design-time UML evidence and every open architecture finding.
 
 ## Produces
 
-`specs/<stable-feature-id>-<name>/tasks.md` from
+`docs/specs/<stable-feature-id>-<name>/tasks.md` from
 the [installed tasks template](../../templates/spec-kit/tasks.md), with
 immutable sequential task IDs, explicit
 paths, source requirement or finding references, dependency edges, and

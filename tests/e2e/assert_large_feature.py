@@ -17,11 +17,11 @@ from tests.large_feature_evidence import assert_large_feature, evidence_digest, 
 PHASES = ("specify", "plan", "findings", "tasks", "slices", "as-built",
           "integration", "converge", "review", "verification")
 ARTIFACTS = {
-    "specify": ["specs/F-001-checkout/spec.md"],
-    "plan": ["specs/F-001-checkout/plan.md"],
+    "specify": ["docs/specs/F-001-checkout/spec.md"],
+    "plan": ["docs/specs/F-001-checkout/plan.md"],
     "findings": ["docs/uml/findings.md", "docs/uml/design-component.mmd",
                  "docs/uml/design-recovery-sequence.mmd", "docs/uml/design-state.mmd"],
-    "tasks": ["specs/F-001-checkout/tasks.md"],
+    "tasks": ["docs/specs/F-001-checkout/tasks.md"],
     "slices": ["reports/slices.json"],
     "as-built": ["docs/uml/reconciliation.md", "docs/uml/component.mmd",
                  "docs/uml/success-sequence.mmd", "docs/uml/recovery-sequence.mmd", "docs/uml/state.mmd"],
@@ -61,7 +61,7 @@ def history(project):
 
 def snapshot(project):
     paths = {}
-    for prefix in ("initial", "checkout", "integration_tests", "specs", "docs/uml", "evidence", "reports"):
+    for prefix in ("initial", "checkout", "integration_tests", "docs/specs", "docs/uml", "evidence", "reports"):
         for path in (project / prefix).rglob("*"):
             if path.is_file() and "__pycache__" not in path.parts:
                 paths[str(path.relative_to(project))] = hashlib.sha256(path.read_bytes()).hexdigest()
@@ -83,7 +83,7 @@ def checkpoint(project, phase):
         need("release" in text.lower() and ("reverse" in text.lower() or "reversal" in text.lower()),
              "initial_compensation_finding_missing")
     if phase == "tasks":
-        text = (project / "specs/F-001-checkout/tasks.md").read_text()
+        text = (project / "docs/specs/F-001-checkout/tasks.md").read_text()
         need(all(term in text for term in ("AF-001", "AF-002", "T001", "T002", "### Slice")),
              "stable_finding_tasks_missing")
     if phase == "verification":

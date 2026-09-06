@@ -3,9 +3,9 @@
 ## Stable work ID
 
 - Feature ID: `<stable-feature-id>`
-- Specification: `specs/<stable-feature-id>-<name>/spec.md`
-- Plan: `specs/<stable-feature-id>-<name>/plan.md`
-- Artifact path: `specs/<stable-feature-id>-<name>/tasks.md`
+- Specification: `docs/specs/<stable-feature-id>-<name>/spec.md`
+- Plan: `docs/specs/<stable-feature-id>-<name>/plan.md`
+- Artifact path: `docs/specs/<stable-feature-id>-<name>/tasks.md`
 
 Use stable task IDs. Order blockers before their dependents and group work into
 cohesive, independently verifiable slices. Mark `[P]` only when ownership and

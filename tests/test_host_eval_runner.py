@@ -118,7 +118,7 @@ class HostRunnerTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory) / "repo"
             prepare_repo(root, case, plugin)
-            change = root / "openspec/changes/export-semicolon"
+            change = root / "docs/openspec/changes/export-semicolon"
             for relative in ("proposal.md", "design.md", "tasks.md", "specs/export/spec.md"):
                 with self.subTest(artifact=relative):
                     self.assertTrue((change / relative).is_file(), "approved apply fixture lacks required planning input")

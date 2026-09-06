@@ -82,7 +82,7 @@ next phase instead of specifying it again.
 ## Produces
 
 Create or update exactly
-`specs/<stable-feature-id>-<name>/spec.md` from
+`docs/specs/<stable-feature-id>-<name>/spec.md` from
 the [installed specification template](../../templates/spec-kit/spec.md).
 Preserve an existing stable feature ID; otherwise
 derive an immutable project-conventional ID and record the source request.

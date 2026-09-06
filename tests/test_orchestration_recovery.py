@@ -17,9 +17,9 @@ from engineering_method.models import BacklogItem, Priority, TaskStatus
 ROOT = Path(__file__).resolve().parents[1]
 WORK_ID = "EM-004"
 ARTIFACTS = (
-    "specs/F-004/spec.md",
-    "specs/F-004/plan.md",
-    "specs/F-004/tasks.md",
+    "docs/specs/F-004/spec.md",
+    "docs/specs/F-004/plan.md",
+    "docs/specs/F-004/tasks.md",
     "docs/uml/component.mmd",
     "reports/slice.md",
     "artifacts/integration.txt",

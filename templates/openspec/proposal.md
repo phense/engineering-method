@@ -3,7 +3,7 @@
 ## Stable work ID
 
 - Change ID: `<change-id>`
-- Artifact path: `openspec/changes/<change-id>/proposal.md`
+- Artifact path: `docs/openspec/changes/<change-id>/proposal.md`
 - Status: Proposed
 
 ## Why
@@ -13,7 +13,7 @@
 ## Changed requirements
 
 List added, modified, removed, or renamed requirements under
-`openspec/changes/<change-id>/specs/<capability>/spec.md`. Describe only the
+`docs/openspec/changes/<change-id>/specs/<capability>/spec.md`. Describe only the
 delta to the existing capability.
 
 ## Acceptance criteria
