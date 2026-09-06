@@ -3,7 +3,7 @@
 ## Stable work ID
 
 - Feature ID: `<stable-feature-id>`
-- Artifact path: `specs/<stable-feature-id>-<name>/spec.md`
+- Artifact path: `docs/specs/<stable-feature-id>-<name>/spec.md`
 - Status: Draft
 - Source request: <concise user outcome>
 

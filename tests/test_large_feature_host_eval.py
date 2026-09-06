@@ -25,12 +25,12 @@ class ArchitectureHostTests(unittest.TestCase):
             project = Path(directory)
             shutil.copytree(fixture / "initial", project / "initial")
             shutil.copytree(fixture / "project/integration_tests", project / "integration_tests")
-            specs = project / "specs/F-001-checkout"
+            specs = project / "docs/specs/F-001-checkout"
             specs.mkdir(parents=True)
             (specs / "spec.md").write_text("Approved checkout behavior and recovery requirements.")
             (specs / "plan.md").write_text("Order, Inventory, Payment, Checkout ownership and contracts.")
             shutil.copytree(fixture / "docs/uml", project / "docs/uml")
-            shutil.copy2(fixture / "specs/F-001-checkout/tasks.md", specs / "tasks.md")
+            shutil.copy2(fixture / "docs/specs/F-001-checkout/tasks.md", specs / "tasks.md")
             transcript = {"tools": [{"name": "command", "input": "cat initial/inventory.py", "output": (project / "initial/inventory.py").read_text()}],
                           "skills": list(SKILLS), "reviewers": []}
             for phase in PHASES:

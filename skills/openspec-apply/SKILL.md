@@ -1,6 +1,6 @@
 ---
 name: openspec-apply
-description: "Use when an existing change under openspec/changes has complete proposal, design, delta requirements, and tasks ready for implementation. Not for proposing, archiving, defect diagnosis, or escalated work."
+description: "Use when an existing change under docs/openspec/changes has complete proposal, design, delta requirements, and tasks ready for implementation. Not for proposing, archiving, defect diagnosis, or escalated work."
 ---
 
 # OpenSpec Apply
@@ -72,10 +72,10 @@ continuation of that change.
 
 ## Consumes
 
-- `openspec/changes/<change-id>/proposal.md`
-- `openspec/changes/<change-id>/design.md`
-- `openspec/changes/<change-id>/tasks.md`
-- `openspec/changes/<change-id>/specs/<capability>/spec.md`
+- `docs/openspec/changes/<change-id>/proposal.md`
+- `docs/openspec/changes/<change-id>/design.md`
+- `docs/openspec/changes/<change-id>/tasks.md`
+- `docs/openspec/changes/<change-id>/specs/<capability>/spec.md`
 - Current project gates, code, tests, and validated run state.
 
 ## Produces

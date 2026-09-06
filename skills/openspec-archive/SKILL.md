@@ -73,9 +73,9 @@ verification passes.
 
 ## Consumes
 
-- The complete active directory at `openspec/changes/<change-id>/`.
-- Each delta spec under `specs/<capability>/spec.md` within that change.
-- The corresponding main `openspec/specs/<capability>/spec.md` files.
+- The complete active directory at `docs/openspec/changes/<change-id>/`.
+- Each delta spec under `docs/specs/<capability>/spec.md` within that change.
+- The corresponding main `docs/openspec/specs/<capability>/spec.md` files.
 - Completed task state, resolved review state, and fresh verification output.
 
 ## Produces
@@ -83,7 +83,7 @@ verification passes.
 - Main capability specs updated with accepted added, modified, removed, or
   renamed requirements while preserving unaffected requirements and scenarios.
 - The completed directory moved to
-  `openspec/changes/archive/yyyy-mm-dd-<change-id>/` without adding a second date
+  `docs/openspec/changes/archive/yyyy-mm-dd-<change-id>/` without adding a second date
   when the change ID is already date-prefixed.
 - A concise archive summary naming synchronized capabilities and evidence.
 

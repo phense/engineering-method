@@ -73,9 +73,9 @@ for the current Spec Kit feature.
 ## Consumes
 
 - Current application code and tests.
-- `specs/<stable-feature-id>-<name>/spec.md`.
-- `specs/<stable-feature-id>-<name>/plan.md`.
-- `specs/<stable-feature-id>-<name>/tasks.md`.
+- `docs/specs/<stable-feature-id>-<name>/spec.md`.
+- `docs/specs/<stable-feature-id>-<name>/plan.md`.
+- `docs/specs/<stable-feature-id>-<name>/tasks.md`.
 - As-built UML, integration-test results, resolved and open review findings, and
   fresh verification output.
 
@@ -84,7 +84,7 @@ for the current Spec Kit feature.
 A convergence findings summary. When actionable findings exist, append one new
 numbered Convergence section with stable traceable task IDs grouped under
 `### Slice <unique-slice-id>: <outcome>` headings to
-`specs/<stable-feature-id>-<name>/tasks.md`. When none exist, leave `tasks.md`
+`docs/specs/<stable-feature-id>-<name>/tasks.md`. When none exist, leave `tasks.md`
 byte-for-byte unchanged.
 
 ## Completion

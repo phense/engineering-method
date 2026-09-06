@@ -13,13 +13,13 @@ status: escalated
 ## Preserved change
 
 - Change ID: `<change-id>`
-- Preserved path: `openspec/changes/<change-id>/`
+- Preserved path: `docs/openspec/changes/<change-id>/`
 - Completed artifacts and work: <paths and stable task IDs>
 - Open findings: <stable IDs and evidence>
 
 ## Spec Kit handoff
 
 - Stable feature ID: `<stable-feature-id>`
-- Feature path: `specs/<stable-feature-id>-<name>/spec.md`
+- Feature path: `docs/specs/<stable-feature-id>-<name>/spec.md`
 - Source requirements and decisions to carry forward: <references>
 - Exact next action: run the semantic `speckit-specify` phase from this record.

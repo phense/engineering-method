@@ -26,7 +26,7 @@ unverified review allegation enters `receiving-code-review` first.
 > format and the other commands unchanged.
 
 A bounded Brownfield change uses OpenSpec: `openspec-propose` records the delta
-requirements, design and tasks under `openspec/changes/<change>/`;
+requirements, design and tasks under `docs/openspec/changes/<change>/`;
 `openspec-apply` implements an approved complete change; `openspec-archive`
 synchronizes and archives its verified requirements. If inspection exposes a
 new system boundary or risky migration, record the escalation before handing
@@ -39,7 +39,7 @@ over to Spec Kit. Do not silently grow the original proposal.
 
 Spec Kit proceeds through `speckit-specify`, `speckit-plan`, the architecture
 gate, `speckit-tasks`, `orchestrated-implementation` and `speckit-converge`.
-Specification artifacts live under `specs/<feature>/`. Relevant diagrams and
+Specification artifacts live under `docs/specs/<feature>/`. Relevant diagrams and
 findings live under `docs/uml/` in the target project. Each diagram answers a
 named question; diagram count is not an acceptance criterion.
 

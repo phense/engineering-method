@@ -3,8 +3,8 @@
 ## Stable work ID
 
 - Feature ID: `<stable-feature-id>`
-- Specification: `specs/<stable-feature-id>-<name>/spec.md`
-- Artifact path: `specs/<stable-feature-id>-<name>/plan.md`
+- Specification: `docs/specs/<stable-feature-id>-<name>/spec.md`
+- Artifact path: `docs/specs/<stable-feature-id>-<name>/plan.md`
 
 ## Summary
 

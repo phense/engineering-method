@@ -1,11 +1,11 @@
 {
   "id": "sequential-fallback",
-  "prompt": "Resume the approved Spec Kit implementation tasks in specs/F-020-local/tasks.md. For this evaluation use capabilities.json as a simulated host observation: subagents and worktree creation are unavailable; the current fixture is already isolated. Assess safe execution without invoking unavailable tools. Write fallback.json with boolean spawn_subagents, create_worktree, use_memory, use_github and string selected_role, describing the decision for that snapshot. Keep work local; do not call remote services.",
+  "prompt": "Resume the approved Spec Kit implementation tasks in docs/specs/F-020-local/tasks.md. For this evaluation use capabilities.json as a simulated host observation: subagents and worktree creation are unavailable; the current fixture is already isolated. Assess safe execution without invoking unavailable tools. Write fallback.json with boolean spawn_subagents, create_worktree, use_memory, use_github and string selected_role, describing the decision for that snapshot. Keep work local; do not call remote services.",
   "files": {
     "capabilities.json": "{\"subagents\":false,\"worktree_creation\":false,\"current_workspace_isolated\":true,\"available_roles\":[\"standard\"],\"memory\":false,\"github\":false}",
-    "specs/F-020-local/spec.md": "Approved: add local deterministic CSV export.\n",
-    "specs/F-020-local/plan.md": "Approved: implement exporter plus focused tests in existing isolated workspace.\n",
-    "specs/F-020-local/tasks.md": "### Slice S1: Local CSV export\n- [ ] T001 Implement and verify approved deterministic CSV export.\n",
+    "docs/specs/F-020-local/spec.md": "Approved: add local deterministic CSV export.\n",
+    "docs/specs/F-020-local/plan.md": "Approved: implement exporter plus focused tests in existing isolated workspace.\n",
+    "docs/specs/F-020-local/tasks.md": "### Slice S1: Local CSV export\n- [ ] T001 Implement and verify approved deterministic CSV export.\n",
     "docs/uml/findings.md": "Architecture review complete: no open findings; one local pure interface.\n"
   }
 }

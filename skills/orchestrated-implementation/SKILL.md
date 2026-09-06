@@ -102,7 +102,7 @@ large feature or architecture-bearing change awaiting implementation.
 
 ## Consumes
 
-- `specs/<stable-feature-id>-<name>/tasks.md` with cohesive slices and stable
+- `docs/specs/<stable-feature-id>-<name>/tasks.md` with cohesive slices and stable
   requirement/finding references.
 - `docs/uml/findings.md` and the relevant design-time diagrams.
 - The stable work ID and current EM-002 run state.

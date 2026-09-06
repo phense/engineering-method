@@ -128,7 +128,7 @@ class InitialArchitectureFindingTests(unittest.TestCase):
     def test_design_findings_become_normal_tasks_before_implementation(self) -> None:
         """An architecture finding omitted from tasks cannot influence implementation."""
         findings = fenced_json(FIXTURE / "docs/uml/findings.md")
-        tasks = fenced_json(FIXTURE / "specs/F-001-checkout/tasks.md")
+        tasks = fenced_json(FIXTURE / "docs/specs/F-001-checkout/tasks.md")
         self.assertEqual("design_time_before_tasks", findings["created_phase"])
         finding_ids = [item["id"] for item in findings["findings"]]
         self.assertEqual(["AF-001", "AF-002"], finding_ids)

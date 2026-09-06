@@ -216,7 +216,7 @@ class OrchestrationScriptTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             self._repo(root)
-            tasks = root / "specs/F-001-checkout/tasks.md"
+            tasks = root / "docs/specs/F-001-checkout/tasks.md"
             tasks.parent.mkdir(parents=True)
             tasks.write_text(
                 "# Tasks\n\n### Slice S1: inventory contract\n\n"

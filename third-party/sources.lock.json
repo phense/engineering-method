@@ -22,49 +22,49 @@
           "source_path": "templates/spec-template.md",
           "destination_path": "templates/spec-kit/spec.md",
           "source_sha256": "3945437fc35cd30a5b2bf7beea680337c3516826d3efa5a6b92c4a7eca1ba28e",
-          "destination_sha256": "36744c24acb903c8db1582b120e79d5f14ced5b9c54b0e7291a601e8c25a5a85",
+          "destination_sha256": "96d69608b9c13b2d349d0410f348141636618ae98c46ff09aca84c7bf08fd545",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/plan-template.md",
           "destination_path": "templates/spec-kit/plan.md",
           "source_sha256": "dfba43da2b2a207ff8c177a0fba03af074fd45e261696b4b64172041fad2e992",
-          "destination_sha256": "65020d97be41931bd11506f82ed29345ae592020c99bf3c9e0577121d0e86002",
+          "destination_sha256": "d1ef93f8030259cde4e5c948c20901de38fdade9bf3a6aac487d9c517905ced8",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/tasks-template.md",
           "destination_path": "templates/spec-kit/tasks.md",
           "source_sha256": "1e448e9153462e8c5b5a55231a54c756d870a82950d4dd9425a2bf5b7008a0d9",
-          "destination_sha256": "236640801d57401402ff047910f1b6663aa517c8458db4b4703113b838d94530",
+          "destination_sha256": "0948857732a43dc638f75432dbd8ed24709cbbb68f5d84210fa73596eb45845d",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/specify.md",
           "destination_path": "skills/speckit-specify/SKILL.md",
           "source_sha256": "07de3d938def8407ccd30bd9a2c433bab8f299c10915fe86199bd10438b295ec",
-          "destination_sha256": "ab9244094b780bdb72b9fbfcc5c3b3f04e8c8e7d4bc5935898526862f5660fbf",
+          "destination_sha256": "e0dec8278a2f40b7505ea4c7e126bea5902bbc6c829450bb307967f74fc322f2",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/plan.md",
           "destination_path": "skills/speckit-plan/SKILL.md",
           "source_sha256": "c77757f07025404647134ba32cfc126ddf145fe20155a787266156c9bca4ecb2",
-          "destination_sha256": "4f1f9de1a5e0d6e9dad8993e3965d1e5e9c2821ffa0631101f637556f30ff7dc",
+          "destination_sha256": "3bc1e7ef89fd50e98132f2f6c14b91e45aa5865dda0c5bf53bd626a27dc9af86",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/tasks.md",
           "destination_path": "skills/speckit-tasks/SKILL.md",
           "source_sha256": "19d3465fdffefb95117c8de493d7f13785dff3b4ad2b8c02d18a3ca5bbc572b5",
-          "destination_sha256": "554475ebbb93f5b508cf28cdc3b2a9c42e832de2371d9e8e9271bf11d070b1d8",
+          "destination_sha256": "5c5b6f44421a94cae3fc8004501ebe1d071ea5d282af2a77f324dbf0b0818afa",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/converge.md",
           "destination_path": "skills/speckit-converge/SKILL.md",
           "source_sha256": "a6dbe49b66ef34f421294e4148afce2af93ba02cb1b861bd80f72f753ee52eed",
-          "destination_sha256": "903e75f0f8e59430d400bec64ea642b1193c84d861e66359905cfb1a19dcf28d",
+          "destination_sha256": "3527cca662f532e4d16cc05a1e981f52a0263b6e4e104b0d594b7d629823788e",
           "modification_status": "adapted"
         }
       ],
@@ -92,7 +92,7 @@
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "templates/openspec/proposal.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "5661332f9fd980de8f355031491af3c2915b2bdfdd8d1e5ad4757759a8ebcabc",
+          "destination_sha256": "5bbd7191de1e63d0d63f2e3c09069a87fc28e16e2399c15a169276689e0332c2",
           "modification_status": "adapted"
         },
         {
@@ -106,7 +106,7 @@
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "templates/openspec/tasks.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "74d64036a28ead4fcc3299ca3ad3561648bcfa8f0ae14116346743971781794e",
+          "destination_sha256": "ec638bceddd16421905d01a2a36cd27b7e71953e9c03d30bfa298dc1d4c1a6b4",
           "modification_status": "adapted"
         },
         {
@@ -120,21 +120,21 @@
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "skills/openspec-propose/SKILL.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "1d1672a479ecbe279f0a78c9e7e1d1a1a89d46974e02aa3a31e079c5abf2720b",
+          "destination_sha256": "04a9746e92326930a0b23d0628ab748cba72ecd55b136f888251a438af32dbaf",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-apply-change/SKILL.md",
           "destination_path": "skills/openspec-apply/SKILL.md",
           "source_sha256": "0cf1cb26935b55d83e240631500c8cee484a7b241c84a705387c0eeb88676ccf",
-          "destination_sha256": "df18c52135fc717fea84d42f21bf043947725bf04dbfe66da07a128cac42c226",
+          "destination_sha256": "3a3ca6b71905248412dfd391f39574da71dd195593b00b1f7a85107a577ee99b",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-archive-change/SKILL.md",
           "destination_path": "skills/openspec-archive/SKILL.md",
           "source_sha256": "3ad0def4d299469fdfd5b05e4842284d65558e6b28710b5962f7f214d6153855",
-          "destination_sha256": "19a55cb0195fff94fb34ec1921b256604142ff9d101d3af15bb8e401091fad9e",
+          "destination_sha256": "5bc05e251656549a6126cbf490853d049d1ef109a58afa398483ac31e4eebaef",
           "modification_status": "adapted"
         }
       ],
@@ -225,7 +225,7 @@
           "source_path": "skills/subagent-driven-development/SKILL.md",
           "destination_path": "skills/orchestrated-implementation/SKILL.md",
           "source_sha256": "8dd1b8e698edec3700c6d89517dbe96febd3bacd3f6ea21c1a3569c62ea104b5",
-          "destination_sha256": "45af3b9a57e8acac42b7803467d435bb156403bd6ccedbacfc2070a9d09a51bd",
+          "destination_sha256": "3cf8b882b02749b0ec1750b56a57c66457309e2680dbdb82f6d4e7b5490025a0",
           "modification_status": "adapted"
         },
         {

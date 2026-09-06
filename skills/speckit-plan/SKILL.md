@@ -59,7 +59,7 @@ final handoff.
 
 ## Trigger
 
-Use when `specs/<stable-feature-id>-<name>/spec.md` exists, satisfies its
+Use when `docs/specs/<stable-feature-id>-<name>/spec.md` exists, satisfies its
 acceptance contract, and has no current `plan.md`, or when repository evidence
 requires that plan to be updated before architecture analysis.
 
@@ -71,13 +71,13 @@ requires that plan to be updated before architecture analysis.
 
 ## Consumes
 
-- `specs/<stable-feature-id>-<name>/spec.md`.
+- `docs/specs/<stable-feature-id>-<name>/spec.md`.
 - Applicable project gates, repository structure, code, tests, and interfaces.
 - Existing validated research or design evidence for the same feature.
 
 ## Produces
 
-- Required: `specs/<stable-feature-id>-<name>/plan.md` from the
+- Required: `docs/specs/<stable-feature-id>-<name>/plan.md` from the
   [installed plan template](../../templates/spec-kit/plan.md).
 - Conditional: `research.md`, `data-model.md`, `contracts/`, and
   `quickstart.md` only when a concrete unknown, data lifecycle, formal interface,

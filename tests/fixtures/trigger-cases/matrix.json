@@ -31,7 +31,7 @@
     "prohibited": ["native-focused-edit", "systematic-debugging", "speckit-specify"],
     "handoff": {
       "consumes": ["existing capability state"],
-      "produces": ["openspec/changes/<change-id>/ planning artifacts"],
+      "produces": ["docs/openspec/changes/<change-id>/ planning artifacts"],
       "next": "openspec-apply"
     }
   },
@@ -43,7 +43,7 @@
     "prohibited": ["native-focused-edit", "systematic-debugging", "openspec-propose"],
     "handoff": {
       "consumes": ["new capability request"],
-      "produces": ["specs/<stable-feature-id>-<name>/spec.md"],
+      "produces": ["docs/specs/<stable-feature-id>-<name>/spec.md"],
       "next": "speckit-plan"
     }
   },
@@ -55,7 +55,7 @@
     "prohibited": ["native-focused-edit", "systematic-debugging", "openspec-propose"],
     "handoff": {
       "consumes": ["risky migration request"],
-      "produces": ["specs/<stable-feature-id>-<name>/spec.md"],
+      "produces": ["docs/specs/<stable-feature-id>-<name>/spec.md"],
       "next": "speckit-plan"
     }
   },
@@ -66,8 +66,8 @@
     "supporting": ["project-backlog"],
     "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify", "systematic-debugging"],
     "handoff": {
-      "consumes": ["specs/<stable-feature-id>-<name>/spec.md"],
-      "produces": ["specs/<stable-feature-id>-<name>/plan.md"],
+      "consumes": ["docs/specs/<stable-feature-id>-<name>/spec.md"],
+      "produces": ["docs/specs/<stable-feature-id>-<name>/plan.md"],
       "next": "architecture-modeling"
     }
   },

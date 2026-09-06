@@ -2,10 +2,10 @@
   "id": "existing-openspec",
   "prompt": "Resume the approved OpenSpec change export-semicolon. Proposal, delta specification, and tasks are complete; apply its remaining task. Preserve the active lifecycle.",
   "files": {
-    "openspec/changes/export-semicolon/proposal.md": "# Approved: optional semicolon delimiter\n",
-    "openspec/changes/export-semicolon/design.md": "# Approved design: optional delimiter\n\nAdd a delimiter parameter to export(values), defaulting to comma. Join values with the supplied delimiter; semicolon is supported. Existing calls and empty-value behavior remain unchanged. Keep the implementation in exporter.py with focused tests for the comma default and explicit semicolon. No new components or dependencies are needed. Rollback removes the optional parameter and restores the previous function; no stored data is migrated.\n",
-    "openspec/changes/export-semicolon/specs/export/spec.md": "# MODIFIED\nOptional delimiter defaults to comma; semicolon allowed.\n",
-    "openspec/changes/export-semicolon/tasks.md": "- [ ] Add optional delimiter and tests preserving comma default.\n",
+    "docs/openspec/changes/export-semicolon/proposal.md": "# Approved: optional semicolon delimiter\n",
+    "docs/openspec/changes/export-semicolon/design.md": "# Approved design: optional delimiter\n\nAdd a delimiter parameter to export(values), defaulting to comma. Join values with the supplied delimiter; semicolon is supported. Existing calls and empty-value behavior remain unchanged. Keep the implementation in exporter.py with focused tests for the comma default and explicit semicolon. No new components or dependencies are needed. Rollback removes the optional parameter and restores the previous function; no stored data is migrated.\n",
+    "docs/openspec/changes/export-semicolon/specs/export/spec.md": "# MODIFIED\nOptional delimiter defaults to comma; semicolon allowed.\n",
+    "docs/openspec/changes/export-semicolon/tasks.md": "- [ ] Add optional delimiter and tests preserving comma default.\n",
     "exporter.py": "def export(values):\n    return ','.join(values)\n"
   }
 }

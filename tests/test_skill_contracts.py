@@ -750,19 +750,19 @@ class SpecKitSkillContractTests(unittest.TestCase):
         """Changing an artifact path or handoff must break lifecycle continuity."""
         contracts = {
             "speckit-specify": (
-                "specs/<stable-feature-id>-<name>/spec.md",
+                "docs/specs/<stable-feature-id>-<name>/spec.md",
                 "speckit-plan",
             ),
             "speckit-plan": (
-                "specs/<stable-feature-id>-<name>/plan.md",
+                "docs/specs/<stable-feature-id>-<name>/plan.md",
                 "architecture-modeling",
             ),
             "speckit-tasks": (
-                "specs/<stable-feature-id>-<name>/tasks.md",
+                "docs/specs/<stable-feature-id>-<name>/tasks.md",
                 "orchestrated-implementation",
             ),
             "speckit-converge": (
-                "specs/<stable-feature-id>-<name>/tasks.md",
+                "docs/specs/<stable-feature-id>-<name>/tasks.md",
                 "verification-before-completion",
             ),
         }
@@ -897,10 +897,10 @@ class OpenSpecSkillContractTests(unittest.TestCase):
         """A Brownfield delta must remain traceable when escalation changes lifecycle."""
         propose = read("skills/openspec-propose/SKILL.md")
         for relative in (
-            "openspec/changes/<change-id>/proposal.md",
-            "openspec/changes/<change-id>/design.md",
-            "openspec/changes/<change-id>/tasks.md",
-            "openspec/changes/<change-id>/specs/<capability>/spec.md",
+            "docs/openspec/changes/<change-id>/proposal.md",
+            "docs/openspec/changes/<change-id>/design.md",
+            "docs/openspec/changes/<change-id>/tasks.md",
+            "docs/openspec/changes/<change-id>/specs/<capability>/spec.md",
         ):
             self.assertIn(relative, propose)
 
@@ -912,9 +912,9 @@ class OpenSpecSkillContractTests(unittest.TestCase):
         escalation_content = read("templates/openspec/escalation.md")
         for phrase in (
             "status: escalated",
-            "openspec/changes/<change-id>/",
+            "docs/openspec/changes/<change-id>/",
             "<stable-feature-id>",
-            "specs/<stable-feature-id>-<name>/spec.md",
+            "docs/specs/<stable-feature-id>-<name>/spec.md",
         ):
             self.assertIn(phrase, escalation_content)
 
@@ -929,8 +929,8 @@ class OpenSpecSkillContractTests(unittest.TestCase):
             "refuse to archive",
             "incomplete task",
             "fresh verification",
-            "openspec/specs/<capability>/spec.md",
-            "openspec/changes/archive/yyyy-mm-dd-<change-id>/",
+            "docs/openspec/specs/<capability>/spec.md",
+            "docs/openspec/changes/archive/yyyy-mm-dd-<change-id>/",
         ):
             self.assertIn(phrase, archive)
         for phrase in ("confirm archive", "confirmation to waive", "ask for confirmation"):

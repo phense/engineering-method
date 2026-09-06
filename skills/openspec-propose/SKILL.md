@@ -75,17 +75,17 @@ remain within its established component boundaries.
 
 - The requested behavior delta and explicit constraints.
 - Applicable project gates, current code and tests, nearby interfaces, and
-  `openspec/specs/<capability>/spec.md` when it exists.
+  `docs/openspec/specs/<capability>/spec.md` when it exists.
 - Any existing active change with the same stable change ID.
 
 ## Produces
 
 Create one kebab-case `<change-id>` directory containing:
 
-- `openspec/changes/<change-id>/proposal.md`
-- `openspec/changes/<change-id>/design.md`
-- `openspec/changes/<change-id>/tasks.md`
-- `openspec/changes/<change-id>/specs/<capability>/spec.md`
+- `docs/openspec/changes/<change-id>/proposal.md`
+- `docs/openspec/changes/<change-id>/design.md`
+- `docs/openspec/changes/<change-id>/tasks.md`
+- `docs/openspec/changes/<change-id>/specs/<capability>/spec.md`
 
 Use the installed [proposal](../../templates/openspec/proposal.md),
 [design](../../templates/openspec/design.md),
@@ -134,7 +134,7 @@ If evidence reveals a new subsystem, architecture work, a risky migration,
 tightly coupled multi-component scope, or material architectural uncertainty:
 
 1. Stop planning the Brownfield delta.
-2. Create `openspec/changes/<change-id>/escalation.md` from the
+2. Create `docs/openspec/changes/<change-id>/escalation.md` from the
    [installed escalation template](../../templates/openspec/escalation.md).
 3. Mark `openspec-propose` inactive, preserve the entire change directory, and
    record `status: escalated`, the evidence-backed reason, and the new Spec Kit
