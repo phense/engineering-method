@@ -37,7 +37,18 @@ and returned `Ready`, with no unresolved findings.
 A subsequent full run passed all behavior tests but exposed the inventory gate:
 a feature must not reference an in-progress backlog entry. F-007 publication in
 the local inventory was postponed until installation and EM-008 completion.
-Final state checks are recorded after local installation.
+Final installed state: all 17 skills resolve from the retained main checkout,
+with 21 total skills visible. Final `unittest discover -s tests -t . -v` passed
+317 tests. Plugin validation, Claude strict validation, compileall, bash syntax
+checks and `git diff --check` passed. Local implementation commit: `518bbf9`.
+
+The committed `518bbf9` package built reproducibly (200 files), SHA-256
+`efdbb73c0412079a6a0f2e966c6c8de3cb467fc96fa9ec2c22cfdd3b19f5f81a`.
+The existing native Claude/Codex clean-install check passed against that exact
+package with empty disposable configurations, no credentials and no model
+requests. Final documentation/state archival is a later local commit; the
+package result is tied to `518bbf9`, not represented as a build of that later
+commit. Runtime integration files are unchanged by archival.
 
 ## Limits
 

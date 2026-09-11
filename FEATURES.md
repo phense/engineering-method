@@ -43,3 +43,10 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Status: available
 - Summary: Stable v0.1.0 on public GitHub with English documentation, reproducible package, checksum and verified dual-host main/tag installation. Original gate coverage accepted with the documented EM-005 evidence reuse and limits; historical rc.1 remains available.
 - Related backlog: `EM-006`, `EM-007`
+
+<!-- engineering-method:feature {"schema_version":1,"id":"F-007","name":"Native OpenCode skill integration","summary":"Source-linked additive skill and adapter loading with guarded reversible installation; 17 skills discovered and bounded DeepSeek skill use verified on OpenCode 1.18.30. Full lifecycle and RAG hooks are outside this acceptance.","status":"available","related_backlog_ids":["EM-008"],"updated_at":"2026-09-11T14:19:43Z"} -->
+## `F-007` Native OpenCode skill integration
+
+- Status: available
+- Summary: Source-linked additive skill and adapter loading with guarded reversible installation; 17 skills discovered and bounded DeepSeek skill use verified on OpenCode 1.18.30. Full lifecycle and RAG hooks are outside this acceptance.
+- Related backlog: `EM-008`
