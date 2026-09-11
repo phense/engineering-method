@@ -49,6 +49,11 @@ lifecycle plugins, including Superpowers, before using Engineering Method.
 Claude also supports session-only loading with `claude --plugin-dir` and an
 absolute plugin directory; see the installation guide.
 
+OpenCode can load the same 17 skills through a source-linked native adapter.
+See [OpenCode installation](docs/opencode.md) for setup, verification and the
+bounded OpenCode 1.18.30 / DeepSeek acceptance scope. This addition is separate
+from the historical v0.1.0 dual-host release evidence.
+
 ## Automatic workflow selection
 
 Describe the engineering outcome. The host selects skills from exclusive
