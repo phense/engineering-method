@@ -8,8 +8,13 @@ It leaves existing model, permissions, provider and MCP settings untouched.
 ## Install from a retained checkout
 
 Requires Python 3.11+ and OpenCode; native validation used OpenCode 1.18.30 on
-macOS. Use a checkout containing `scripts/install-opencode`; the earlier v0.1.0
-release predates this integration. From that checkout:
+macOS. Use version 0.1.1 or newer; the earlier v0.1.0 release predates this
+integration. Clone a retained checkout and install from it:
+
+```sh
+git clone --branch v0.1.1 --depth 1 https://github.com/phense/engineering-method.git
+cd engineering-method
+```
 
 ```sh
 python3 scripts/install-opencode --check

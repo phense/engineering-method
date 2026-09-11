@@ -50,6 +50,9 @@ requests. Final documentation/state archival is a later local commit; the
 package result is tied to `518bbf9`, not represented as a build of that later
 commit. Runtime integration files are unchanged by archival.
 
+User confirmation, 2026-09-11: T3 on Windows confirmed the loaded skill in the
+Mac environment. This supplements CLI evidence; it is not a full workflow test.
+
 ## Limits
 
 This proves skill discovery, additive instruction registration and one actual

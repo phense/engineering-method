@@ -5,6 +5,10 @@ run in a terminal. Start a new host session after changing installed plugins.
 The tested versions are Codex CLI 0.153.4 and Claude Code 2.1.259 on macOS;
 installation success does not establish live model behavior on every host.
 
+For OpenCode, follow [the source-linked installation](opencode.md), available
+since 0.1.1. Its native discovery and bounded DeepSeek test were checked with
+OpenCode 1.18.30; see [release scope](releases/0.1.1.md).
+
 ## Install from GitHub
 
 The marketplace and plugin both use the name `engineering-method`.
@@ -22,11 +26,11 @@ claude plugin install engineering-method@engineering-method
 claude plugin list --json
 ```
 
-For stable version 0.1.0 on either host, clone the release tag and register the
+For stable version 0.1.1 on either host, clone the release tag and register the
 absolute checkout path instead of the GitHub shorthand:
 
 ```sh
-git clone --branch v0.1.0 --depth 1 https://github.com/phense/engineering-method.git
+git clone --branch v0.1.1 --depth 1 https://github.com/phense/engineering-method.git
 cd engineering-method
 em_plugin="$(pwd)"
 codex plugin marketplace add "$em_plugin"
@@ -39,11 +43,11 @@ Choose one source per marketplace name. If switching an existing local
 marketplace to GitHub, uninstall this plugin and remove its marketplace using
 the commands below, then register the new source. Preserve your project files.
 
-Alternatively, download `engineering-method-0.1.0.zip` and
-`SHA256SUMS` from the [0.1.0 release](https://github.com/phense/engineering-method/releases/tag/v0.1.0).
+Alternatively, download `engineering-method-0.1.1.zip` and
+`SHA256SUMS` from the [0.1.1 release](https://github.com/phense/engineering-method/releases/tag/v0.1.1).
 In the download directory, run `shasum -a 256 -c SHA256SUMS`, extract the archive,
 and register the extracted `engineering-method` directory as above.
-The plugin manifests and stable Git tag identify version `0.1.0`. The older
+The plugin manifests and stable Git tag identify version `0.1.1`. The older
 `v0.1.0-rc.1` pre-release remains available for historical reference.
 
 Claude also supports a session-only load:

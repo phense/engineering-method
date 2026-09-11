@@ -63,7 +63,8 @@ alone do not prevent sensitive Git history from being published.
 
 ## Release policy
 
-`v0.1.0` is the stable release following
+`v0.1.1` adds OpenCode with [bounded integration evidence](docs/verification/EM-008-opencode.md).
+Its release notes must keep that scope separate from the historical `v0.1.0` baseline with
 [independently accepted original gate coverage](docs/verification/EM-005-acceptance.md).
 The historical `v0.1.0-rc.1` retains its reduced acceptance scope. Evidence reuse
 must identify unchanged inputs, revisions and limitations; corrections must

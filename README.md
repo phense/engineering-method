@@ -1,6 +1,6 @@
 # Engineering Method
 
-Risk-proportionate engineering workflows for Codex and Claude. One shared plugin
+Risk-proportionate engineering workflows for Codex, Claude and OpenCode. One shared plugin
 combines selected Spec Kit, OpenSpec and Superpowers practices with durable
 project state, cohesive implementation slices and architecture verification.
 Small edits stay small; complex changes receive the evidence they need.
@@ -10,8 +10,9 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-**[Version 0.1.0](https://github.com/phense/engineering-method/releases/tag/v0.1.0)
-is the stable release.** It follows independently accepted
+**[Version 0.1.1](https://github.com/phense/engineering-method/releases/tag/v0.1.1)
+adds native OpenCode integration.** See the [release notes](docs/releases/0.1.1.md)
+for its bounded acceptance. The historical 0.1.0 baseline has independently accepted
 [complete original gate coverage](docs/verification/EM-005-acceptance.md), with
 documented evidence reuse and corrections. Read the acceptance limits before
 relying on it for unattended work. The
@@ -23,7 +24,8 @@ acceptance scope.
 
 ## Installation
 
-Requires Python 3.11+, Git, and Codex CLI or Claude Code with plugin support.
+Requires Python 3.11+, Git, and Codex CLI, Claude Code or OpenCode.
+OpenCode uses the separate source-linked installation described below.
 GitHub task synchronization additionally requires authenticated `gh` and repository
 permissions. No upstream Spec Kit, OpenSpec or Superpowers installation is needed.
 Native installation was checked with Codex CLI 0.153.4 and Claude Code 2.1.259;

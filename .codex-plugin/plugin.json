@@ -1,7 +1,7 @@
 {
   "name": "engineering-method",
-  "version": "0.1.0",
-  "description": "Risk-proportionate engineering workflows for Codex and Claude.",
+  "version": "0.1.1",
+  "description": "Risk-proportionate engineering workflows for Codex, Claude and OpenCode.",
   "author": {
     "name": "Peter Hense"
   },
