@@ -50,3 +50,10 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Status: available
 - Summary: Source-linked additive skill and adapter loading with guarded reversible installation; 17 skills discovered and bounded DeepSeek skill use verified on OpenCode 1.18.30. Full lifecycle and RAG hooks are outside this acceptance.
 - Related backlog: `EM-008`
+
+<!-- engineering-method:feature {"schema_version":1,"id":"F-008","name":"OpenCode patch release 0.1.1","summary":"Published GitHub release with updated installation docs, reproducible archive and downloaded checksum verification. OpenCode acceptance remains bounded to discovery and skill use.","status":"available","related_backlog_ids":["EM-009"],"updated_at":"2026-09-11T15:11:54Z"} -->
+## `F-008` OpenCode patch release 0.1.1
+
+- Status: available
+- Summary: Published GitHub release with updated installation docs, reproducible archive and downloaded checksum verification. OpenCode acceptance remains bounded to discovery and skill use.
+- Related backlog: `EM-009`
