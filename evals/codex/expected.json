@@ -1,57 +1,57 @@
 {
-"sequential-fallback": {
-  "primary": "orchestrated-implementation",
-  "supporting": [
-    "project-backlog"
-  ],
-  "prohibited": [
-    "speckit-specify",
-    "speckit-plan",
-    "speckit-tasks",
-    "speckit-converge",
-    "openspec-propose",
-    "openspec-apply",
-    "openspec-archive"
-  ],
-  "artifacts": [
-    "decision.md",
-    "fallback.json"
-  ],
-  "fallback": {
-    "selected_role": "standard",
-    "spawn_subagents": false,
-    "create_worktree": false,
-    "use_memory": false,
-    "use_github": false
-  }
-},
-"optional-integrations-fallback": {
-  "primary": "systematic-debugging",
-  "supporting": [
-    "project-backlog"
-  ],
-  "prohibited": [
-    "speckit-specify",
-    "speckit-plan",
-    "speckit-tasks",
-    "speckit-converge",
-    "openspec-propose",
-    "openspec-apply",
-    "openspec-archive"
-  ],
-  "artifacts": [
-    "decision.md",
-    "fallback.json"
-  ],
-  "fallback": {
-    "selected_role": "standard",
-    "spawn_subagents": false,
-    "create_worktree": false,
-    "use_memory": false,
-    "use_github": false,
-    "retry_authentication": false
-  }
-},
+  "sequential-fallback": {
+    "primary": "orchestrated-implementation",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md",
+      "fallback.json"
+    ],
+    "fallback": {
+      "selected_role": "standard",
+      "spawn_subagents": false,
+      "create_worktree": false,
+      "use_memory": false,
+      "use_github": false
+    }
+  },
+  "optional-integrations-fallback": {
+    "primary": "systematic-debugging",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md",
+      "fallback.json"
+    ],
+    "fallback": {
+      "selected_role": "standard",
+      "spawn_subagents": false,
+      "create_worktree": false,
+      "use_memory": false,
+      "use_github": false,
+      "retry_authentication": false
+    }
+  },
   "trivial-edit": {
     "primary": "native-focused-edit",
     "supporting": [],
@@ -226,6 +226,50 @@
       "openspec-propose",
       "openspec-apply",
       "openspec-archive"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "standalone-document": {
+    "primary": "documentation-authoring",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "documentation-planning",
+      "documentation-review",
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive",
+      "systematic-debugging"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "documentation-set": {
+    "primary": "documentation-planning",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-review",
+      "speckit-specify",
+      "speckit-plan",
+      "speckit-tasks",
+      "orchestrated-implementation",
+      "speckit-converge",
+      "openspec-propose",
+      "openspec-apply",
+      "openspec-archive",
+      "systematic-debugging"
     ],
     "artifacts": [
       "decision.md"

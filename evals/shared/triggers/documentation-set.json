@@ -1,0 +1,7 @@
+{
+  "id": "documentation-set",
+  "prompt": "Create the complete user manual for this product: about twelve chapters for administrators, end users and support staff, with shared terminology and screenshots, to be written over several sessions. Perform only the first safe assessment: select the workflow, load the applicable skills, and record decision.md; do not write the plan or chapters.",
+  "files": {
+    "README.md": "# Keyforge\n\nKeyforge manages API keys, teams and audit logs. It has an admin console, an end-user portal and a support view.\n"
+  }
+}

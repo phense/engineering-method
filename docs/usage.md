@@ -49,6 +49,46 @@ resolve review findings before convergence. The shared policies favor cohesive
 slices and reuse unchanged evidence. Additional expensive runs or reviews need
 a concrete unresolved question and must respect user effort limits.
 
+## Write one document
+
+> Write a how-to guide that shows an administrator how to rotate an API key.
+> One reader group; no other documentation exists yet.
+
+The writing-depth policy places this at the medium scale. `documentation-authoring`
+runs in standalone mode: it defines the reader and version, uses the task
+skeleton from the chunk template, and applies `writing-procedures` (goal,
+prerequisites, blocks of three to five imperative steps, a check that it
+worked). A recorded self-review and fresh link check close the work. No plan
+directory is created.
+
+## Build a documentation set
+
+> Create the complete user manual: about twelve chapters for administrators,
+> end users and support staff, with shared terminology and screenshots.
+
+Several readers, shared terms and images and many sessions place this at the
+large scale. `documentation-planning` records the scale decision and writes
+`docs/writing/<doc-id>/plan.md` with readers, information architecture and a
+chunk manifest, plus `glossary.md` and `assets.md`. `documentation-authoring`
+then writes one Markdown file per chunk with frontmatter, using
+`explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`
+per content type, `terminology-guard` for terms and `visual-placeholders`
+for image callouts. `documentation-review` checks the set at a named revision
+and returns findings to authoring; acceptance needs zero open Critical or
+Important findings and fresh verification.
+
+## Explain, instruct or troubleshoot in a reply
+
+> Why does the retry queue drop messages after a restart, and what should I
+> check first?
+
+Outside documentation projects, the reader-oriented output policy applies the
+same skills to ordinary replies: the explanation opens with an everyday
+analogy and avoids undefined jargon, the next steps are numbered imperative
+actions with exact locations and a visible result, and help with a failure
+starts from the symptom the user sees. Evidence and verification rules do not
+change.
+
 ## Resume work
 
 > Resume work item APP-014 from its repository checkpoint. Reconcile Git,

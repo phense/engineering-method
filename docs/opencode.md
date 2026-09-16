@@ -1,7 +1,9 @@
 # OpenCode integration
 
-Engineering Method exposes its unchanged 17 skills through OpenCode's native
-skill tool. A local plugin config hook adds the skill directory and
+Engineering Method exposes its shared skills through OpenCode's native skill
+tool. The recorded discovery evidence covers the 17 skills of version 0.1.1;
+the current main branch adds eight documentation skills that load from the same
+directory. A local plugin config hook adds the skill directory and
 [OpenCode adapter](../shared/platform/opencode.md) to effective configuration.
 It leaves existing model, permissions, provider and MCP settings untouched.
 

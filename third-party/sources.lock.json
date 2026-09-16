@@ -316,7 +316,19 @@
       "shared/policies/orchestration.md",
       "shared/policies/lifecycle-handoffs.md",
       "templates/openspec/escalation.md",
-      "shared/policies/proportionality.md"
+      "shared/policies/proportionality.md",
+      "skills/documentation-planning/SKILL.md",
+      "skills/documentation-authoring/SKILL.md",
+      "skills/documentation-review/SKILL.md",
+      "skills/explaining-concepts/SKILL.md",
+      "skills/writing-procedures/SKILL.md",
+      "skills/empathic-troubleshooting/SKILL.md",
+      "skills/terminology-guard/SKILL.md",
+      "skills/visual-placeholders/SKILL.md",
+      "shared/policies/writing-depth.md",
+      "shared/policies/reader-oriented-output.md",
+      "shared/writing/**",
+      "templates/documentation/**"
     ],
     "scope": "These paths are original implementation. All adapted destinations are enumerated separately in sources; no upstream runtime is bundled."
   }

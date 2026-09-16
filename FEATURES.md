@@ -16,11 +16,11 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. The state-check command automatically migrates a local backlog when the GitHub remote is writable; it is not read-only.
 - Related backlog: `EM-002`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-003","name":"Exclusive workflow skills","summary":"Seventeen shared lifecycle and quality skills with artifact-specific handoffs. All 12 routing cases passed on both hosts for 0784c79; see the EM-005 acceptance scope.","status":"available","related_backlog_ids":["EM-003"],"updated_at":"2026-09-05T19:11:37Z"} -->
+<!-- engineering-method:feature {"schema_version":1,"id":"F-003","name":"Exclusive workflow skills","summary":"Twenty-five shared lifecycle and quality skills with artifact-specific handoffs: the original seventeen engineering skills plus eight documentation and reader-oriented writing skills added by EM-010. All 12 engineering routing cases passed on both hosts for 0784c79; the three documentation routing cases have contract-test coverage only.","status":"changed","related_backlog_ids":["EM-003"],"updated_at":"2026-09-16T07:47:28Z"} -->
 ## `F-003` Exclusive workflow skills
 
-- Status: available
-- Summary: Seventeen shared lifecycle and quality skills with artifact-specific handoffs. All 12 routing cases passed on both hosts for 0784c79; see the EM-005 acceptance scope.
+- Status: changed
+- Summary: Twenty-five shared lifecycle and quality skills with artifact-specific handoffs: the original seventeen engineering skills plus eight documentation and reader-oriented writing skills added by EM-010. All 12 engineering routing cases passed on both hosts for 0784c79; the three documentation routing cases have contract-test coverage only.
 - Related backlog: `EM-003`
 
 <!-- engineering-method:feature {"schema_version":1,"id":"F-004","name":"Orchestration and architecture gates","summary":"Cohesive slices, protected continuity artifacts, independent review and evidence-driven fixes; relevant Mermaid views and executable checkout success/recovery acceptance. Mermaid sources are semantically checked, not rendered.","status":"available","related_backlog_ids":["EM-004"],"updated_at":"2026-09-05T10:52:23Z"} -->
@@ -51,9 +51,9 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Source-linked additive skill and adapter loading with guarded reversible installation; 17 skills discovered and bounded DeepSeek skill use verified on OpenCode 1.18.30. Full lifecycle and RAG hooks are outside this acceptance.
 - Related backlog: `EM-008`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-008","name":"OpenCode patch release 0.1.1","summary":"Published GitHub release with updated installation docs, reproducible archive and downloaded checksum verification. OpenCode acceptance remains bounded to discovery and skill use.","status":"available","related_backlog_ids":["EM-009"],"updated_at":"2026-09-11T15:11:54Z"} -->
-## `F-008` OpenCode patch release 0.1.1
+<!-- engineering-method:feature {"schema_version":1,"id":"F-008","name":"Scale-aware documentation and reader-oriented writing","summary":"Writing-depth scale decision (small, medium, large); documentation-planning, documentation-authoring and documentation-review lifecycle with plan, chunk manifest, glossary, asset manifest and review templates under docs/writing; didactic skills explaining-concepts, writing-procedures and empathic-troubleshooting applied to documentation and ordinary replies; terminology-guard and visual-placeholders. Contract tests and validators pass; no native host evaluation of the new routing cases.","status":"available","related_backlog_ids":["EM-009","EM-010"],"updated_at":"2026-09-16T07:47:29Z"} -->
+## `F-008` Scale-aware documentation and reader-oriented writing
 
 - Status: available
-- Summary: Published GitHub release with updated installation docs, reproducible archive and downloaded checksum verification. OpenCode acceptance remains bounded to discovery and skill use.
-- Related backlog: `EM-009`
+- Summary: Writing-depth scale decision (small, medium, large); documentation-planning, documentation-authoring and documentation-review lifecycle with plan, chunk manifest, glossary, asset manifest and review templates under docs/writing; didactic skills explaining-concepts, writing-procedures and empathic-troubleshooting applied to documentation and ordinary replies; terminology-guard and visual-placeholders. Contract tests and validators pass; no native host evaluation of the new routing cases.
+- Related backlog: `EM-009`, `EM-010`

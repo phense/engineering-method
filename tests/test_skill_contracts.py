@@ -19,6 +19,9 @@ LIFECYCLE_SKILLS = (
     "speckit-plan",
     "speckit-tasks",
     "speckit-converge",
+    "documentation-planning",
+    "documentation-authoring",
+    "documentation-review",
 )
 
 ENTRY_CONTROLLERS = frozenset(
@@ -27,8 +30,12 @@ ENTRY_CONTROLLERS = frozenset(
         "systematic-debugging",
         "openspec-propose",
         "speckit-specify",
+        "documentation-planning",
+        "documentation-authoring",
     }
 )
+
+DOCUMENTATION_ENTRIES = ["documentation-planning", "documentation-authoring"]
 
 CONTRACT_HEADINGS = (
     "Trigger",
@@ -118,10 +125,21 @@ class LifecycleContractTests(unittest.TestCase):
         """Open convergence findings must return to the sole executor, never verification."""
         graph = fenced_json("shared/policies/lifecycle-handoffs.md")
         retry = graph.get("retry_transitions", [])
-        self.assertEqual(1, len(retry))
-        self.assertEqual("speckit-converge", retry[0]["from"])
-        self.assertEqual("orchestrated-implementation", retry[0]["to"])
-        self.assertEqual("actionable findings appended as new slices", retry[0]["condition"])
+        self.assertEqual(
+            {
+                ("speckit-converge", "orchestrated-implementation"),
+                ("documentation-review", "documentation-authoring"),
+            },
+            {(edge["from"], edge["to"]) for edge in retry},
+        )
+        convergence = next(edge for edge in retry if edge["from"] == "speckit-converge")
+        self.assertEqual("actionable findings appended as new slices", convergence["condition"])
+        documentation = next(edge for edge in retry if edge["from"] == "documentation-review")
+        self.assertEqual("actionable findings returned for affected chunks", documentation["condition"])
+        self.assertTrue(documentation["preserves"])
+        review = next(edge for edge in graph["edges"] if edge["from"] == "documentation-review")
+        self.assertEqual("verification-before-completion", review["to"])
+        self.assertIn("no open Critical or Important findings", review.get("completion_guard", ""))
         execution = next(edge for edge in graph["edges"] if edge["from"] == "orchestrated-implementation")
         self.assertEqual("architecture-modeling:as-built", execution.get("required_gate"))
         completion = next(edge for edge in graph["edges"] if edge["from"] == "speckit-converge")
@@ -147,6 +165,7 @@ class LifecycleContractTests(unittest.TestCase):
                 "bugfix": "test-driven-development",
                 "openspec": "openspec-apply",
                 "speckit": "orchestrated-implementation",
+                "documentation": "documentation-authoring",
             },
             executors,
         )
@@ -251,6 +270,9 @@ class LifecycleContractTests(unittest.TestCase):
                 "received-review",
                 "independent-failures",
                 "completion-without-evidence",
+                "standalone-document",
+                "documentation-set",
+                "existing-documentation-plan",
             },
             {case["id"] for case in matrix},
         )
@@ -268,27 +290,27 @@ class LifecycleContractTests(unittest.TestCase):
             "trivial-edit": (
                 "native-focused-edit",
                 ["project-backlog", "verification-before-completion"],
-                ["speckit-specify", "openspec-propose", "systematic-debugging"],
+                ["speckit-specify", "openspec-propose", "systematic-debugging", *DOCUMENTATION_ENTRIES],
             ),
             "reproducible-defect": (
                 "systematic-debugging",
                 ["project-backlog", "test-driven-development", "verification-before-completion"],
-                ["native-focused-edit", "openspec-propose", "speckit-specify"],
+                ["native-focused-edit", "openspec-propose", "speckit-specify", *DOCUMENTATION_ENTRIES],
             ),
             "bounded-behavior-delta": (
                 "openspec-propose",
                 ["project-backlog", "test-driven-development", "verification-before-completion"],
-                ["native-focused-edit", "systematic-debugging", "speckit-specify"],
+                ["native-focused-edit", "systematic-debugging", "speckit-specify", *DOCUMENTATION_ENTRIES],
             ),
             "multi-component-feature": (
                 "speckit-specify",
                 ["project-backlog", "architecture-modeling", "verification-before-completion"],
-                ["native-focused-edit", "systematic-debugging", "openspec-propose"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose", *DOCUMENTATION_ENTRIES],
             ),
             "architecture-migration": (
                 "speckit-specify",
                 ["project-backlog", "architecture-modeling", "verification-before-completion"],
-                ["native-focused-edit", "systematic-debugging", "openspec-propose"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose", *DOCUMENTATION_ENTRIES],
             ),
             "existing-artifacts": (
                 "speckit-plan",
@@ -298,17 +320,32 @@ class LifecycleContractTests(unittest.TestCase):
             "received-review": (
                 "native-focused-edit",
                 ["project-backlog", "receiving-code-review", "verification-before-completion"],
-                ["speckit-specify", "openspec-propose", "systematic-debugging"],
+                ["speckit-specify", "openspec-propose", "systematic-debugging", *DOCUMENTATION_ENTRIES],
             ),
             "independent-failures": (
                 "systematic-debugging",
                 ["project-backlog", "dispatching-parallel-agents", "verification-before-completion"],
-                ["native-focused-edit", "openspec-propose", "speckit-specify"],
+                ["native-focused-edit", "openspec-propose", "speckit-specify", *DOCUMENTATION_ENTRIES],
             ),
             "completion-without-evidence": (
                 "native-focused-edit",
                 ["project-backlog", "verification-before-completion"],
-                ["speckit-specify", "openspec-propose", "systematic-debugging"],
+                ["speckit-specify", "openspec-propose", "systematic-debugging", *DOCUMENTATION_ENTRIES],
+            ),
+            "standalone-document": (
+                "documentation-authoring",
+                ["project-backlog", "writing-procedures", "terminology-guard", "verification-before-completion"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
+            ),
+            "documentation-set": (
+                "documentation-planning",
+                ["project-backlog", "terminology-guard", "visual-placeholders", "verification-before-completion"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-authoring"],
+            ),
+            "existing-documentation-plan": (
+                "documentation-authoring",
+                ["project-backlog", "explaining-concepts", "writing-procedures", "empathic-troubleshooting", "terminology-guard", "visual-placeholders"],
+                ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
             ),
         }
         actual = {
@@ -372,6 +409,26 @@ class LifecycleContractTests(unittest.TestCase):
             },
             "skills/test-driven-development/SKILL.md": {"writing-good-tests.md"},
             "skills/requesting-code-review/SKILL.md": {"code-reviewer.md"},
+            "skills/documentation-planning/SKILL.md": {
+                "../../templates/documentation/plan.md",
+                "../../templates/documentation/glossary.md",
+                "../../templates/documentation/assets.md",
+                "../../templates/documentation/chunk.md",
+                "../../shared/policies/writing-depth.md",
+            },
+            "skills/documentation-authoring/SKILL.md": {
+                "../../templates/documentation/chunk.md",
+                "../../shared/writing/curse-of-knowledge-filter.md",
+            },
+            "skills/documentation-review/SKILL.md": {"../../templates/documentation/review.md"},
+            "skills/terminology-guard/SKILL.md": {"../../templates/documentation/glossary.md"},
+            "skills/visual-placeholders/SKILL.md": {"../../templates/documentation/assets.md"},
+            "skills/explaining-concepts/SKILL.md": {
+                "../../shared/writing/curse-of-knowledge-filter.md",
+                "../../shared/policies/reader-oriented-output.md",
+            },
+            "skills/writing-procedures/SKILL.md": {"../../shared/writing/curse-of-knowledge-filter.md"},
+            "skills/empathic-troubleshooting/SKILL.md": {"../../shared/writing/curse-of-knowledge-filter.md"},
         }
         for relative, required in expected.items():
             with self.subTest(skill=relative):

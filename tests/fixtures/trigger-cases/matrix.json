@@ -3,11 +3,24 @@
     "id": "trivial-edit",
     "request": "Correct a typo in one documentation sentence.",
     "primary": "native-focused-edit",
-    "supporting": ["project-backlog", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"],
+    "supporting": [
+      "project-backlog",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose",
+      "systematic-debugging",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["focused edit request"],
-      "produces": ["verified repository change"],
+      "consumes": [
+        "focused edit request"
+      ],
+      "produces": [
+        "verified repository change"
+      ],
       "next": "complete"
     }
   },
@@ -15,11 +28,26 @@
     "id": "reproducible-defect",
     "request": "A regression test reproduces an unexplained failure.",
     "primary": "systematic-debugging",
-    "supporting": ["project-backlog", "test-driven-development", "verification-before-completion"],
-    "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify"],
+    "supporting": [
+      "project-backlog",
+      "test-driven-development",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "openspec-propose",
+      "speckit-specify",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["observed failure evidence"],
-      "produces": ["root-cause evidence", "failing regression test"],
+      "consumes": [
+        "observed failure evidence"
+      ],
+      "produces": [
+        "root-cause evidence",
+        "failing regression test"
+      ],
       "next": "test-driven-development"
     }
   },
@@ -27,11 +55,25 @@
     "id": "bounded-behavior-delta",
     "request": "Change one existing capability's intentional behavior without redesigning its boundaries.",
     "primary": "openspec-propose",
-    "supporting": ["project-backlog", "test-driven-development", "verification-before-completion"],
-    "prohibited": ["native-focused-edit", "systematic-debugging", "speckit-specify"],
+    "supporting": [
+      "project-backlog",
+      "test-driven-development",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "systematic-debugging",
+      "speckit-specify",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["existing capability state"],
-      "produces": ["docs/openspec/changes/<change-id>/ planning artifacts"],
+      "consumes": [
+        "existing capability state"
+      ],
+      "produces": [
+        "docs/openspec/changes/<change-id>/ planning artifacts"
+      ],
       "next": "openspec-apply"
     }
   },
@@ -39,11 +81,25 @@
     "id": "multi-component-feature",
     "request": "Add a new capability spanning several tightly coupled components.",
     "primary": "speckit-specify",
-    "supporting": ["project-backlog", "architecture-modeling", "verification-before-completion"],
-    "prohibited": ["native-focused-edit", "systematic-debugging", "openspec-propose"],
+    "supporting": [
+      "project-backlog",
+      "architecture-modeling",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "systematic-debugging",
+      "openspec-propose",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["new capability request"],
-      "produces": ["docs/specs/<stable-feature-id>-<name>/spec.md"],
+      "consumes": [
+        "new capability request"
+      ],
+      "produces": [
+        "docs/specs/<stable-feature-id>-<name>/spec.md"
+      ],
       "next": "speckit-plan"
     }
   },
@@ -51,11 +107,25 @@
     "id": "architecture-migration",
     "request": "Plan and implement a risky migration that changes system boundaries.",
     "primary": "speckit-specify",
-    "supporting": ["project-backlog", "architecture-modeling", "verification-before-completion"],
-    "prohibited": ["native-focused-edit", "systematic-debugging", "openspec-propose"],
+    "supporting": [
+      "project-backlog",
+      "architecture-modeling",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "systematic-debugging",
+      "openspec-propose",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["risky migration request"],
-      "produces": ["docs/specs/<stable-feature-id>-<name>/spec.md"],
+      "consumes": [
+        "risky migration request"
+      ],
+      "produces": [
+        "docs/specs/<stable-feature-id>-<name>/spec.md"
+      ],
       "next": "speckit-plan"
     }
   },
@@ -63,11 +133,24 @@
     "id": "existing-artifacts",
     "request": "Continue an existing Spec Kit feature whose spec is complete and plan is absent.",
     "primary": "speckit-plan",
-    "supporting": ["project-backlog"],
-    "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify", "systematic-debugging"],
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-planning",
+      "native-focused-edit",
+      "openspec-propose",
+      "speckit-specify",
+      "systematic-debugging"
+    ],
     "handoff": {
-      "consumes": ["docs/specs/<stable-feature-id>-<name>/spec.md"],
-      "produces": ["docs/specs/<stable-feature-id>-<name>/plan.md"],
+      "consumes": [
+        "docs/specs/<stable-feature-id>-<name>/spec.md"
+      ],
+      "produces": [
+        "docs/specs/<stable-feature-id>-<name>/plan.md"
+      ],
       "next": "architecture-modeling"
     }
   },
@@ -75,11 +158,26 @@
     "id": "received-review",
     "request": "Evaluate received review feedback on a focused implementation slice.",
     "primary": "native-focused-edit",
-    "supporting": ["project-backlog", "receiving-code-review", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"],
+    "supporting": [
+      "project-backlog",
+      "receiving-code-review",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose",
+      "systematic-debugging",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["review findings", "current implementation evidence"],
-      "produces": ["verified finding dispositions"],
+      "consumes": [
+        "review findings",
+        "current implementation evidence"
+      ],
+      "produces": [
+        "verified finding dispositions"
+      ],
       "next": "verification-before-completion"
     }
   },
@@ -87,11 +185,25 @@
     "id": "independent-failures",
     "request": "Investigate two observed failures after evidence establishes independent root-cause domains.",
     "primary": "systematic-debugging",
-    "supporting": ["project-backlog", "dispatching-parallel-agents", "verification-before-completion"],
-    "prohibited": ["native-focused-edit", "openspec-propose", "speckit-specify"],
+    "supporting": [
+      "project-backlog",
+      "dispatching-parallel-agents",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "openspec-propose",
+      "speckit-specify",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["independent observed failure groups"],
-      "produces": ["independent root-cause evidence"],
+      "consumes": [
+        "independent observed failure groups"
+      ],
+      "produces": [
+        "independent root-cause evidence"
+      ],
       "next": "test-driven-development"
     }
   },
@@ -99,12 +211,113 @@
     "id": "completion-without-evidence",
     "request": "Claim a focused edit is complete without fresh command output.",
     "primary": "native-focused-edit",
-    "supporting": ["project-backlog", "verification-before-completion"],
-    "prohibited": ["speckit-specify", "openspec-propose", "systematic-debugging"],
+    "supporting": [
+      "project-backlog",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose",
+      "systematic-debugging",
+      "documentation-planning",
+      "documentation-authoring"
+    ],
     "handoff": {
-      "consumes": ["unverified focused change"],
-      "produces": ["fresh verification output"],
+      "consumes": [
+        "unverified focused change"
+      ],
+      "produces": [
+        "fresh verification output"
+      ],
       "next": "complete"
+    }
+  },
+  {
+    "id": "standalone-document",
+    "request": "Write one how-to guide for an existing feature for a single reader group.",
+    "primary": "documentation-authoring",
+    "supporting": [
+      "project-backlog",
+      "writing-procedures",
+      "terminology-guard",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "systematic-debugging",
+      "openspec-propose",
+      "speckit-specify",
+      "documentation-planning"
+    ],
+    "handoff": {
+      "consumes": [
+        "standalone document request",
+        "defined reader and subject version"
+      ],
+      "produces": [
+        "one document with chunk frontmatter and recorded self-review"
+      ],
+      "next": "verification-before-completion"
+    }
+  },
+  {
+    "id": "documentation-set",
+    "request": "Create a multi-chapter user manual with several reader groups that must share terminology and screenshots.",
+    "primary": "documentation-planning",
+    "supporting": [
+      "project-backlog",
+      "terminology-guard",
+      "visual-placeholders",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "systematic-debugging",
+      "openspec-propose",
+      "speckit-specify",
+      "documentation-authoring"
+    ],
+    "handoff": {
+      "consumes": [
+        "documentation set request",
+        "existing material and subject version"
+      ],
+      "produces": [
+        "docs/writing/<doc-id>/plan.md",
+        "docs/writing/<doc-id>/glossary.md",
+        "docs/writing/<doc-id>/assets.md"
+      ],
+      "next": "documentation-authoring"
+    }
+  },
+  {
+    "id": "existing-documentation-plan",
+    "request": "Continue a documentation set whose plan and manifest are complete and whose chunks are not yet drafted.",
+    "primary": "documentation-authoring",
+    "supporting": [
+      "project-backlog",
+      "explaining-concepts",
+      "writing-procedures",
+      "empathic-troubleshooting",
+      "terminology-guard",
+      "visual-placeholders"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "systematic-debugging",
+      "openspec-propose",
+      "speckit-specify",
+      "documentation-planning"
+    ],
+    "handoff": {
+      "consumes": [
+        "docs/writing/<doc-id>/plan.md",
+        "docs/writing/<doc-id>/glossary.md"
+      ],
+      "produces": [
+        "drafted chunk files under the content root"
+      ],
+      "next": "documentation-review"
     }
   }
 ]

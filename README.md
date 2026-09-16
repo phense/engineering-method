@@ -51,7 +51,8 @@ lifecycle plugins, including Superpowers, before using Engineering Method.
 Claude also supports session-only loading with `claude --plugin-dir` and an
 absolute plugin directory; see the installation guide.
 
-OpenCode can load the same 17 skills through a source-linked native adapter.
+OpenCode can load the same shared skills through a source-linked native adapter;
+its recorded discovery evidence covers the 17 skills of version 0.1.1.
 See [OpenCode installation](docs/opencode.md) for setup, verification and the
 bounded OpenCode 1.18.30 / DeepSeek acceptance scope. This addition is separate
 from the historical v0.1.0 dual-host release evidence.
@@ -70,10 +71,34 @@ lifecycle rather than start competing plans.
 | Bounded intentional change to existing behavior | OpenSpec `propose` → `apply` → `archive` |
 | New subsystem, multi-component feature, architecture change or risky migration | Spec Kit `specify` → `plan` → architecture gate → `tasks` → orchestrated implementation → `converge` |
 | Existing Spec Kit or OpenSpec artifacts | Continue the recorded phase; preserve completed work |
+| One standalone reader-facing document | `documentation-authoring` in standalone mode with the didactic writing skills |
+| Documentation set: several chapters or readers sharing terms, structure and images | `documentation-planning` → `documentation-authoring` per chunk → `documentation-review` |
 
 Review, TDD, worktrees and parallel dispatch activate only when their own
 conditions apply. If a bounded change reveals architectural scope, its formal
 escalation artifact preserves the original work and transfers ownership.
+
+## Documentation and reader-oriented writing
+
+Prose deliverables decide their scale first with the
+[writing-depth policy](shared/policies/writing-depth.md): a wording fix stays a
+focused edit, one document uses `documentation-authoring` directly, and a
+manual or handbook runs through planning, per-chunk authoring and set-wide
+review with checkpoints across sessions. Plans, glossaries, asset manifests and
+review reports live under `docs/writing/<doc-id>/`; chapters are one Markdown
+file per chunk with uniform frontmatter.
+
+Three didactic skills shape the text and, through the
+[reader-oriented output policy](shared/policies/reader-oriented-output.md),
+ordinary replies as well: `explaining-concepts` introduces each concept with
+an everyday analogy before the mechanism and removes undefined jargon;
+`writing-procedures` writes imperative single-action steps in blocks of three
+to five with exact locations, prerequisites and a check that it worked;
+`empathic-troubleshooting` starts from the symptom the reader sees. All three
+apply the shared curse-of-knowledge filter that writes out the steps and
+locations an expert would skip. `terminology-guard` keeps one term per concept
+across hundreds of pages, and `visual-placeholders` inserts standardized
+screenshot and diagram callouts with alt text and capture instructions.
 
 ## Architecture and review
 
@@ -168,7 +193,8 @@ separate budget authorization and are not implied by these local checks.
 ## Examples and contributing
 
 - [Usage examples](docs/usage.md): a small edit, bug repair, a bounded existing-system
-  change, a large feature, and recovery after compact or a new session.
+  change, a large feature, one document, a documentation set, reader-oriented
+  replies, and recovery after compact or a new session.
 - [Contributing](CONTRIBUTING.md): local checks, provenance, packaging and review.
 - [Verification history](docs/verification/EM-005-completion-path.md): bounded
   candidate acceptance and the [subsequent complete gate coverage](docs/verification/EM-005-acceptance.md).

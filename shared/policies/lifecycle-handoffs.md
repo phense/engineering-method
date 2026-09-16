@@ -20,12 +20,16 @@ The following JSON is the authoritative, machine-readable handoff graph:
     "architecture-modeling",
     "speckit-tasks",
     "orchestrated-implementation",
-    "speckit-converge"
+    "speckit-converge",
+    "documentation-planning",
+    "documentation-authoring",
+    "documentation-review"
   ],
   "executors": {
     "bugfix": "test-driven-development",
     "openspec": "openspec-apply",
-    "speckit": "orchestrated-implementation"
+    "speckit": "orchestrated-implementation",
+    "documentation": "documentation-authoring"
   },
   "edges": [
     {"from": "systematic-debugging", "to": "test-driven-development", "artifact": "reproduction and root-cause evidence"},
@@ -41,10 +45,14 @@ The following JSON is the authoritative, machine-readable handoff graph:
     {"from": "orchestrated-implementation", "to": "speckit-converge", "artifact": "implementation, as-built models, integration results, and review state", "required_gate": "architecture-modeling:as-built"},
     {"from": "speckit-converge", "to": "verification-before-completion", "artifact": "closed convergence findings", "completion_guard": "no actionable findings and all evidence current"},
     {"from": "openspec-propose", "to": "speckit-specify", "artifact": "docs/openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-propose", "traceability": "escalation record preserves the change path and new feature ID"},
-    {"from": "openspec-apply", "to": "speckit-specify", "artifact": "docs/openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-apply", "traceability": "escalation record preserves completed task IDs, change path, and new feature ID"}
+    {"from": "openspec-apply", "to": "speckit-specify", "artifact": "docs/openspec/changes/<change-id>/escalation.md", "condition": "status: escalated", "deactivates": "openspec-apply", "traceability": "escalation record preserves completed task IDs, change path, and new feature ID"},
+    {"from": "documentation-planning", "to": "documentation-authoring", "artifact": "docs/writing/<doc-id>/plan.md"},
+    {"from": "documentation-authoring", "to": "documentation-review", "artifact": "drafted chunk files with frontmatter, glossary and asset manifest state"},
+    {"from": "documentation-review", "to": "verification-before-completion", "artifact": "docs/writing/<doc-id>/review.md", "completion_guard": "no open Critical or Important findings at the reviewed revision"}
   ],
   "retry_transitions": [
-    {"from": "speckit-converge", "to": "orchestrated-implementation", "condition": "actionable findings appended as new slices", "artifact": "tasks.md append-only convergence slices", "preserves": "completed work and stable task IDs"}
+    {"from": "speckit-converge", "to": "orchestrated-implementation", "condition": "actionable findings appended as new slices", "artifact": "tasks.md append-only convergence slices", "preserves": "completed work and stable task IDs"},
+    {"from": "documentation-review", "to": "documentation-authoring", "condition": "actionable findings returned for affected chunks", "artifact": "docs/writing/<doc-id>/review.md findings", "preserves": "accepted chunks and stable chunk IDs"}
   ]
 }
 ```
@@ -55,7 +63,17 @@ evidence, stable IDs, and artifact path named by the edge. For OpenSpec,
 preserve the change and write the formal escalation record before Spec Kit
 starts.
 
-The forward phase graph remains acyclic. A convergence retry is an explicit
-return to the existing executor, never a new controller or a completion
-handoff. Before convergence, that executor invokes the architecture skill in
+The forward phase graph remains acyclic. A convergence retry, or a documentation
+review returning findings, is an explicit return to the existing executor,
+never a new controller or a completion handoff. Before convergence, that executor invokes the architecture skill in
 as-built mode and carries its reconciliation and integration evidence forward.
+
+## Documentation lifecycle
+
+Reader-facing documentation follows the [writing-depth policy](writing-depth.md).
+A documentation set runs `documentation-planning` → `documentation-authoring`
+→ `documentation-review` → `verification-before-completion`; review findings
+return to the same authoring executor. A standalone document enters
+`documentation-authoring` directly and closes with a recorded self-review. The
+documentation lifecycle never shares a work ID with an engineering lifecycle;
+software behavior stays with Spec Kit, OpenSpec or debugging.

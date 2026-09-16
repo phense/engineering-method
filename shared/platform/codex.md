@@ -103,3 +103,14 @@ ephemeral mode when explicitly authorized; that is not a temporary-home auth
 test. Never copy, read, or symlink credentials for isolation, and never mutate
 global plugin settings. A fully isolated live home needs human-controlled
 login. Preserve account authentication and never fall back to an API key.
+
+## Reader-oriented output
+
+Explanations, instructions and troubleshooting help written for the user or
+for another reader follow the shared [reader-oriented output
+policy](../policies/reader-oriented-output.md) and its skills
+`explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`.
+Documentation work decides its scale with the [writing-depth
+policy](../policies/writing-depth.md) before selecting a writing lifecycle.
+The policy shapes wording and order only; verification and evidence rules are
+unchanged.

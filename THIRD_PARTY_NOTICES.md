@@ -19,6 +19,13 @@ contracts, exclusive lifecycle boundaries, risk-proportionate depth and tested
 continuity. EM-004 additionally hardens output containment, cohesive task handoffs
 and architecture evidence. No upstream CLI or full methodology is redistributed.
 
+EM-010 adds original documentation and reader-oriented writing skills, the
+writing-depth and reader-oriented-output policies, the shared curse-of-knowledge
+filter and the documentation templates. They were written from public style
+guides and framework descriptions cited in
+`docs/verification/EM-010-documentation-skills.md`; no third-party text was
+copied and no upstream mapping applies.
+
 ## Spec Kit
 
 - Repository: https://github.com/github/spec-kit.git

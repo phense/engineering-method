@@ -16,3 +16,8 @@ and verification. Depth describes needed evidence, not an unlimited work budget.
 Do not add lifecycle artifacts merely because tools are available. Add depth
 when current evidence crosses a boundary above, and record the reason in the
 owning artifact.
+
+Reader-facing documentation has its own scale table in
+[writing-depth](writing-depth.md); the [reader-oriented output
+policy](reader-oriented-output.md) governs explanations, instructions and
+troubleshooting help in ordinary replies.

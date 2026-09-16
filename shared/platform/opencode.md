@@ -82,6 +82,19 @@ agentic-rag remains separate. An existing read-only MCP server can be used when
 needed and permitted, but this plugin neither configures it nor grants write
 access. Never read or copy credential files to another host or provider.
 
+## Reader-oriented output
+
+Because this file is loaded as an OpenCode instruction, the shared
+[reader-oriented output policy](../policies/reader-oriented-output.md) applies
+to ordinary replies here: explanations lead with an everyday analogy and avoid
+undefined jargon (`explaining-concepts`), instructions are numbered imperative
+steps with exact locations and a visible result (`writing-procedures`), and
+help with failures starts from the symptom the user sees
+(`empathic-troubleshooting`). Documentation requests decide their scale with
+the [writing-depth policy](../policies/writing-depth.md) before loading
+`documentation-authoring` or `documentation-planning`. Evidence and
+verification rules are unchanged.
+
 ## Verification interfaces and limits
 
 - opencode debug skill: native skill inventory. Write stdout directly to a file;

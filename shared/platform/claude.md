@@ -117,3 +117,14 @@ Do not use `--safe-mode`: it disables plugins and skills. If using the separate
 `claude plugin eval` feature, include `--no-publish`; report publication can
 otherwise be enabled by default. The custom stream driver above does not use
 that feature.
+
+## Reader-oriented output
+
+Explanations, instructions and troubleshooting help written for the user or
+for another reader follow the shared [reader-oriented output
+policy](../policies/reader-oriented-output.md) and its skills
+`explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`.
+Documentation work decides its scale with the [writing-depth
+policy](../policies/writing-depth.md) before selecting a writing lifecycle.
+The policy shapes wording and order only; verification and evidence rules are
+unchanged.

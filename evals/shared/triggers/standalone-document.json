@@ -1,0 +1,7 @@
+{
+  "id": "standalone-document",
+  "prompt": "Write a how-to guide, docs/how-to/rotate-api-keys.md, that shows an administrator how to rotate an API key in this product. There is one reader group and no other documentation exists yet. Perform only the first safe assessment: select the workflow, load the applicable skills, and record decision.md; do not draft the guide.",
+  "files": {
+    "README.md": "# Keyforge\n\nAdministrators manage API keys under Settings > API keys. Keys can be generated, revoked and rotated.\n"
+  }
+}
