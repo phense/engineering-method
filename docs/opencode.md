@@ -2,8 +2,10 @@
 
 Engineering Method exposes its shared skills through OpenCode's native skill
 tool. The recorded discovery evidence covers the 17 skills of version 0.1.1;
-the current main branch adds eight documentation skills that load from the same
-directory. A local plugin config hook adds the skill directory and
+the current main branch adds ten writing and PDF skills that load from the same
+directory. Later [native probes](verification/EM-013-prepublication.md) verify
+PDF selection and pre-draft authoring with Humanizer through the skill tool.
+A local plugin config hook adds the skill directory and
 [OpenCode adapter](../shared/platform/opencode.md) to effective configuration.
 It leaves existing model, permissions, provider and MCP settings untouched.
 

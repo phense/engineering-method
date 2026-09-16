@@ -1,5 +1,9 @@
 # EM-011 Humanizer drafting constraints
 
+Subsequent acceptance: [EM-013](EM-013-prepublication.md) records native
+documentation/Humanizer/PDF routing checks and final package installation.
+The results and limits below describe this change's original verification.
+
 Date: 2026-09-16. Base: `4b69c08` (EM-010). Integrates blader/humanizer as a
 drafting-time supporting skill for medium and large documentation.
 

@@ -1,5 +1,9 @@
 # EM-012 Local Quarto and Typst PDF export
 
+Subsequent acceptance: [EM-013](EM-013-prepublication.md) records native
+documentation/Humanizer/PDF routing checks and final package installation.
+The results and limits below describe this change's original verification.
+
 Date: 2026-09-16. Base: `13a372f` (Humanizer drafting integration).
 
 ## Scope

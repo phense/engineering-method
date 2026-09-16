@@ -1,5 +1,9 @@
 # EM-010 documentation and reader-oriented writing skills
 
+Subsequent acceptance: [EM-013](EM-013-prepublication.md) records native
+documentation/Humanizer/PDF routing checks and final package installation.
+The results and limits below describe this change's original verification.
+
 Date: 2026-09-16. Base: `137306c` (v0.1.1). Adds eight original skills, two
 shared policies, one shared writing checklist and five templates. No upstream
 file was copied; the third-party source lock and notices are unchanged.

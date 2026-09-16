@@ -22,13 +22,21 @@ intended scope.
 The earlier `v0.1.0-rc.1` pre-release remains available with its original, reduced
 acceptance scope.
 
+The default branch additionally includes scale-aware documentation, Humanizer
+rules applied during drafting, local Quarto/Typst PDF export, and read-only
+backlog status checks. These additions are separate from the fixed `v0.1.1`
+release. [Current verification](docs/verification/EM-013-prepublication.md)
+covers 319 local tests, five documentation routing cases on each of Codex and
+Claude, and two bounded native OpenCode probes.
+
 ## Installation
 
 Requires Python 3.11+, Git, and Codex CLI, Claude Code or OpenCode.
 OpenCode uses the separate source-linked installation described below.
 GitHub task synchronization additionally requires authenticated `gh` and repository
 permissions. No upstream Spec Kit, OpenSpec or Superpowers installation is needed.
-Native installation was checked with Codex CLI 0.153.4 and Claude Code 2.1.259;
+Current local package installation was checked with Codex CLI 0.154.0 and
+Claude Code 2.1.272;
 other host versions and operating systems are not covered by that evidence.
 
 Install from [phense/engineering-method](https://github.com/phense/engineering-method):
@@ -108,6 +116,11 @@ For a requested PDF, `documentation-pdf` uses a reusable Quarto/Typst
 chapters in the accepted order with central branding, a linked contents page
 and current/total page numbers. Quarto is an optional local export dependency;
 see the [native verification scope](docs/verification/EM-012-quarto-pdf.md).
+An accepted documentation plan continues directly with authoring. Planning is
+selected again only for changes to the set structure, readers or manifest.
+The [routing checks](docs/verification/EM-013-routing-results.json) include
+Humanizer preparation at medium and large scales and PDF export selection;
+they do not claim complete authored-document quality.
 
 ## Architecture and review
 

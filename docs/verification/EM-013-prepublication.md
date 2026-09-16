@@ -1,7 +1,10 @@
 # EM-013 Safe state checks and documentation routing
 
-Date: 2026-09-16. Base: `0c158cd`. Local prepublication work; no push,
-release, issue creation or migration was authorized or performed.
+Date: 2026-09-16. Base: `0c158cd`. The implementation and verification below
+were performed locally before publication approval. On 2026-09-16 the
+maintainer authorized documentation updates, integration into the existing
+GitHub default branch `main`, and a push. No new release, issue creation or
+backlog migration is included.
 
 ## Read-only state check
 
@@ -112,7 +115,8 @@ acceptance blocker remained open; no skill implementation was changed.
 ## Verification scope
 
 Independent review of the added evaluation cases returned Ready; all existing
-selection and evidence gates remain enforced. The full Python suite passes 318 tests. The package validator and native Claude
+selection and evidence gates remain enforced. The initial state-check change
+passed 318 tests; the subsequent authentication correction passes 319. The package validator and native Claude
 strict manifest validator pass. Both edited skills also pass the skill-creator
 validator with the existing PyYAML-capable project interpreter. Prior Quarto rendering evidence in
 [EM-012](EM-012-quarto-pdf.md) remains applicable because the export skill and
@@ -166,4 +170,20 @@ evidence; fresh repetitions passed without changing prompts, expectations or
 evidence gates. Both failed transcripts remain recorded. The native checks
 prove selection/preparation, including Humanizer before drafting at medium and
 large scales, not full authored-document quality. EM-013 has no remaining
-acceptance blocker. No remote publication has been performed.
+acceptance blocker. Publication approval was given after this verification.
+
+## Final package and main integration
+
+Implementation commit `89ad76c` built reproducibly as a 244-file package with
+SHA-256 `1d803c95023ef01d00ca5434982adfd0ff40bf1e841de4a311ac29c31b8947b4`.
+Clean installation passed for both Claude and Codex in disposable empty
+configurations, without credentials or model calls. Raw transcripts and built
+packages remain local; the tracked report contains bounded results and hashes.
+
+The approved publication includes the documentation, Humanizer, PDF and
+state-check/native-auth changes since remote `main` at `137306c`, followed by
+this documentation refresh. The existing local `main` at `4b69c08` can advance
+by fast-forward. The repository has no `master` branch. Existing version tags
+and release manifests remain at `0.1.1`; a default-branch push is not a new
+versioned release. Native routing and PDF rendering evidence is reused with
+its recorded revisions because this refresh changes documentation only.
