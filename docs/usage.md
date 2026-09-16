@@ -113,3 +113,17 @@ permission, GitHub migration maps hierarchy to Sub-Issues and dependencies to
 native dependency edges. After migration, Issues become canonical and the local
 backlog is a marked cache; offline changes queue for reconciliation. Publishing
 a repository alone does not authorize migrating its tasks.
+
+## Export reviewed Markdown to PDF
+
+> Build one PDF from these accepted chapters, in plan order, with the manual
+> design, table of contents and page numbers.
+
+`documentation-pdf` uses Quarto and its bundled Typst engine after content
+review. Copy the [manual template](../templates/documentation/pdf/DESIGN.md)
+to a new documentation root, map the accepted manifest rows to `book.chapters`
+in `_quarto.yml`, and set title, language, output name and `_brand.yml`.
+From that directory, run `quarto render --to em-manual-typst`. The default
+result is `_book/manual.pdf`. Inspect the actual contents links, page totals
+and page layout before delivery. This export preserves Markdown sources and
+does not publish remotely or re-run Humanizer over the finished text.

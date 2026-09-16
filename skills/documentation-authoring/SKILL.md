@@ -149,6 +149,11 @@ For a standalone document, the review is a self-review against the review
 template's checks recorded in the reply, followed by
 `verification-before-completion`.
 
+If the requested deliverable includes a PDF, invoke
+[documentation-pdf](../documentation-pdf/SKILL.md) after the content review is
+accepted and before final artifact verification. Export is optional for other
+deliverables and does not introduce a new prose-editing phase.
+
 ## Supporting skills
 
 - `project-backlog` for recovery, canonical task state, events, and checkpoints.

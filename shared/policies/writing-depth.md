@@ -35,6 +35,13 @@ that recorded scale and phase instead of deciding again.
 | Medium | Content type chosen from the information architecture, one template-based document with frontmatter, explicit reader, prerequisites and validation for procedures, local glossary check, drafting under the `human-prose-drafting` constraints, self-review against the didactic rules, fresh link and rendering check |
 | Large | Documentation plan with audience, architecture map, chunk manifest and conventions; shared glossary; asset manifest with placeholders; per-chunk authoring under the `human-prose-drafting` constraints with checkpoints; set-wide consistency review including prose tells; convergence of findings; fresh verification |
 
+## PDF delivery
+
+When the user requests a PDF, apply `documentation-pdf` after content review
+and before final verification. Use the accepted manifest order for a set, or
+the reviewed file for a standalone document. Rendering is local and does not
+change the writing scale or add a Humanizer rewrite pass.
+
 ## Escalation between scales
 
 If a medium document reveals shared terminology, several audiences or a chapter

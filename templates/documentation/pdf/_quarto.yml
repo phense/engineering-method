@@ -1,0 +1,31 @@
+project:
+  type: book
+  output-dir: _book
+
+book:
+  title: "A clear guide"
+  subtitle: "Markdown chapters, one designed PDF"
+  author: "Documentation team"
+  output-file: manual
+  chapters:
+    - index.md
+    - chapters/01-start.md
+    - chapters/02-reference.md
+    - chapters/03-check.md
+
+lang: en
+execute:
+  enabled: false
+
+format:
+  em-manual-typst:
+    papersize: a4
+    margin:
+      x: 18mm
+      top: 20mm
+      bottom: 22mm
+    toc: true
+    toc-depth: 2
+    number-sections: true
+    section-numbering: "1.1"
+    keep-typ: true

@@ -42,8 +42,8 @@ by the readers' journey and keep every level internally consistent.
 
 ## Chunk manifest
 
-One row per Markdown file. Keep IDs stable; reorder by changing the order
-column, never by renaming an ID.
+One row per Markdown file. Rows define reading order; reorder rows without
+renaming stable IDs.
 
 | Chunk ID | File | Type | Title | Readers | Depends on | Assets | Status |
 |---|---|---|---|---|---|---|---|
@@ -73,6 +73,16 @@ Statuses: planned, drafted, reviewed, accepted, superseded.
 - Acceptance criteria: <what makes the set complete, for example every reader
   goal has a path, every placeholder has capture instructions, no terminology
   findings remain>.
+
+## PDF output (when requested)
+
+- Export skill: `documentation-pdf`, after content acceptance.
+- Quarto project root: <directory containing the chapters and _quarto.yml>
+- PDF title, language and output name: <values>
+- Design: <bundled em-manual template or named project template>
+- Chapter list: accepted manifest rows in the same order, each included once.
+- Verification: inspect contents links, page references, footer totals, assets
+  and representative pages; record source revision and tool versions.
 
 ## Out of scope
 

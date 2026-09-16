@@ -95,6 +95,10 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 - ✅ `EM-011` **P1** Integrate adapted Humanizer drafting constraints into medium and large documentation writing
   - Depends on: `EM-010`
   - Notes: Humanizer drafting rules loaded before medium/large authoring; contextual preservation rules, provenance and independent review verified. See docs/verification/EM-011-humanizer-drafting.md. Native host routing and installation are not claimed.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-012","title":"Add local Quarto and Typst PDF export for documentation","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-011"],"notes":"Original Quarto/Typst manual template and export skill integrated; native en/de and reordered 120-row table checks passed, source bytes preserved, pages visually inspected. Independent review Ready. See docs/verification/EM-012-quarto-pdf.md. No remote publication or host-routing acceptance.","updated_at":"2026-09-16T08:29:21Z"} -->
+- ✅ `EM-012` **P1** Add local Quarto and Typst PDF export for documentation
+  - Depends on: `EM-011`
+  - Notes: Original Quarto/Typst manual template and export skill integrated; native en/de and reordered 120-row table checks passed, source bytes preserved, pages visually inspected. Independent review Ready. See docs/verification/EM-012-quarto-pdf.md. No remote publication or host-routing acceptance.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"complete","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"All nine original gate criteria accepted on 0784c79 with explicit same-package evidence reuse, Claude checkpoint supplement and independently verified ownership metadata correction. Failed reports preserved; see docs/verification/EM-005-acceptance.md. Accidental Issues #1-38 removed with approval; local backlog remains canonical.","updated_at":"2026-09-05T19:11:37Z"} -->
 - ✅ `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`

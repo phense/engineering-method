@@ -356,7 +356,8 @@
       "shared/policies/writing-depth.md",
       "shared/policies/reader-oriented-output.md",
       "shared/writing/**",
-      "templates/documentation/**"
+      "templates/documentation/**",
+      "skills/documentation-pdf/SKILL.md"
     ],
     "scope": "These paths are original implementation. All adapted destinations are enumerated separately in sources; no upstream runtime is bundled."
   }

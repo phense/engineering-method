@@ -103,6 +103,12 @@ humanizing pass. `terminology-guard` keeps one term per concept
 across hundreds of pages, and `visual-placeholders` inserts standardized
 screenshot and diagram callouts with alt text and capture instructions.
 
+For a requested PDF, `documentation-pdf` uses a reusable Quarto/Typst
+[manual template](templates/documentation/pdf/DESIGN.md). It combines Markdown
+chapters in the accepted order with central branding, a linked contents page
+and current/total page numbers. Quarto is an optional local export dependency;
+see the [native verification scope](docs/verification/EM-012-quarto-pdf.md).
+
 ## Architecture and review
 
 Large features and architecture changes use relevant Mermaid sources under

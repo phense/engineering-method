@@ -1,0 +1,17 @@
+#show: body => em-manual(
+  title: [$title$],
+  subtitle: [$if(subtitle)$$subtitle$$endif$],
+  lang: "$if(lang)$$lang$$else$en$endif$",
+  accent: brand-color.at("primary", default: rgb("007D8A")),
+  ink: brand-color.at("foreground", default: rgb("20262B")),
+  muted: brand-color.at("muted", default: rgb("5C6873")),
+  font: $if(brand.typography.base.family)$$brand.typography.base.family$$else$("Libertinus Serif",)$endif$,
+  font-size: $if(brand.typography.base.size)$$brand.typography.base.size$$else$11pt$endif$,
+  code-font: $if(brand.typography.monospace.family)$$brand.typography.monospace.family$$else$("DejaVu Sans Mono",)$endif$,
+  code-size: $if(brand.typography.monospace.size)$$brand.typography.monospace.size$$else$9pt$endif$,
+  show-toc: $if(toc)$true$else$false$endif$,
+  toc-title: [$if(toc-title)$$toc-title$$endif$],
+  toc-depth: $if(toc-depth)$$toc-depth$$else$2$endif$,
+  numbering-pattern: $if(section-numbering)$"$section-numbering$"$else$none$endif$,
+  body,
+)

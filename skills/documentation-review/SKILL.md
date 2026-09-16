@@ -129,6 +129,11 @@ of the scope requires zero open Critical or Important findings.
 the findings to `documentation-authoring` as new work for the affected chunks;
 that return preserves accepted chunks and stable IDs and is not a new plan.
 
+If the requested deliverable includes a PDF, invoke
+[documentation-pdf](../documentation-pdf/SKILL.md) after the content review is
+accepted and before final artifact verification. Export is optional for other
+deliverables and does not introduce a new prose-editing phase.
+
 ## Supporting skills
 
 - `project-backlog` for recovery, canonical task state, events, and checkpoints.

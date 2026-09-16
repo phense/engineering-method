@@ -1,0 +1,21 @@
+meta:
+  name: Documentation
+color:
+  palette:
+    petrol: "#007D8A"
+    ink: "#20262B"
+    muted: "#5C6873"
+    paper: "#FFFFFF"
+  primary: petrol
+  foreground: ink
+  background: paper
+typography:
+  base:
+    family: "Helvetica Neue"
+    size: 11pt
+  headings:
+    family: "Helvetica Neue"
+    weight: 700
+  monospace:
+    family: "Menlo"
+    size: 9pt

@@ -57,3 +57,10 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Status: available
 - Summary: Writing-depth scale decision (small, medium, large); documentation-planning, documentation-authoring and documentation-review lifecycle with plan, chunk manifest, glossary, asset manifest and review templates under docs/writing; didactic skills explaining-concepts, writing-procedures and empathic-troubleshooting applied to documentation and ordinary replies; terminology-guard and visual-placeholders; human-prose-drafting (adapted from Humanizer, MIT) applied while drafting medium and large texts. Contract tests and validators pass; no native host evaluation of the new routing cases.
 - Related backlog: `EM-009`, `EM-010`, `EM-011`
+
+<!-- engineering-method:feature {"schema_version":1,"id":"F-009","name":"Local Markdown book PDF export","summary":"Optional documentation-pdf skill with a reusable Quarto/Typst template, centralized brand settings, ordered Markdown chapters, linked contents and current/total page numbers. Native macOS sample and long-table checks verified; no remote publication or native host-routing claim.","status":"available","related_backlog_ids":["EM-012"],"updated_at":"2026-09-16T08:29:21Z"} -->
+## `F-009` Local Markdown book PDF export
+
+- Status: available
+- Summary: Optional documentation-pdf skill with a reusable Quarto/Typst template, centralized brand settings, ordered Markdown chapters, linked contents and current/total page numbers. Native macOS sample and long-table checks verified; no remote publication or native host-routing claim.
+- Related backlog: `EM-012`

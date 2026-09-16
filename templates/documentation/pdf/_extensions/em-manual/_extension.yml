@@ -1,0 +1,13 @@
+title: Engineering Method Manual
+author: Peter Hense
+version: 0.1.0
+quarto-required: ">=1.10.18"
+contributes:
+  formats:
+    typst:
+      filters:
+        - path: chunk-title.lua
+          at: pre-quarto
+      template-partials:
+        - typst-template.typ
+        - typst-show.typ

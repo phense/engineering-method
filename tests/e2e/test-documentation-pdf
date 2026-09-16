@@ -1,0 +1,128 @@
+#!/usr/bin/env python3
+"""Native template check; requires Quarto, Poppler and MuPDF, no model calls."""
+from pathlib import Path
+import argparse
+import hashlib
+import json
+import re
+import shutil
+import subprocess
+import tempfile
+import xml.etree.ElementTree as ET
+
+ROOT = Path(__file__).resolve().parents[2]
+TEMPLATE = ROOT / 'templates/documentation/pdf'
+CHAPTERS = [('sec-start', 'Create your first PDF'),
+            ('sec-reference', 'Configure the document'),
+            ('sec-check', 'Check the finished PDF')]
+
+
+def run(*args, cwd=None):
+    result = subprocess.run(args, cwd=cwd, text=True, capture_output=True, timeout=120)
+    if result.returncode:
+        raise AssertionError(f'{args[0]} failed ({result.returncode}):\n{result.stdout}\n{result.stderr}')
+    return result.stdout + result.stderr if args[0].endswith('quarto') else result.stdout
+
+
+def source_hashes(root):
+    return {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in root.rglob('*.md')
+            if not {'_book', '.quarto'}.intersection(p.relative_to(root).parts)}
+
+
+def check(quarto, root, language, stress=False):
+    shutil.copytree(TEMPLATE, root, ignore=shutil.ignore_patterns('_book', '.quarto', 'index.typ'))
+    config = root / '_quarto.yml'
+    config.write_text(config.read_text().replace('lang: en', f'lang: {language}'))
+    expected = list(CHAPTERS)
+    if stress:
+        text = config.read_text().replace(
+            '    - chapters/01-start.md\n    - chapters/02-reference.md',
+            '    - chapters/02-reference.md\n    - chapters/01-start.md')
+        config.write_text(text)
+        expected[0], expected[1] = expected[1], expected[0]
+        chapter = root / 'chapters/02-reference.md'
+        with chapter.open('a') as f:
+            f.write('\n## Long table\n\n| Row | Description |\n|---|---|\n')
+            for row in range(1, 121):
+                f.write(f'| ROW-{row:03} | This row verifies a table spanning PDF pages. |\n')
+    before = source_hashes(root)
+    output = run(quarto, 'render', '--to', 'em-manual-typst', cwd=root)
+    assert not re.search(r'\b(?:warning|error):', output, re.I), output
+    pdf = root / '_book/manual.pdf'
+    assert pdf.is_file(), 'Missing PDF'
+    assert source_hashes(root) == before, 'Rendering changed Markdown source bytes'
+    info = run('pdfinfo', str(pdf))
+    count = int(re.search(r'^Pages:\s+(\d+)', info, re.M)[1])
+    text = run('pdftotext', '-layout', str(pdf), '-')
+    pages = text.rstrip('\f\n').split('\f')
+    assert len(pages) == count
+    assert 'A4' in info
+    for number, page in enumerate(pages, 1):
+        footer = f'Seite {number} von {count}' if language == 'de' else f'Page {number} of {count}'
+        assert footer in ' '.join(page.split()), (number, footer)
+    assert ('Inhaltsverzeichnis' if language == 'de' else 'Table of contents') in pages[0]
+    chapter_pages = {}
+    for number, (anchor, title) in enumerate(expected, 1):
+        matches = [i for i, page in enumerate(pages[1:], 2)
+                   if re.search(r'^\s*' + str(number) + r'\s+' + re.escape(title) + r'\s*$', page, re.M)]
+        assert len(matches) == 1, (title, 'Missing or duplicate chapter', matches)
+        chapter_pages[anchor] = matches[0]
+        assert len(re.findall(re.escape(title), pages[0])) == 1, 'Duplicate contents entry'
+        toc = next(line for line in pages[0].splitlines() if title in line)
+        assert re.search(r'\b' + str(matches[0]) + r'\s*$', toc), (title, toc)
+    assert list(chapter_pages.values()) == sorted(chapter_pages.values())
+    page_objects = {int(obj): int(page) for page, obj in re.findall(
+        r'page (\d+) = (\d+) 0 R', run('mutool', 'show', str(pdf), 'pages'))}
+    named = run('mutool', 'show', str(pdf), 'trailer/Root/Names/Dests')
+    destinations = dict(re.findall(r'\(([^)]+)\)\s+(\d+) 0 R', named))
+    for anchor, page in chapter_pages.items():
+        target = run('mutool', 'show', str(pdf), destinations[anchor])
+        obj = int(re.search(r'\[\s*(\d+) 0 R', target)[1])
+        assert page_objects[obj] == page, (anchor, 'Wrong PDF destination')
+    links = run('mutool', 'show', str(pdf), 'pages/*/Annots/*')
+    for anchor in chapter_pages:
+        assert '/Dest (' + anchor + ')' in links, (anchor, 'Missing clickable link')
+    for anchor in re.findall(r'/Dest \(([^)]+)\)', links):
+        assert anchor in destinations, ('Dangling PDF link', anchor)
+    bbox = ET.fromstring(run('pdftotext', '-bbox', str(pdf), '-'))
+    for page in bbox.iter('{http://www.w3.org/1999/xhtml}page'):
+        width, height = float(page.attrib['width']), float(page.attrib['height'])
+        for word in page:
+            box = {key: float(word.attrib[key]) for key in ['xMin','xMax','yMin','yMax']}
+            assert box['xMin'] >= -0.1 and box['xMax'] <= width + 0.1, ('Horizontal overflow', word.text)
+            assert box['yMin'] >= -0.1 and box['yMax'] <= height + 0.1, ('Vertical overflow', word.text)
+    if stress:
+        assert count > 4, 'Long table did not span additional pages'
+        for row in range(1, 121):
+            assert text.count(f'ROW-{row:03}') == 1, ('Missing/duplicate table row', row)
+    return {'language': language, 'stress': stress, 'pages': count,
+            'chapter_pages': chapter_pages, 'source_unchanged': True,
+            'contents_links_and_page_totals': 'passed', 'pdf': str(pdf)}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--quarto', default=shutil.which('quarto'))
+    parser.add_argument('--output-dir', type=Path)
+    args = parser.parse_args()
+    if not args.quarto:
+        parser.error('Provide --quarto or install Quarto on PATH')
+    for tool in ['pdfinfo', 'pdftotext', 'mutool']:
+        if not shutil.which(tool):
+            parser.error(f'Required verification tool missing: {tool}')
+    root = args.output_dir.resolve() if args.output_dir else Path(tempfile.mkdtemp(prefix='em-pdf-check-'))
+    root.mkdir(parents=True, exist_ok=True)
+    # Each destination must be absent; never overwrite a prior verification run.
+    results = [check(args.quarto, root/'en', 'en'),
+               check(args.quarto, root/'de', 'de'),
+               check(args.quarto, root/'stress', 'en', stress=True)]
+    report = {'quarto': run(args.quarto, '--version').strip(),
+              'typst': run(args.quarto, 'typst', '--version').strip(),
+              'results': results}
+    (root/'verification.json').write_text(json.dumps(report, indent=2)+'\n')
+    print(json.dumps(report, indent=2))
+
+
+if __name__ == '__main__':
+    main()
