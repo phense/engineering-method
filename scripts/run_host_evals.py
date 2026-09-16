@@ -552,7 +552,7 @@ def stage_plugin(plugin, destination):
         ".git", ".engineering-method", ".superpowers", ".worktrees", "__pycache__"))
     return destination
 
-def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", budget=2):
+def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", budget=2, native_auth=False):
     env = os.environ.copy()
     for key in ("ANTHROPIC_API_KEY", "OPENAI_API_KEY", "CLAUDECODE", "ANTHROPIC_AUTH_TOKEN"):
         env.pop(key, None)
@@ -572,7 +572,8 @@ def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", b
             command.extend(["-c", f'model_reasoning_effort="{effort}"'])
         command.append(prompt)
     else:
-        env["CLAUDE_CONFIG_DIR"] = str(auth_home or config)
+        if not native_auth:
+            env["CLAUDE_CONFIG_DIR"] = str(auth_home or config)
         settings = config / "settings.json"
         settings.write_text(json.dumps({"disableAllHooks": True, "enableAllProjectMcpServers": False}))
         command = ["claude", "-p", "--verbose", "--output-format", "stream-json",
@@ -624,7 +625,7 @@ The supporting array lists only skills whose instructions were opened and applie
 during this assessment. Mention future implementation or verification skills in
 decision.md as next steps instead; exclude future-only skills from the final JSON.
 """
-def run_case(host, case, expected, output, timeout, auth_home=None, model=None, plugin=ROOT):
+def run_case(host, case, expected, output, timeout, auth_home=None, model=None, plugin=ROOT, native_auth=False):
     source_sha256 = fingerprint(plugin)
     with tempfile.TemporaryDirectory(prefix="engineering-method-eval-") as directory:
         temporary = Path(directory)
@@ -638,7 +639,7 @@ def run_case(host, case, expected, output, timeout, auth_home=None, model=None, 
         evaluation_role = policy["evaluation_roles"][evaluation_kind]
         model = model or policy["roles"][evaluation_role][0]["model"]
         command, env = host_command(host, repo, staged_plugin, config, model, auth_home,
-                                    case["prompt"] + "\n" + ROUTING_INSTRUCTION)
+                                    case["prompt"] + "\n" + ROUTING_INSTRUCTION, native_auth=native_auth)
         stdout = ""
         try:
             stdout = execute(command, repo, env, timeout)
@@ -671,10 +672,15 @@ def main(argv=None):
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--timeout", type=float, default=240,
                         help="maximum seconds per native routing assessment")
-    parser.add_argument("--auth-home", type=Path)
+    auth = parser.add_mutually_exclusive_group()
+    auth.add_argument("--auth-home", type=Path)
+    auth.add_argument("--native-auth", action="store_true",
+                      help="Claude only: preserve the calling terminal native authentication environment")
     parser.add_argument("--model")
     parser.add_argument("--plugin-root", type=Path, default=ROOT)
     args = parser.parse_args(argv)
+    if args.native_auth and args.host != "claude":
+        parser.error("--native-auth is supported only for Claude")
     output = args.output_dir.resolve()
     fixture = (ROOT / "tests/fixtures").resolve()
     if output.is_relative_to(ROOT.resolve()):
@@ -691,7 +697,7 @@ def main(argv=None):
     for case in cases:
         try:
             result = run_case(args.host, case, expected[case["id"]], output, args.timeout,
-                              args.auth_home, args.model, args.plugin_root)
+                              args.auth_home, args.model, args.plugin_root, native_auth=args.native_auth)
         except (EvalFailure, OSError, ValueError) as exc:
             result = {"case_id": case["id"], "host": args.host, "status": "failed",
                       "failure": str(exc) if isinstance(exc, EvalFailure) else type(exc).__name__}
@@ -702,7 +708,7 @@ def main(argv=None):
             break
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
     summary = {"status": "passed" if len(results) == len(cases) and all(r["status"] == "passed" for r in results) else "failed",
-               "host": args.host, "source_commit": commit.stdout.strip(),
+               "host": args.host, "native_auth": args.native_auth, "source_commit": commit.stdout.strip(),
                "source_sha256": fingerprint(args.plugin_root), "completed_at": datetime.now(timezone.utc).isoformat(),
                "requested_cases": len(cases), "results": results}
     (output / "summary.json").write_text(json.dumps(summary, indent=2) + "\n")

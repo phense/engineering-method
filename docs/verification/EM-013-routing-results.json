@@ -136,19 +136,8 @@
     }
   ],
   "claude": {
-    "status": "blocked",
-    "reason": "Native session limit; reset reported at 11:40 Europe/Berlin. No routing evaluated.",
-    "attempted_cases": [
-      "standalone-document",
-      "documentation-set"
-    ],
-    "pending_cases": [
-      "standalone-document",
-      "documentation-set",
-      "documentation-draft-preparation",
-      "existing-documentation-plan",
-      "documentation-pdf"
-    ],
+    "status": "passed",
+    "pending_cases": [],
     "retry_attempts": [
       {
         "completed_at": "2026-09-16T09:08:11.081098+00:00",
@@ -201,7 +190,123 @@
           }
         ]
       }
-    ]
+    ],
+    "authentication_diagnosis": {
+      "cause": "Explicit CLAUDE_CONFIG_DIR selected different native account metadata than the default terminal environment.",
+      "correction": "Claude-only --native-auth preserves caller environment; no credential copying or manual login change.",
+      "initial_native_default_probe": "standalone-document passed with only the config-variable override removed."
+    },
+    "initial_limit_attempt": {
+      "reason": "Native session limit; reset reported at 11:40 Europe/Berlin. No routing evaluated.",
+      "attempted_cases": [
+        "standalone-document",
+        "documentation-set"
+      ]
+    },
+    "results": [
+      {
+        "case_id": "standalone-document",
+        "status": "passed",
+        "host": "claude",
+        "model": "sonnet",
+        "effort": "medium",
+        "source_sha256": "1dd4b3a3ad43e36870f343dddffa71f4ebfacbae02ea4e13ec528ea9005e0994",
+        "primary": "documentation-authoring",
+        "skills": [
+          "documentation-authoring",
+          "project-backlog"
+        ],
+        "tool_count": 6,
+        "event_count": 34,
+        "artifacts": {
+          "decision.md": "df1f519f17db3e776e9d328670ad262971570182048d28ba82d3604c4b3f77cc"
+        },
+        "transcript_sha256": "2dc2725df4d9e2cdc03f518217b73a1a691dd13a10a23fee9012b3c66ce724a7"
+      },
+      {
+        "case_id": "documentation-set",
+        "status": "passed",
+        "host": "claude",
+        "model": "sonnet",
+        "effort": "medium",
+        "source_sha256": "1dd4b3a3ad43e36870f343dddffa71f4ebfacbae02ea4e13ec528ea9005e0994",
+        "primary": "documentation-planning",
+        "skills": [
+          "documentation-planning",
+          "project-backlog"
+        ],
+        "tool_count": 7,
+        "event_count": 39,
+        "artifacts": {
+          "decision.md": "154828f9ffc052407cae530914d650ff3057bb2efc0ebb3e41148cc5824b59ee"
+        },
+        "transcript_sha256": "9a2d3c9e639c2a3f2921e9c6c9f3956941ffd668cd0d80900de03939176ce80e"
+      },
+      {
+        "case_id": "documentation-draft-preparation",
+        "status": "passed",
+        "host": "claude",
+        "model": "sonnet",
+        "effort": "medium",
+        "source_sha256": "1dd4b3a3ad43e36870f343dddffa71f4ebfacbae02ea4e13ec528ea9005e0994",
+        "primary": "documentation-authoring",
+        "skills": [
+          "documentation-authoring",
+          "human-prose-drafting",
+          "project-backlog",
+          "writing-procedures"
+        ],
+        "tool_count": 12,
+        "event_count": 54,
+        "artifacts": {
+          "decision.md": "89f570b21db06d4486b3123e21f957006c8eab99d2126f5b419ab23bec9e1475"
+        },
+        "transcript_sha256": "ba9d5607b79372b9272742f07378d3e2c3f7d2c3f7d7c150ee37b98b79e7fe3e"
+      },
+      {
+        "case_id": "existing-documentation-plan",
+        "status": "passed",
+        "host": "claude",
+        "model": "sonnet",
+        "effort": "medium",
+        "source_sha256": "1dd4b3a3ad43e36870f343dddffa71f4ebfacbae02ea4e13ec528ea9005e0994",
+        "primary": "documentation-authoring",
+        "skills": [
+          "documentation-authoring",
+          "explaining-concepts",
+          "human-prose-drafting",
+          "project-backlog",
+          "terminology-guard"
+        ],
+        "tool_count": 17,
+        "event_count": 70,
+        "artifacts": {
+          "decision.md": "7a3434c32a05ef9a8c1e2f38ea2ee0f3a4089f62ec83e894053e48663a789c98"
+        },
+        "transcript_sha256": "c5fcc56702f46987b95fe488f0a6f1f043830cf58f6c8244e4cfef36ba4a8f9f"
+      },
+      {
+        "case_id": "documentation-pdf",
+        "status": "passed",
+        "host": "claude",
+        "model": "sonnet",
+        "effort": "medium",
+        "source_sha256": "1dd4b3a3ad43e36870f343dddffa71f4ebfacbae02ea4e13ec528ea9005e0994",
+        "primary": "documentation-pdf",
+        "skills": [
+          "documentation-pdf"
+        ],
+        "tool_count": 9,
+        "event_count": 49,
+        "artifacts": {
+          "decision.md": "7ce1862b31e009b2b4e0d2365335d84f8a1de4175ff858b5db92c5b014863090"
+        },
+        "transcript_sha256": "ab624756c3d4e5b42280f300b78144aa33f62e972ccd975f5c2ca2deaeff25af"
+      }
+    ],
+    "cli_version": "2.1.272",
+    "native_auth": true,
+    "completed_at": "2026-09-16T09:19:22.599421+00:00"
   },
   "fixture_sha256": {
     "documentation-pdf.json": "18658f1b9ff808ea720e0aa43583309001d96d6e0f99ecf29ddeacb0ad638956",
@@ -235,7 +340,19 @@
       "host": "opencode",
       "case": "pdf initial probe",
       "reason": "Incorrect working directory/configuration; excluded and repeated with explicit --dir and config content"
+    },
+    {
+      "host": "claude",
+      "case": "documentation-set",
+      "reason": "missing_skill_evidence under native authentication; selection matched but complete standalone reads were not all proven",
+      "transcript_sha256": "c5c717d942d2591a0646351d63d617c8e314b29645a6cbb773f9d9c2e7cafd65"
+    },
+    {
+      "host": "claude",
+      "case": "documentation-pdf",
+      "reason": "missing_skill_evidence under native authentication; selection matched but complete standalone reads were not all proven",
+      "transcript_sha256": "4ae593d372ef1c3cdfb16adfc4a74dd62ec62421f99b580206b7c5584653ed46"
     }
   ],
-  "status": "blocked_on_claude_session_limit"
+  "status": "passed"
 }

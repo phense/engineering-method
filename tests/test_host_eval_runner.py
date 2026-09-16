@@ -297,6 +297,36 @@ class HostRunnerTests(unittest.TestCase):
                     os.killpg(process.pid, signal.SIGKILL)
                     process.wait()
 
+    def test_native_claude_auth_preserves_terminal_environment_and_isolation(self):
+        # Forcing a config directory can silently select a different native account.
+        from scripts.run_host_evals import main
+        for inherited in (None, "/native/custom-config"):
+            with self.subTest(inherited=inherited), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                env = {"ANTHROPIC_API_KEY": "test-only-placeholder"}
+                if inherited is not None:
+                    env["CLAUDE_CONFIG_DIR"] = inherited
+                def native(command, cwd, child_env, timeout):
+                    self.assertEqual(inherited, child_env.get("CLAUDE_CONFIG_DIR"))
+                    self.assertNotIn("ANTHROPIC_API_KEY", child_env)
+                    self.assertEqual("", command[command.index("--setting-sources") + 1])
+                    self.assertIn("--strict-mcp-config", command)
+                    self.assertEqual('{"mcpServers":{}}', command[command.index("--mcp-config") + 1])
+                    settings = json.loads(Path(command[command.index("--settings") + 1]).read_text())
+                    self.assertTrue(settings["disableAllHooks"])
+                    (cwd / "decision.md").write_text("PDF assessment only.")
+                    return "\n".join(map(json.dumps, [
+                        {"type": "assistant", "message": {"content": [{"type": "tool_use", "id": "s1", "name": "Skill", "input": {"skill": "documentation-pdf"}}]}},
+                        {"type": "user", "message": {"content": [{"type": "tool_result", "tool_use_id": "s1", "content": "PDF skill loaded"}]}},
+                        {"type": "result", "subtype": "success", "is_error": False, "structured_output": {"primary": "documentation-pdf", "supporting": []}},
+                    ]))
+                with patch.dict(os.environ, env, clear=True), patch("scripts.run_host_evals.execute", native):
+                    try:
+                        code = main(["--host", "claude", "--native-auth", "--case", "documentation-pdf", "--output-dir", str(root)])
+                    except SystemExit as exc:
+                        code = exc.code
+                self.assertEqual(0, code)
+
     def test_claude_empty_mcp_configuration_has_native_schema(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

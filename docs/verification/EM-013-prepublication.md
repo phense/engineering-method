@@ -76,7 +76,7 @@ The command used `opencode run --pure --dir <fixture> --model
 `OPENCODE_CONFIG_DIR`, `XDG_CONFIG_HOME` and disabled Claude discovery. Native
 provider authentication stayed in place without opening or copying credentials.
 
-## Unsuccessful probes and remaining blocker
+## Unsuccessful probes and authentication diagnosis
 
 - Initial Codex probes were rejected because the source checkout changed during
   evaluation. They were repeated against the frozen copy; no failed result was
@@ -95,7 +95,8 @@ provider authentication stayed in place without opening or copying credentials.
 - Claude Code 2.1.272 rejected both attempted routing calls with its native
   session limit, reporting reset at 11:40 Europe/Berlin. No skill selection ran.
   No alternate billing credential or provider was used. All five Claude cases
-  remain to be run after the native limit resets; Claude acceptance is open.
+  were initially deferred. The authentication correction below supersedes
+  that diagnosis; the limit did not establish the user terminal account quota.
 
 ## Claude retry after reported quota availability
 
@@ -104,9 +105,9 @@ copy of commit `48b37f5`, using the same native Claude account and Sonnet at
 medium effort. Each invocation was rejected before routing with the session
 limit message and the reported 11:40 Europe/Berlin reset. Native authentication
 was valid. The rate-limit event identified the five-hour window and disabled
-organization-level overage. No alternate account or billing method was used.
-The JSON report retains each failed attempt and transcript hash. The Claude
-acceptance blocker remains open; no skill implementation was changed.
+organization-level overage. No manual account switch or billing change was requested.
+The JSON report retains each failed attempt and transcript hash. At that point the Claude
+acceptance blocker remained open; no skill implementation was changed.
 
 ## Verification scope
 
@@ -116,3 +117,53 @@ strict manifest validator pass. Both edited skills also pass the skill-creator
 validator with the existing PyYAML-capable project interpreter. Prior Quarto rendering evidence in
 [EM-012](EM-012-quarto-pdf.md) remains applicable because the export skill and
 template are unchanged. This report does not grant a release or publish approval.
+
+## Native authentication correction
+
+The user's terminal screenshot showed 5% session usage, contradicting the test
+results. A native `claude auth status` comparison found different account and
+organization metadata depending on whether `CLAUDE_CONFIG_DIR` was explicitly
+set to the default-looking `~/.claude` path. The runner's `--auth-home` option
+sets that variable. Authentication status had previously been inspected without
+that variable, so the status check and routing attempts were not comparable.
+No credential files or secret values were inspected or copied.
+
+Repeating the same standalone fixture while changing only that environment
+handling succeeded. Each probe already used a fresh Claude process; no terminal
+restart or new login was needed. Prior limit messages remain real evidence for
+the forced environment, not evidence that the user's active terminal account
+was exhausted. The earlier quota conclusion was incorrect.
+
+The runner now offers Claude-only `--native-auth`, mutually exclusive with
+`--auth-home`. It preserves the caller's native configuration environment,
+including absence of `CLAUDE_CONFIG_DIR`. Existing isolated defaults are
+unchanged. Native authentication does not enable API keys, hooks, inherited
+settings or MCP: the existing exclusions remain enforced.
+
+```sh
+python3 scripts/run_host_evals.py --host claude --native-auth \
+  --case documentation-draft-preparation \
+  --plugin-root /path/to/unchanging/plugin-copy \
+  --output-dir /tmp/em-claude-routing-result --timeout 180
+```
+
+A regression executes the CLI-to-host boundary with both absent and inherited
+configuration variables, verifies environment preservation and isolation, and
+requires native evidence and a decision artifact. It failed before the new
+option existed and passed after implementation. The report retains the prior
+failed attempts instead of treating them as routing failures or successful tests.
+
+The full Python suite passes 319 tests after the starter change. Independent
+read-only review returned Ready, reran all 31 runner tests and verified that
+Codex rejects `--native-auth` and that Claude rejects combining it with
+`--auth-home`. Both rejected argument combinations exit before native calls.
+
+All five Claude cases now pass with Sonnet at medium effort and `--native-auth`.
+The unchanged snapshot fingerprint is
+`1dd4b3a3ad43e36870f343dddffa71f4ebfacbae02ea4e13ec528ea9005e0994`.
+Two initial native-auth attempts were rejected for missing complete skill-read
+evidence; fresh repetitions passed without changing prompts, expectations or
+evidence gates. Both failed transcripts remain recorded. The native checks
+prove selection/preparation, including Humanizer before drafting at medium and
+large scales, not full authored-document quality. EM-013 has no remaining
+acceptance blocker. No remote publication has been performed.

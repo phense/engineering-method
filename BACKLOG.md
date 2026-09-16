@@ -13,9 +13,6 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 
 ## Tasks
 
-<!-- engineering-method:backlog {"schema_version":1,"id":"EM-013","title":"Make state checks read-only and verify documentation skill routing","status":"blocked","priority":"P0","parent_id":null,"depends_on":[],"notes":"State-check fix complete: regression, 318 tests, independent review and live read-only check passed. Native routing: Codex 5/5; OpenCode 2 bounded probes passed. Existing-plan planning collision corrected and verified. Claude blocked by native session limit until 11:40 Europe/Berlin on 2026-09-16; five cases remain. See docs/verification/EM-013-prepublication.md. No remote publication.","updated_at":"2026-09-16T08:54:07Z"} -->
-- ❌ `EM-013` **P0** Make state checks read-only and verify documentation skill routing
-  - Notes: State-check fix complete: regression, 318 tests, independent review and live read-only check passed. Native routing: Codex 5/5; OpenCode 2 bounded probes passed. Existing-plan planning collision corrected and verified. Claude blocked by native session limit until 11:40 Europe/Berlin on 2026-09-16; five cases remain. See docs/verification/EM-013-prepublication.md. No remote publication.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-000","title":"Approve and commit the consolidated plugin design (`877a7ea`).","status":"complete","priority":"P0","parent_id":null,"depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
 - ✅ `EM-000` **P0** Approve and commit the consolidated plugin design (`877a7ea`).
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-001","title":"Establish the dual-host plugin foundation and provenance controls. Blocks `EM-002` through `EM-005`.","status":"complete","priority":"P0","parent_id":null,"depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
@@ -28,6 +25,9 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
   - ✅ `EM-001.3` **P0** Pin upstream revisions and implement MIT attribution controls.
   <!-- engineering-method:backlog {"schema_version":1,"id":"EM-001.4","title":"Add baseline structural validation for both hosts.","status":"complete","priority":"P0","parent_id":"EM-001","depends_on":[],"notes":"","updated_at":"1970-01-01T00:00:00Z"} -->
   - ✅ `EM-001.4` **P0** Add baseline structural validation for both hosts.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-013","title":"Make state checks read-only and verify documentation skill routing","status":"complete","priority":"P0","parent_id":null,"depends_on":[],"notes":"Read-only state-check fix and native routing verified: Codex 5/5, Claude 5/5, OpenCode 2 bounded probes. Corrected native Claude authentication environment after forced config selected different account metadata; 319 tests and independent reviews passed. See docs/verification/EM-013-prepublication.md. No remote publication.","updated_at":"2026-09-16T09:20:15Z"} -->
+- ✅ `EM-013` **P0** Make state checks read-only and verify documentation skill routing
+  - Notes: Read-only state-check fix and native routing verified: Codex 5/5, Claude 5/5, OpenCode 2 bounded probes. Corrected native Claude authentication environment after forced config selected different account metadata; 319 tests and independent reviews passed. See docs/verification/EM-013-prepublication.md. No remote publication.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-002","title":"Implement durable project state and compact continuity","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-001"],"notes":"","updated_at":"2026-09-04T14:43:50Z"} -->
 - ✅ `EM-002` **P1** Implement durable project state and compact continuity
   - Depends on: `EM-001`

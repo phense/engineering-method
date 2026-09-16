@@ -47,6 +47,16 @@ mapped file, update its destination hash and explain the adaptation; do not
 silently replace upstream revisions. Public authoring tools are not plugin
 runtime dependencies; see the [authoring record](docs/verification/documentation-authoring.md).
 
+## Bounded native routing checks
+
+For authorized Claude model probes, use `scripts/run_host_evals.py --host claude
+--native-auth --case <fixture-id> --plugin-root <unchanging-copy> --output-dir
+<temporary-output>`. `--native-auth` preserves the terminal's native login
+environment while disabling inherited settings, hooks and MCP. Do not substitute
+`--auth-home ~/.claude` merely because it looks like the default directory:
+explicitly setting `CLAUDE_CONFIG_DIR` can select a different native account.
+The default isolated mode and explicit `--auth-home` remain available.
+
 ## Package and install
 
 The packager reads committed Git blobs at `HEAD`, not unstaged or staged edits.
