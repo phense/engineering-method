@@ -97,6 +97,17 @@ provider authentication stayed in place without opening or copying credentials.
   No alternate billing credential or provider was used. All five Claude cases
   remain to be run after the native limit resets; Claude acceptance is open.
 
+## Claude retry after reported quota availability
+
+At 11:07 CEST on 2026-09-16, all five cases were retried against an unchanged
+copy of commit `48b37f5`, using the same native Claude account and Sonnet at
+medium effort. Each invocation was rejected before routing with the session
+limit message and the reported 11:40 Europe/Berlin reset. Native authentication
+was valid. The rate-limit event identified the five-hour window and disabled
+organization-level overage. No alternate account or billing method was used.
+The JSON report retains each failed attempt and transcript hash. The Claude
+acceptance blocker remains open; no skill implementation was changed.
+
 ## Verification scope
 
 Independent review of the added evaluation cases returned Ready; all existing

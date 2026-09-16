@@ -148,6 +148,59 @@
       "documentation-draft-preparation",
       "existing-documentation-plan",
       "documentation-pdf"
+    ],
+    "retry_attempts": [
+      {
+        "completed_at": "2026-09-16T09:08:11.081098+00:00",
+        "source_commit": "48b37f595d9e194299859c05bdc6837b111dcfae",
+        "source_sha256": "099ea96c287db3bd7784431d6fbfcfa8b5269ecc5a9d06cacdff3b70aca8e037",
+        "cli_version": "2.1.272",
+        "auth_status": "logged in with native claude.ai authentication",
+        "rate_limit_type": "five_hour",
+        "overage_disabled_reason": "org_level_disabled",
+        "results": [
+          {
+            "case_id": "standalone-document",
+            "host": "claude",
+            "status": "failed",
+            "failure": "host_exit:1:uncategorized_native_error",
+            "native_reason": "You've hit your session limit \u00b7 resets 11:40am (Europe/Berlin)",
+            "transcript_sha256": "bea98a93ca67931e245e8a6138db9fcb783bfd4c2014c7629d8b34962ac28d58"
+          },
+          {
+            "case_id": "documentation-set",
+            "host": "claude",
+            "status": "failed",
+            "failure": "host_exit:1:uncategorized_native_error",
+            "native_reason": "You've hit your session limit \u00b7 resets 11:40am (Europe/Berlin)",
+            "transcript_sha256": "5e3a59eb5feba8e18812fffd2607517b4fcbdd664edd7ef23681c466ef464fd8"
+          },
+          {
+            "case_id": "documentation-draft-preparation",
+            "host": "claude",
+            "status": "failed",
+            "failure": "host_exit:1:uncategorized_native_error",
+            "native_reason": "You've hit your session limit \u00b7 resets 11:40am (Europe/Berlin)",
+            "transcript_sha256": "27805286bf84708bf0e5efe6b3e0363727aaf14943d4baf7aae666b6cf13eb44"
+          },
+          {
+            "case_id": "existing-documentation-plan",
+            "host": "claude",
+            "status": "failed",
+            "failure": "host_exit:1:uncategorized_native_error",
+            "native_reason": "You've hit your session limit \u00b7 resets 11:40am (Europe/Berlin)",
+            "transcript_sha256": "c06e19c00dd58ce567c40b1e4aec3f5c06cf332b4cf57a73fded83cafdcda95d"
+          },
+          {
+            "case_id": "documentation-pdf",
+            "host": "claude",
+            "status": "failed",
+            "failure": "host_exit:1:uncategorized_native_error",
+            "native_reason": "You've hit your session limit \u00b7 resets 11:40am (Europe/Berlin)",
+            "transcript_sha256": "be3d461bc67345b68d770a276be229fd9e3ad41779404b463e416c4b7121d407"
+          }
+        ]
+      }
     ]
   },
   "fixture_sha256": {
