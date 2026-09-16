@@ -334,7 +334,7 @@ class LifecycleContractTests(unittest.TestCase):
             ),
             "standalone-document": (
                 "documentation-authoring",
-                ["project-backlog", "writing-procedures", "terminology-guard", "verification-before-completion"],
+                ["project-backlog", "writing-procedures", "human-prose-drafting", "terminology-guard", "verification-before-completion"],
                 ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
             ),
             "documentation-set": (
@@ -344,7 +344,7 @@ class LifecycleContractTests(unittest.TestCase):
             ),
             "existing-documentation-plan": (
                 "documentation-authoring",
-                ["project-backlog", "explaining-concepts", "writing-procedures", "empathic-troubleshooting", "terminology-guard", "visual-placeholders"],
+                ["project-backlog", "explaining-concepts", "writing-procedures", "empathic-troubleshooting", "human-prose-drafting", "terminology-guard", "visual-placeholders"],
                 ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
             ),
         }

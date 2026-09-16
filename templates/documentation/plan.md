@@ -59,6 +59,9 @@ Statuses: planned, drafted, reviewed, accepted, superseded.
 - Procedures: imperative steps, one action per step, three to five steps per
   block, an observable result after each block.
 - Terminology: the glossary is authoritative; add a term before using it.
+- Prose: every chunk is drafted under the `human-prose-drafting` constraints;
+  preserve source facts, technical terms and required structure while avoiding
+  staged rhetoric and filler. There is no separate humanizing pass.
 - Assets: use the placeholder callout syntax from `visual-placeholders` and
   register every placeholder in the asset manifest.
 - Cross-references: link by relative file path and chunk ID; no bare "see above".

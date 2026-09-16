@@ -20,6 +20,7 @@
 | Placeholders and assets | Every callout has a manifest row and capture instructions | pass / findings |
 | Cross-references | Every relative link resolves; no dangling chunk IDs | pass / findings |
 | Troubleshooting chunks | Symptom first, causes ordered, fix, confirmation | pass / findings |
+| Prose tells | Assess passages in context per `human-prose-drafting`; preserve facts, terms, warnings and required structure; no word-blacklist failures | pass / findings |
 
 ## Findings
 

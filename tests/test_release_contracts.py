@@ -56,7 +56,7 @@ class PublicReleaseContracts(unittest.TestCase):
                     self.assertIn('`' + mapping["destination_path"] + '`', notices)
         permission = (ROOT / "LICENSE").read_text().split("Permission is hereby granted", 1)[1]
         normalized = " ".join(notices.split())
-        self.assertEqual(3, normalized.count(" ".join(("Permission is hereby granted" + permission).split())))
+        self.assertEqual(4, normalized.count(" ".join(("Permission is hereby granted" + permission).split())))
         self.assertIn("Original implementation", notices)
 
 

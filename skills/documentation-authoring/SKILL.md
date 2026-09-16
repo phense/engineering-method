@@ -110,14 +110,20 @@ findings.
    paragraph of any other type; `writing-procedures` for task and tutorial
    chunks, with blocks of three to five steps and a validation section;
    `empathic-troubleshooting` for troubleshooting chunks; consistent tables
-   for reference chunks.
+   for reference chunks. Before writing the first sentence, read
+   [human-prose-drafting](../human-prose-drafting/SKILL.md) and apply its
+   guidance while drafting: direct statements, concrete facts, natural
+   rhythm and useful formatting. Preserve its exceptions for source fidelity,
+   required structure and technical terms. These constraints apply while writing; a
+   separate humanizing pass afterwards is not part of this lifecycle.
 4. Keep one content type per chunk. When a procedure needs explanation, link
    the concept chunk; when a concept needs steps, link the task chunk.
 5. Check facts against the subject: run or replay commands, open the interface,
    read the code. Record the version or revision in the frontmatter.
-6. Run the [curse-of-knowledge filter](../../shared/writing/curse-of-knowledge-filter.md)
-   and the `terminology-guard` consistency check on the chunk; insert
-   `visual-placeholders` callouts where an image confirms a state.
+6. Run the [curse-of-knowledge filter](../../shared/writing/curse-of-knowledge-filter.md),
+   the `human-prose-drafting` chunk check and the `terminology-guard`
+   consistency check on the chunk; insert `visual-placeholders` callouts
+   where an image confirms a state.
 7. Mark the manifest row drafted, checkpoint, and continue with the next
    chunk. Stop at a section boundary when the plan calls for a section review.
 
@@ -129,9 +135,10 @@ documented language.
 
 A chunk is complete when its frontmatter is filled, its body follows the type
 skeleton, task blocks have three to five imperative steps and an observable
-validation, every term passes the glossary check, every image has a registered
-placeholder, cross-references resolve, and the described facts were checked
-against the current subject. Standalone documents are complete when the same
+validation, every term passes the glossary check, the prose passes the
+`human-prose-drafting` chunk check, every image has a registered placeholder,
+cross-references resolve, and the described facts were checked against the
+current subject. Standalone documents are complete when the same
 holds for the single file and its links render.
 
 ## Next phase
@@ -147,6 +154,7 @@ template's checks recorded in the reply, followed by
 - `project-backlog` for recovery, canonical task state, events, and checkpoints.
 - `explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`
   for the text of each content type.
+- `human-prose-drafting` for the sentence-level constraints of every draft.
 - `terminology-guard` and `visual-placeholders` for glossary and assets.
 - `dispatching-parallel-agents` only for chunks with disjoint files, a stable
   glossary and no cross-dependency; the coordinator owns the manifest.

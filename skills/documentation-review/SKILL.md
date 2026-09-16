@@ -106,6 +106,11 @@ on the text rather than recollection:
 7. Cross-references: every relative link and chunk ID resolves; no "see above".
 8. Troubleshooting chunks: symptom first, causes ordered, first check, fix,
    confirmation, escalation.
+9. Read [human-prose-drafting](../human-prose-drafting/SKILL.md) and assess
+   passages for staged contrasts, empty closers, dash chains, inflated wording
+   and chatbot residue. Apply its context and preservation exceptions; a
+   word match alone is not a finding. Return specific prose findings to the
+   author within the existing review cycle; add no separate rewrite phase.
 
 Independence: a set-wide acceptance review is performed by a reviewer who did
 not draft the reviewed chunks when the host can provide one; otherwise record
@@ -128,6 +133,7 @@ that return preserves accepted chunks and stable IDs and is not a new plan.
 
 - `project-backlog` for recovery, canonical task state, events, and checkpoints.
 - `terminology-guard` for the set-wide term check.
+- `human-prose-drafting` for the prose-tell check.
 - `receiving-code-review` for evaluating disputed findings against the text.
 - `verification-before-completion` for the final fresh check.
 

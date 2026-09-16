@@ -294,6 +294,34 @@
       ],
       "copyright": "Copyright (c) 2025 Jesse Vincent",
       "modification_summary": "Curated quality practices and adapted report, brief, review and recovery mechanics for cohesive slices, proportional review and protected project-state storage."
+    },
+    {
+      "id": "humanizer",
+      "project": "Humanizer",
+      "repository": "https://github.com/blader/humanizer.git",
+      "revision": "9862685f575c65a8247f90369951df1b3416e3d6",
+      "license": {
+        "spdx": "MIT",
+        "source_path": "LICENSE",
+        "sha256": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96"
+      },
+      "files": [
+        {
+          "source_path": "LICENSE",
+          "destination_path": "THIRD_PARTY_NOTICES.md",
+          "source_sha256": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
+          "modification_status": "notice-only"
+        },
+        {
+          "source_path": "SKILL.md",
+          "destination_path": "skills/human-prose-drafting/SKILL.md",
+          "source_sha256": "e8269e236bed06ed0fe4824c274112e54950b0cb46b0bafe5e1576ef7c9f93d5",
+          "destination_sha256": "6cd68c9a20d0bc8c2484b93692653f83cc05c8a03179173cde640758bd035def",
+          "modification_status": "adapted"
+        }
+      ],
+      "copyright": "Copyright (c) 2025 Siqi Chen",
+      "modification_summary": "Reframed the after-the-fact rewrite procedure as drafting-time constraints for medium and large documentation, condensed the 25 patterns into constraint groups, removed pasted-text and voice-matching modes, and added the chunk check and documentation voice rules."
     }
   ],
   "original": {

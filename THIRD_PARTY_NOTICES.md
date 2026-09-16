@@ -179,3 +179,45 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## Humanizer
+
+- Repository: https://github.com/blader/humanizer.git
+- Revision: `9862685f575c65a8247f90369951df1b3416e3d6`
+- License: MIT (`LICENSE`)
+- License SHA-256: `4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96`
+- Copyright holder: 2025 Siqi Chen
+- `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Adapted in EM-011:
+
+- `SKILL.md` -> `skills/human-prose-drafting/SKILL.md`: adapted
+
+The upstream skill rewrites finished AI-sounding text in a separate pass. The
+adaptation turns its 25 patterns into constraints applied while drafting
+medium and large documentation, condenses them into groups by strength,
+removes the pasted-text, file and voice-matching modes, and adds a per-chunk
+check and documentation voice rules. Upstream credits Wikipedia's "Signs of AI
+writing" (WikiProject AI Cleanup) as the pattern source.
+
+MIT License
+
+Copyright (c) 2025 Siqi Chen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

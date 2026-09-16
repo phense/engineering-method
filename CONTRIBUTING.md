@@ -38,7 +38,8 @@ Provenance auditing requires local upstream trees at the exact revisions in
 python3 scripts/audit-provenance \
   --source-root github-spec-kit=/path/to/pinned/spec-kit \
   --source-root openspec=/path/to/pinned/OpenSpec \
-  --source-root superpowers=/path/to/pinned/superpowers
+  --source-root superpowers=/path/to/pinned/superpowers \
+  --source-root humanizer=/path/to/pinned/humanizer
 ```
 
 Preserve upstream MIT notices and source mappings. If intentionally adapting a

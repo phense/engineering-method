@@ -239,6 +239,7 @@
     "supporting": [
       "project-backlog",
       "writing-procedures",
+      "human-prose-drafting",
       "terminology-guard",
       "verification-before-completion"
     ],
@@ -299,6 +300,7 @@
       "explaining-concepts",
       "writing-procedures",
       "empathic-troubleshooting",
+      "human-prose-drafting",
       "terminology-guard",
       "visual-placeholders"
     ],

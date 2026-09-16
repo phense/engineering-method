@@ -96,7 +96,10 @@ an everyday analogy before the mechanism and removes undefined jargon;
 to five with exact locations, prerequisites and a check that it worked;
 `empathic-troubleshooting` starts from the symptom the reader sees. All three
 apply the shared curse-of-knowledge filter that writes out the steps and
-locations an expert would skip. `terminology-guard` keeps one term per concept
+locations an expert would skip. Medium and large texts are drafted under
+`human-prose-drafting`, an adaptation of Humanizer's AI-writing patterns
+applied while writing, so finished documentation needs no separate
+humanizing pass. `terminology-guard` keeps one term per concept
 across hundreds of pages, and `visual-placeholders` inserts standardized
 screenshot and diagram callouts with alt text and capture instructions.
 
@@ -229,6 +232,8 @@ mappings, hashes and complete MIT notices.
   proposals, application and archival practices/templates.
 - [Superpowers](https://github.com/obra/superpowers): adapted debugging, TDD,
   verification, reviews, worktree and delegation practices.
+- [Humanizer](https://github.com/blader/humanizer): adapted AI-writing
+  patterns as drafting-time constraints for documentation.
 
 Project-state implementation, architecture modeling, host adapters and validation
 fixtures are original work. Orchestration combines original policy with the

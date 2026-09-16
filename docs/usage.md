@@ -58,8 +58,9 @@ The writing-depth policy places this at the medium scale. `documentation-authori
 runs in standalone mode: it defines the reader and version, uses the task
 skeleton from the chunk template, and applies `writing-procedures` (goal,
 prerequisites, blocks of three to five imperative steps, a check that it
-worked). A recorded self-review and fresh link check close the work. No plan
-directory is created.
+worked). The draft is written under `human-prose-drafting` from the first
+sentence, so no humanizing pass follows. A recorded self-review and fresh link
+check close the work. No plan directory is created.
 
 ## Build a documentation set
 
@@ -72,8 +73,9 @@ large scale. `documentation-planning` records the scale decision and writes
 chunk manifest, plus `glossary.md` and `assets.md`. `documentation-authoring`
 then writes one Markdown file per chunk with frontmatter, using
 `explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`
-per content type, `terminology-guard` for terms and `visual-placeholders`
-for image callouts. `documentation-review` checks the set at a named revision
+per content type, `human-prose-drafting` for sentence-level constraints while
+writing, `terminology-guard` for terms and `visual-placeholders` for image
+callouts. `documentation-review` checks the set at a named revision
 and returns findings to authoring; acceptance needs zero open Critical or
 Important findings and fresh verification.
 

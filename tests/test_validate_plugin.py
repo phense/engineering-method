@@ -37,6 +37,13 @@ PROVENANCE_SOURCES = (
         "revision": "b36e0829c6d0140e93cfef2ca599b1b07d4a7797",
         "license_sha256": "a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400",
     },
+    {
+        "id": "humanizer",
+        "project": "Humanizer",
+        "repository": "https://github.com/blader/humanizer.git",
+        "revision": "9862685f575c65a8247f90369951df1b3416e3d6",
+        "license_sha256": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
+    },
 )
 
 
