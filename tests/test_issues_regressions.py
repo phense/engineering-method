@@ -266,7 +266,25 @@ class MigrationConvergenceTests(unittest.TestCase):
         self.assertEqual(runner.sub_issues[1], {102})
         self.assertEqual(runner.sub_issues[3], set())
 
-    def test_state_check_migrates_archived_history_only_after_complete_success(self) -> None:
+    def test_state_check_is_read_only_even_with_writable_remote_and_archive(self) -> None:
+        # Regression: automatic migration creates issues and deletes archived history.
+        from engineering_method.cli import main
+        runner = MutableGitHubRunner()
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            (root / "BACKLOG.md").write_text(render_backlog(
+                BacklogDocument("EM", "local", (backlog_item("EM-002"),))))
+            (root / "BACKLOG-ARCHIVE.md").write_text(render_backlog_archive(
+                BacklogDocument("EM", "local", (backlog_item("EM-001", TaskStatus.COMPLETE),))))
+            before = {p.name: p.read_bytes() for p in root.iterdir()}
+            result = main(["backlog", "state-check"], root=root,
+                          gateway=gh.GitHubIssuesGateway(runner))
+            self.assertEqual(result, 0)
+            self.assertEqual(runner.mutation_count, 0)
+            self.assertEqual({p.name: p.read_bytes() for p in root.iterdir()}, before)
+            self.assertEqual(load_backlog(root / "BACKLOG.md").mode, "local")
+
+    def test_explicit_migration_migrates_archived_history_only_after_complete_success(self) -> None:
         runner = MutableGitHubRunner()
         gateway = gh.GitHubIssuesGateway(runner)
         with tempfile.TemporaryDirectory() as temporary:
@@ -286,7 +304,7 @@ class MigrationConvergenceTests(unittest.TestCase):
                 encoding="utf-8",
             )
 
-            outcome = issues.workflow_state_check(active_path, gateway)
+            outcome = issues.migrate_local_backlog(active_path, gateway)
 
             self.assertEqual(outcome.document.mode, "github-cache")
             self.assertEqual(len(outcome.document.items), 2)

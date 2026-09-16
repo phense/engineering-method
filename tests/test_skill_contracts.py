@@ -273,6 +273,7 @@ class LifecycleContractTests(unittest.TestCase):
                 "standalone-document",
                 "documentation-set",
                 "existing-documentation-plan",
+                "documentation-pdf",
             },
             {case["id"] for case in matrix},
         )
@@ -347,6 +348,11 @@ class LifecycleContractTests(unittest.TestCase):
                 ["project-backlog", "explaining-concepts", "writing-procedures", "empathic-troubleshooting", "human-prose-drafting", "terminology-guard", "visual-placeholders"],
                 ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
             ),
+            "documentation-pdf": (
+                "documentation-pdf",
+                ["verification-before-completion"],
+                ["native-focused-edit", "documentation-authoring", "documentation-planning", "systematic-debugging", "speckit-specify", "openspec-propose"],
+            ),
         }
         actual = {
             case["id"]: (case["primary"], case["supporting"], case["prohibited"])
@@ -364,7 +370,8 @@ class LifecycleContractTests(unittest.TestCase):
                 self.assertNotIn(case["primary"], case["supporting"])
                 self.assertNotIn(case["primary"], case["prohibited"])
                 self.assertEqual([], sorted(set(case["supporting"]) & set(case["prohibited"])))
-                self.assertIn("project-backlog", case["supporting"])
+                if case["id"] != "documentation-pdf":
+                    self.assertIn("project-backlog", case["supporting"])
                 competing_entries = ENTRY_CONTROLLERS - {case["primary"]}
                 self.assertEqual(set(competing_entries), set(case["prohibited"]) & ENTRY_CONTROLLERS)
 

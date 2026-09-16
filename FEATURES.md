@@ -9,11 +9,11 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Summary: Shared plugin identity, MIT licensing, portable validation and pinned-source provenance controls.
 - Related backlog: `EM-001`
 
-<!-- engineering-method:feature {"schema_version":1,"id":"F-002","name":"Durable project state","summary":"Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. The state-check command automatically migrates a local backlog when the GitHub remote is writable; it is not read-only.","status":"available","related_backlog_ids":["EM-002"],"updated_at":"2026-09-05T15:31:44Z"} -->
+<!-- engineering-method:feature {"schema_version":1,"id":"F-002","name":"Durable project state","summary":"Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. State checks are read-only even with a writable remote; migration requires an explicitly authorized backlog-to-issues migrate command.","status":"available","related_backlog_ids":["EM-002"],"updated_at":"2026-09-16T08:51:39Z"} -->
 ## `F-002` Durable project state
 
 - Status: available
-- Summary: Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. The state-check command automatically migrates a local backlog when the GitHub remote is writable; it is not read-only.
+- Summary: Blocker-first local backlog, feature inventory, GitHub migration and native relationships, offline queue and compact recovery. State checks are read-only even with a writable remote; migration requires an explicitly authorized backlog-to-issues migrate command.
 - Related backlog: `EM-002`
 
 <!-- engineering-method:feature {"schema_version":1,"id":"F-003","name":"Exclusive workflow skills","summary":"Twenty-five shared lifecycle and quality skills with artifact-specific handoffs: the original seventeen engineering skills plus eight documentation and reader-oriented writing skills added by EM-010. All 12 engineering routing cases passed on both hosts for 0784c79; the three documentation routing cases have contract-test coverage only.","status":"changed","related_backlog_ids":["EM-003"],"updated_at":"2026-09-16T07:47:28Z"} -->

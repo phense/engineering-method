@@ -1,0 +1,7 @@
+{
+  "id": "documentation-draft-preparation",
+  "prompt": "Prepare to draft a medium-length administrator how-to guide for rotating API keys. The reader, task scope and facts are established in README.md. Load the writing instructions and all sentence-level guidance that must apply before the first sentence. Record decision.md but do not draft prose yet.",
+  "files": {
+    "README.md": "# Keyforge 1.0\n\nReader: administrator. One standalone task guide. Settings > API keys: Generate creates a new key; Revoke disables an existing key. Install the new key in the client and verify it before revoking the old one. No other product behavior is established.\n"
+  }
+}

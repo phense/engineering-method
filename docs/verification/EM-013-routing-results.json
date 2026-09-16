@@ -1,0 +1,188 @@
+{
+  "date": "2026-09-16",
+  "base_commit": "0c158cdadace5e5898b5ac590932068d77b63e41",
+  "scope": "bounded routing and pre-draft skill reads, not full writing workflows",
+  "codex": [
+    {
+      "case_id": "standalone-document",
+      "status": "passed",
+      "host": "codex",
+      "model": "gpt-5.6-luna",
+      "effort": "medium",
+      "source_sha256": "47f80b6358a702e9570cce0fce2f89a7d535454e0327f6d6abb55411d2e1e1e6",
+      "primary": "documentation-authoring",
+      "skills": [
+        "documentation-authoring",
+        "project-backlog",
+        "writing-procedures"
+      ],
+      "tool_count": 9,
+      "event_count": 28,
+      "artifacts": {
+        "decision.md": "5a9655d176f96ed862911a7f9c99d75aa74d03e8176192d1d30385948fdcaca7"
+      },
+      "transcript_sha256": "aee2cacfae2c50394e75902018c907d632f83032ac9b2850c9e95a3915be8c19"
+    },
+    {
+      "case_id": "documentation-set",
+      "status": "passed",
+      "host": "codex",
+      "model": "gpt-5.6-luna",
+      "effort": "medium",
+      "source_sha256": "e9a24d63930d34dc2ad285011c8ed7836d80f52a8793aa1bcf0b482f965ed210",
+      "primary": "documentation-planning",
+      "skills": [
+        "documentation-planning",
+        "project-backlog",
+        "terminology-guard",
+        "visual-placeholders"
+      ],
+      "tool_count": 13,
+      "event_count": 41,
+      "artifacts": {
+        "decision.md": "eb368032d72a10211938f5eb39958545cd41636baea750915f86fe0314497ec5"
+      },
+      "transcript_sha256": "0abb4cf7b6eaed5fc9c3860b4cc87d1cc55e57faf0d71bc49828786f3def98dc"
+    },
+    {
+      "case_id": "documentation-draft-preparation",
+      "status": "passed",
+      "host": "codex",
+      "model": "gpt-5.6-luna",
+      "effort": "medium",
+      "source_sha256": "47f80b6358a702e9570cce0fce2f89a7d535454e0327f6d6abb55411d2e1e1e6",
+      "primary": "documentation-authoring",
+      "skills": [
+        "documentation-authoring",
+        "human-prose-drafting",
+        "project-backlog",
+        "writing-procedures"
+      ],
+      "tool_count": 12,
+      "event_count": 39,
+      "artifacts": {
+        "decision.md": "314acf4ac3c84c10282f9aeb5aeb135776f1c0bc306ae5900c006e5f32fef1b2"
+      },
+      "transcript_sha256": "12189f922dd9b6d0e85051f40b611d545a8f3038703392572844b4927d2adaed"
+    },
+    {
+      "case_id": "documentation-pdf",
+      "status": "passed",
+      "host": "codex",
+      "model": "gpt-5.6-luna",
+      "effort": "medium",
+      "source_sha256": "47f80b6358a702e9570cce0fce2f89a7d535454e0327f6d6abb55411d2e1e1e6",
+      "primary": "documentation-pdf",
+      "skills": [
+        "documentation-pdf",
+        "project-backlog"
+      ],
+      "tool_count": 12,
+      "event_count": 35,
+      "artifacts": {
+        "decision.md": "bd9eefa925821cce0d3b367249c967241ab4e83d26d51769de502ea415e4d86f"
+      },
+      "transcript_sha256": "652a746d9a1d620f93b55cfe226c260ab97794a124a9fba7a6575ccf15251e90"
+    },
+    {
+      "case_id": "existing-documentation-plan",
+      "status": "passed",
+      "host": "codex",
+      "model": "gpt-5.6-luna",
+      "effort": "medium",
+      "source_sha256": "e9a24d63930d34dc2ad285011c8ed7836d80f52a8793aa1bcf0b482f965ed210",
+      "primary": "documentation-authoring",
+      "skills": [
+        "documentation-authoring",
+        "explaining-concepts",
+        "human-prose-drafting",
+        "project-backlog",
+        "terminology-guard"
+      ],
+      "tool_count": 20,
+      "event_count": 58,
+      "artifacts": {
+        "decision.md": "d040fa4908a2b30189dbd313b3bb2d46530406f34d6fb5d3588b8dc4824cd4a9"
+      },
+      "transcript_sha256": "55fa6cb61b1c9f6ce8cd8b56ae391976ce6b11f32cbaa718a5c37c79e9d6db18"
+    }
+  ],
+  "opencode": [
+    {
+      "case": "explicit-dir",
+      "host": "opencode",
+      "model": "deepseek/deepseek-flash",
+      "status": "passed",
+      "observed_native_skills": [
+        "documentation-pdf",
+        "verification-before-completion"
+      ],
+      "transcript_sha256": "784e5f99bc5927ee90a0a9376f6c9c54a75dffd6964261e73f6e9e32f97b2302"
+    },
+    {
+      "case": "draft",
+      "host": "opencode",
+      "model": "deepseek/deepseek-flash",
+      "status": "passed",
+      "observed_native_skills": [
+        "documentation-authoring",
+        "human-prose-drafting",
+        "writing-procedures",
+        "terminology-guard",
+        "explaining-concepts",
+        "empathic-troubleshooting"
+      ],
+      "transcript_sha256": "eefc6b015d0119af39d3f6b2f8623e0e5e498d76f7fab1a4b29a449adee9001e"
+    }
+  ],
+  "claude": {
+    "status": "blocked",
+    "reason": "Native session limit; reset reported at 11:40 Europe/Berlin. No routing evaluated.",
+    "attempted_cases": [
+      "standalone-document",
+      "documentation-set"
+    ],
+    "pending_cases": [
+      "standalone-document",
+      "documentation-set",
+      "documentation-draft-preparation",
+      "existing-documentation-plan",
+      "documentation-pdf"
+    ]
+  },
+  "fixture_sha256": {
+    "documentation-pdf.json": "18658f1b9ff808ea720e0aa43583309001d96d6e0f99ecf29ddeacb0ad638956",
+    "standalone-document.json": "25cfcc31a9fec68fedd349150fc48ad09cf58dab2799825f2f7fbd22bb7f59c0",
+    "documentation-draft-preparation.json": "54eb3d34e020d2a5b6c6ec96fa1c7527a9c9c98b9ae2bc98a83a34c824a33d8f",
+    "documentation-set.json": "c1de867f781a434026c666089818aaabad79c61f3b6938f45ce090640c9624c2",
+    "existing-documentation-plan.json": "e14ff69edc74fc7b621d03ee1a7b775744a1977691964788f5067db29ed32b63"
+  },
+  "excluded_or_failed_attempts": [
+    {
+      "host": "codex",
+      "cases": [
+        "standalone-document",
+        "documentation-set",
+        "documentation-draft-preparation",
+        "documentation-pdf"
+      ],
+      "reason": "plugin_changed_during_evaluation; repeated on frozen snapshot"
+    },
+    {
+      "host": "codex",
+      "case": "existing-documentation-plan",
+      "reason": "missing_artifact:decision.md; fixture clarified repository-root path"
+    },
+    {
+      "host": "codex",
+      "case": "existing-documentation-plan",
+      "reason": "unexpected_selection; documentation-planning added as support to existing accepted plan; skill boundary corrected without relaxing expectation"
+    },
+    {
+      "host": "opencode",
+      "case": "pdf initial probe",
+      "reason": "Incorrect working directory/configuration; excluded and repeated with explicit --dir and config content"
+    }
+  ],
+  "status": "blocked_on_claude_session_limit"
+}

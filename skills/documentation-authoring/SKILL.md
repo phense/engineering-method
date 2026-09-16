@@ -70,6 +70,11 @@ places the work at the medium scale (one self-contained document), or when a
 documentation plan exists and manifest rows are planned or returned with review
 findings.
 
+An accepted plan is an input to authoring, not a reason to activate
+`documentation-planning` again as a supporting skill. Return to planning only
+when the requested work changes the set structure, reader scope or manifest;
+ordinary continuation follows the existing plan directly.
+
 ## Do not use for
 
 - Changing a sentence, paragraph or section of existing text without new

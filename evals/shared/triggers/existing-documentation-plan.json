@@ -1,0 +1,10 @@
+{
+  "id": "existing-documentation-plan",
+  "prompt": "Continue the accepted large documentation plan in docs/writing/keyforge/plan.md. Prepare to write the first chunk: inspect dependencies and load all writing guidance that must apply before its first sentence. Do not draft prose or change canonical state yet; record the assessment in ./decision.md at the repository root (outside docs/writing/keyforge).",
+  "files": {
+    "README.md": "# Keyforge 1.0\n\nAdministrators generate and revoke API keys in Settings > API keys. End users supply a valid key when connecting. Revoked keys stop working.\n",
+    "docs/writing/keyforge/plan.md": "# Documentation Plan: Keyforge\n\n## Stable work ID\nDocumentation ID: keyforge\nStatus: Planned and accepted\nContent root: docs/manual\n\n## Scale decision\nLarge: twelve chapters for administrators, end users and support staff across sessions. This fixture starts the first concept chunk.\n\n## Readers\nR1: administrators new to Keyforge 1.0; understand API keys before managing them.\n\n## Chunk manifest\n| Chunk ID | File | Type | Title | Readers | Depends on | Assets | Status |\n|---|---|---|---|---|---|---|---|\n| C-001 | docs/manual/api-keys.md | concept | API keys | R1 | none | none | planned |\n\n## Conventions\nUse chunk frontmatter and the authoritative glossary.\n",
+    "docs/writing/keyforge/glossary.md": "# Glossary\n\nAPI key: credential a client supplies to connect to Keyforge.\n",
+    "docs/writing/keyforge/assets.md": "# Assets\n\nNo assets required for C-001.\n"
+  }
+}

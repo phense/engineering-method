@@ -423,7 +423,22 @@ def _detection(gateway: IssueGateway) -> RepositoryDetection:
 
 
 def workflow_state_check(path: Path, gateway: IssueGateway) -> StateCheckResult:
-    """Migrate automatically only when a writable authenticated remote exists."""
+    """Report canonical mode and remote availability without changing either."""
+    document = load_backlog(path)
+    detection = _detection(gateway)
+    if detection.repository is None:
+        return StateCheckResult(document, detection.reason)
+    if document.mode == "github-cache":
+        return StateCheckResult(document, "GitHub Issues cache already canonical")
+    return StateCheckResult(
+        document,
+        "local backlog remains canonical; writable GitHub repository available; "
+        "explicit backlog-to-issues migrate required",
+    )
+
+
+def migrate_local_backlog(path: Path, gateway: IssueGateway) -> StateCheckResult:
+    """Explicitly migrate local history after caller authorization."""
     document = load_backlog(path)
     detection = _detection(gateway)
     if detection.repository is None:

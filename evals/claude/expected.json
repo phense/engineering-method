@@ -274,5 +274,50 @@
     "artifacts": [
       "decision.md"
     ]
+  },
+  "documentation-pdf": {
+    "primary": "documentation-pdf",
+    "supporting": [],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose",
+      "documentation-planning",
+      "systematic-debugging"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "documentation-draft-preparation": {
+    "primary": "documentation-authoring",
+    "supporting": [
+      "project-backlog",
+      "human-prose-drafting"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose",
+      "documentation-planning",
+      "systematic-debugging"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
+  },
+  "existing-documentation-plan": {
+    "primary": "documentation-authoring",
+    "supporting": [
+      "project-backlog",
+      "human-prose-drafting"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose",
+      "documentation-planning",
+      "systematic-debugging"
+    ],
+    "artifacts": [
+      "decision.md"
+    ]
   }
 }

@@ -141,6 +141,10 @@ complete or blocked. `FEATURES.md` records working capabilities, not another
 task list. Large local backlogs archive eligible completed groups while retaining
 active dependencies.
 
+`backlog state-check` only reports state; it never migrates or writes local or
+remote data. Migration requires explicit authorization and the separate
+`backlog-to-issues migrate` command.
+
 With a reachable authorized GitHub repository and suitable CLI permissions,
 migration preserves IDs and completed history in Issues. Hierarchy becomes
 sub-issues and dependency edges become native dependencies. All agent-authored

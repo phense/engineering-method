@@ -321,5 +321,30 @@
       ],
       "next": "documentation-review"
     }
+  },
+  {
+    "id": "documentation-pdf",
+    "request": "Export reviewed Markdown chapters into one local PDF with a reusable design, table of contents and page numbers.",
+    "primary": "documentation-pdf",
+    "supporting": [
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "native-focused-edit",
+      "documentation-authoring",
+      "documentation-planning",
+      "systematic-debugging",
+      "speckit-specify",
+      "openspec-propose"
+    ],
+    "handoff": {
+      "consumes": [
+        "reviewed Markdown and accepted chapter order"
+      ],
+      "produces": [
+        "local PDF and export verification"
+      ],
+      "next": "verification-before-completion"
+    }
   }
 ]

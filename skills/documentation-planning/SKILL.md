@@ -1,6 +1,6 @@
 ---
 name: documentation-planning
-description: "Use when a documentation set is requested or discovered: a manual, handbook, course, knowledge base, or several documents that must share terms, structure, readers and images. Decides the writing scale, then produces the documentation plan, chunk manifest, glossary and asset manifest. Not for one standalone document (use documentation-authoring), a wording fix, or software specification."
+description: "Use when a documentation set needs an initial plan or an explicit structural re-plan: a manual, handbook, course, knowledge base, or several documents that must share terms, structure, readers and images. Decides the writing scale, then produces the documentation plan, chunk manifest, glossary and asset manifest. Not for drafting from an existing accepted plan (use documentation-authoring), one standalone document, a wording fix, or software specification."
 ---
 
 # Documentation Planning

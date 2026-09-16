@@ -31,6 +31,7 @@ from .files import atomic_write_bundle, atomic_write_text, require_repo_relative
 from .gh import GitHubIssuesGateway, RepositoryRef
 from .issues import (
     IssueGateway,
+    migrate_local_backlog,
     overlay_pending_queue,
     queue_mutation,
     refresh_issue_cache,
@@ -688,7 +689,7 @@ def _github_command(
     if rest:
         raise ValueError(f"backlog-to-issues {action} accepts no arguments")
     if action == "migrate":
-        return workflow_state_check(path, gateway).reason
+        return migrate_local_backlog(path, gateway).reason
     if action == "reconcile":
         replay_pending_queue(root, path, gateway, _repository(gateway))
         return "BACKLOG.md\n.engineering-method/github-queue.jsonl"

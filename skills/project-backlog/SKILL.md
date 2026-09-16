@@ -62,7 +62,7 @@ to those resolved absolute paths.
    only for persisted coordinator-only provenance with no saved agent activity;
    otherwise stop before mutation. Never fabricate observed IDs.
 3. Complete recovery, or the verified no-run result, before any canonical or
-   backlog mutation, including state check, migration, refresh, queue replay,
+   backlog mutation, including migration, refresh, queue replay,
    status changes, dependency changes, and feature updates.
 4. Read `state.json` and `resume.md`, then reconcile commits, worktree,
    artifacts, canonical backlog or issue state, and saved agent identities.
@@ -97,6 +97,10 @@ Run commands from the project root. Initialize only when state is absent:
 "$PROJECT_STATE" backlog init --project-key EM
 "$PROJECT_STATE" backlog state-check
 ```
+
+State checks are read-only, including with a writable authenticated GitHub remote.
+They never create Issues, rewrite the backlog, remove its archive, or switch modes.
+Migration requires explicit authorization and `backlog-to-issues migrate`.
 
 Initialization is non-destructive. `--replace` is an explicit destructive reset. Add and update work with `backlog add|start|block|complete|priority|dependencies`; use `--depends-on ID[,ID]` for dependencies. Normal writes enforce blocker-first ordering and the archive threshold.
 
@@ -200,7 +204,7 @@ explicit `checkpoint` call succeeds.
 
 - At work start, complete the Recovery gate first. After a verified no-run
   result, initialize missing state from the supplied stable work ID. Only then
-  run the automatic state check and mark the stable backlog ID in progress.
+  run the read-only state check and mark the stable backlog ID in progress.
 - At scope change, recover first, update the same stable backlog ID, emit the
   applicable event, and checkpoint revised artifacts, pending work, and next
   action.

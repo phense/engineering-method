@@ -1,0 +1,9 @@
+{
+  "id": "documentation-pdf",
+  "prompt": "Combine the two reviewed Markdown chapters into one local PDF with a reusable design, clickable table of contents and page numbers. The prose is accepted. Assess the export workflow and load its instructions; do not render yet.",
+  "files": {
+    "README.md": "# Reviewed manual\n\nBoth chapters are accepted for export in this order: docs/setup.md, docs/usage.md.\n",
+    "docs/setup.md": "# Setup\n\nCreate a workspace.\n",
+    "docs/usage.md": "# Usage\n\nOpen your workspace.\n"
+  }
+}
