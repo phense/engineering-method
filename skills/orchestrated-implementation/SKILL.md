@@ -235,3 +235,14 @@ The loop ends only when all actionable findings are resolved or a recorded
 external blocker, missing authorization, unsafe irreversible operation, or
 specification contradiction makes further action guesswork. Record evidence,
 attempts, affected work, and the exact next action for every terminal blocker.
+
+## Playbook obligations
+
+Follow the [playbook policy](../../shared/policies/playbooks.md) for planned
+artifacts. Invoke `playbook-authoring` and `playbook-review` as supporting skills.
+Before a development operation, require its current procedure, accepted review
+and agreed rehearsal evidence; do not defer them until final delivery. Deliver
+system playbooks through their assigned slices. Coordinate rehearsals only under
+existing execution authority. Persist paths, findings and evidence in the same
+run; affected system changes make prior proof stale. Missing required evidence
+blocks the dependent operation or delivery, not unrelated safe work.

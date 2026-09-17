@@ -55,8 +55,8 @@ class PublicReleaseContracts(unittest.TestCase):
                 if mapping["modification_status"] == "adapted":
                     self.assertIn('`' + mapping["destination_path"] + '`', notices)
         permission = (ROOT / "LICENSE").read_text().split("Permission is hereby granted", 1)[1]
-        normalized = " ".join(notices.split())
-        self.assertEqual(4, normalized.count(" ".join(("Permission is hereby granted" + permission).split())))
+        normalized = " ".join(notices.replace("“", '"').replace("”", '"').split())
+        self.assertEqual(len(lock["sources"]), normalized.count(" ".join(("Permission is hereby granted" + permission).split())))
         self.assertIn("Original implementation", notices)
 
 

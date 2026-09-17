@@ -141,3 +141,13 @@ tightly coupled multi-component scope, or material architectural uncertainty:
    feature ID and path.
 4. Do not enter `openspec-apply`; begin `speckit-specify` from the recorded
    handoff.
+
+## Playbook obligations
+
+Apply the [playbook policy](../../shared/policies/playbooks.md) to this delta.
+Record system-deliverable playbooks in proposal and delta requirements, and
+critical development-operation playbooks in design. Include affected existing
+procedures or a concise none/rationale. Assign IDs, owners, paths, dependencies,
+deadlines and review/rehearsal criteria. Tasks must make development readiness a
+prerequisite of the operation and system readiness a prerequisite of delivery.
+Planned usage or recovery risk is sufficient origin evidence.

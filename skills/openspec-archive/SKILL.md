@@ -150,3 +150,13 @@ RENAMED then REMOVED then MODIFIED then ADDED.
 Recompose the main spec under one `## Requirements` section without delta
 operation headers, then re-read it and prove every operation before moving the
 change directory.
+
+## Playbook obligations
+
+Before synchronization or movement apply the
+[playbook policy](../../shared/policies/playbooks.md). Check required and affected
+playbooks against accepted delta/design, current system and artifact revisions,
+review findings and agreed rehearsal evidence. Missing or stale required evidence
+blocks archival; return findings to `openspec-apply`. Do not repair or execute
+procedures here. Retain canonical system playbooks outside the archived change
+and preserve their requirement links and validation obligations.

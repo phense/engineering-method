@@ -29,3 +29,10 @@ evidence. Keep task IDs stable when ordering changes.
 - [ ] C004 All tasks are complete with no deferred specified behavior.
 - [ ] C005 Fresh targeted verification passes.
 - [ ] C006 Accepted requirement deltas are ready to synchronize before archive.
+
+## Playbook obligations
+
+Add required authoring, review and rehearsal tasks: development playbooks must
+be ready before their operation; system playbooks before delivery/archival.
+Separate content review from practical validation and keep corrections in this
+executor. See the [playbook policy](../../shared/policies/playbooks.md).

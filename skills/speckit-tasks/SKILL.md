@@ -119,3 +119,12 @@ or authority boundary requires user input.
    outcomes; organize remaining work by independently valuable slice.
 5. Give every task an exact action, path, dependency, and acceptance evidence.
 6. Validate coverage, ordering, stable IDs, and safe parallel markers.
+
+## Playbook obligations
+
+Read the plan's need inventory under the
+[playbook policy](../../shared/policies/playbooks.md). Add explicit authoring,
+review and required rehearsal tasks for each required playbook. Development
+readiness is a dependency of the operation itself; system-playbook readiness is
+a delivery dependency. Include affected existing procedures. Reuse the same
+stable work ID and executor; do not start a documentation lifecycle.

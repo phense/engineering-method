@@ -19,3 +19,13 @@ scale and phase. An active OpenSpec change stays in OpenSpec unless its proposal
 escalation. An active Spec Kit feature stays in Spec Kit. When the request is
 ambiguous at the nearest boundary, inspect the affected code and artifacts
 read-only; ask only if the answer would materially change scope or ownership.
+
+## Engineering playbooks
+
+Scenario-bound development and system-deliverable playbooks use
+`playbook-authoring` and `playbook-review` under the
+[playbook policy](playbooks.md). They are engineering artifacts, including when
+their audience is an end user, and retain the owning engineering work ID.
+Direct requests enter the supporting skill without starting a new lifecycle.
+Generic manuals and tutorials retain the documentation routes above. A request
+for new system behavior still enters the appropriate engineering phase first.

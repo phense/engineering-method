@@ -44,6 +44,16 @@ PROVENANCE_SOURCES = (
         "revision": "9862685f575c65a8247f90369951df1b3416e3d6",
         "license_sha256": "4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96",
     },
+    {'id': 'sre-runbook-agent-skills',
+     'project': 'sre-runbook-agent-skills',
+     'repository': 'https://github.com/medzin/sre-runbook-agent-skills.git',
+     'revision': '44ab3d87293788036013098868563f82a3369b81',
+     'license_sha256': 'f114aa5869612318e5c35fb10175e322e1feec5039bddf321a1822edf2737cf6'},
+    {'id': 'han',
+     'project': 'han',
+     'repository': 'https://github.com/testdouble/han.git',
+     'revision': '19cb21bcb1154d29bf20d1f3c9ad4854a59580d2',
+     'license_sha256': '9940ab927f654e997d00aedc6a8734be0600f9443377697419ee7ed4247f2d36'},
 )
 
 

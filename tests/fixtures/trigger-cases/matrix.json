@@ -346,5 +346,136 @@
       ],
       "next": "verification-before-completion"
     }
+  },
+  {
+    "id": "playbook-system-requirement",
+    "request": "Specify a new data-import service. Operators must recover interrupted imports and restore backups before its first production launch; no incident has happened yet. Identify which playbooks belong to the delivered system.",
+    "primary": "speckit-specify",
+    "supporting": [
+      "project-backlog",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-planning",
+      "native-focused-edit",
+      "openspec-propose",
+      "systematic-debugging",
+      "playbook-authoring",
+      "playbook-review"
+    ],
+    "handoff": {
+      "consumes": [
+        "new-system request and planned operating scenarios"
+      ],
+      "produces": [
+        "specification with system-playbook delivery requirements and acceptance criteria"
+      ],
+      "next": "speckit-plan"
+    }
+  },
+  {
+    "id": "playbook-development-operation",
+    "request": "The approved specification for a database replacement exists. Plan the staged cutover of live data, including interruption recovery and rollback. Determine which development playbook must be ready before the cutover.",
+    "primary": "speckit-plan",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-planning",
+      "native-focused-edit",
+      "openspec-propose",
+      "speckit-specify",
+      "systematic-debugging",
+      "playbook-authoring",
+      "playbook-review"
+    ],
+    "handoff": {
+      "consumes": [
+        "approved spec and live migration constraints"
+      ],
+      "produces": [
+        "plan with development-playbook readiness dependency and rehearsal criteria"
+      ],
+      "next": "architecture-modeling"
+    }
+  },
+  {
+    "id": "playbook-authoring",
+    "request": "An accepted engineering task assigns PB-01, a staged cutover playbook. Write its decision paths, actions, interruption recovery and verification using the supplied system interfaces. Do not execute it.",
+    "primary": "playbook-authoring",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-planning",
+      "native-focused-edit",
+      "openspec-propose",
+      "speckit-specify",
+      "systematic-debugging"
+    ],
+    "handoff": {
+      "consumes": [
+        "PB-01 need record and current system interfaces"
+      ],
+      "produces": [
+        "drafted PB-01 procedure and unresolved-fact record"
+      ],
+      "next": "playbook-review"
+    }
+  },
+  {
+    "id": "playbook-review",
+    "request": "Review PB-01 against its accepted requirements. It says generated today and claims validated, but contains no rehearsal results. The procedure retries a non-idempotent import after a timeout without checking state. Do not execute it.",
+    "primary": "playbook-review",
+    "supporting": [
+      "project-backlog"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-planning",
+      "native-focused-edit",
+      "openspec-propose",
+      "speckit-specify",
+      "systematic-debugging"
+    ],
+    "handoff": {
+      "consumes": [
+        "PB-01 procedure, acceptance criteria and claimed evidence"
+      ],
+      "produces": [
+        "review findings and separate rehearsal status"
+      ],
+      "next": "return to owning executor"
+    }
+  },
+  {
+    "id": "playbook-small-edit",
+    "request": "Rename a local test helper without changing behavior. No deployment, operational process or system interface changes.",
+    "primary": "native-focused-edit",
+    "supporting": [
+      "project-backlog",
+      "verification-before-completion"
+    ],
+    "prohibited": [
+      "documentation-authoring",
+      "documentation-planning",
+      "openspec-propose",
+      "speckit-specify",
+      "systematic-debugging",
+      "playbook-authoring",
+      "playbook-review"
+    ],
+    "handoff": {
+      "consumes": [
+        "small reversible refactor"
+      ],
+      "produces": [
+        "targeted verification without a playbook"
+      ],
+      "next": "complete"
+    }
   }
 ]

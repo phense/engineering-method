@@ -77,3 +77,13 @@ return to the same authoring executor. A standalone document enters
 `documentation-authoring` directly and closes with a recorded self-review. The
 documentation lifecycle never shares a work ID with an engineering lifecycle;
 software behavior stays with Spec Kit, OpenSpec or debugging.
+
+## Supporting playbook handoffs
+
+The [playbook policy](playbooks.md) adds conditional support within the existing
+engineering phases. `playbook-authoring` returns a drafted procedure to its
+owner; `playbook-review` returns a separate report. Findings return to authoring
+through that owner. Neither skill is a lifecycle controller or application
+executor. Required development readiness precedes its operation; required system
+readiness precedes convergence or archival. Both require the agreed current
+review and rehearsal evidence, which are distinct acceptance facts.

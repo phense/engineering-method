@@ -221,3 +221,66 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+## medzin/sre-runbook-agent-skills
+
+Source: https://github.com/medzin/sre-runbook-agent-skills.git
+
+License: MIT (`LICENSE`); SHA-256: `f114aa5869612318e5c35fb10175e322e1feec5039bddf321a1822edf2737cf6`.
+
+Pinned revision: `44ab3d87293788036013098868563f82a3369b81`. Selected authoring, review and validation mechanics
+are adapted for the Engineering Method playbook support; see the source lock
+for file mappings and modification details.
+
+- `LICENSE` -> `THIRD_PARTY_NOTICES.md`: notice-only
+- `skills/sre-runbook-author/SKILL.md` -> `skills/playbook-authoring/SKILL.md`: adapted
+- `skills/sre-runbook-author/references/runbook-template.md` -> `templates/playbooks/playbook.md`: adapted
+- `skills/sre-runbook-reviewer/SKILL.md` -> `skills/playbook-review/SKILL.md`: adapted
+- `skills/sre-runbook-reviewer/references/review-scorecard.md` -> `templates/playbooks/review.md`: adapted
+
+```text
+MIT License
+
+Copyright (c) 2026 Adam Medziński
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
+
+## testdouble/han
+
+Source: https://github.com/testdouble/han.git
+
+License: MIT (`LICENSE`); SHA-256: `9940ab927f654e997d00aedc6a8734be0600f9443377697419ee7ed4247f2d36`.
+
+Pinned revision: `19cb21bcb1154d29bf20d1f3c9ad4854a59580d2`. Selected authoring, review and validation mechanics
+are adapted for the Engineering Method playbook support; see the source lock
+for file mappings and modification details.
+
+- `LICENSE` -> `THIRD_PARTY_NOTICES.md`: notice-only
+- `han-documentation/skills/runbook/SKILL.md` -> `shared/policies/playbooks.md`: adapted
+
+```text
+Copyright 2026 Test Double, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+```

@@ -46,3 +46,10 @@
 ## Success measures
 
 - SC-001: <measurable, technology-neutral outcome>
+
+## Playbook obligations
+
+Record required system playbooks as deliverables with stable ID, source
+requirement/scenario, audience and acceptance criteria, or none with rationale.
+Planning separately assesses development operations. Follow the
+[playbook policy](../../shared/policies/playbooks.md).

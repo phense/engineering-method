@@ -86,6 +86,29 @@ Review, TDD, worktrees and parallel dispatch activate only when their own
 conditions apply. If a bounded change reveals architectural scope, its formal
 escalation artifact preserves the original work and transfers ownership.
 
+## Engineering playbooks
+
+The [playbook policy](shared/policies/playbooks.md) distinguishes procedures
+needed to carry out development from procedures delivered with the system.
+Specification identifies system-playbook requirements; planning assesses
+critical development operations. Tasks make a development playbook ready before
+its operation and a system playbook ready before delivery. Small reversible
+work does not acquire a playbook by default.
+
+`playbook-authoring` creates scenario-bound decisions, actions, verification,
+interruption recovery and rollback paths. `playbook-review` checks the procedure
+without relying on the author's background knowledge. They support the existing
+engineering owner, including direct playbook requests, and do not execute the
+procedure. Drafted, reviewed and rehearsed are separate facts; generation never
+sets the validation date. Missing or stale required evidence blocks the dependent
+operation, convergence or archival.
+
+Default target-project paths are `docs/playbooks/development/` and
+`docs/playbooks/system/`, with separate review/rehearsal records. Existing
+project conventions take precedence. The current checkout adds these skills
+beyond fixed release 0.1.1; see the
+[bounded verification record](docs/verification/EM-014-playbooks.md).
+
 ## Documentation and reader-oriented writing
 
 Prose deliverables decide their scale first with the
@@ -255,6 +278,10 @@ mappings, hashes and complete MIT notices.
   proposals, application and archival practices/templates.
 - [Superpowers](https://github.com/obra/superpowers): adapted debugging, TDD,
   verification, reviews, worktree and delegation practices.
+- [SRE Runbook Agent Skills](https://github.com/medzin/sre-runbook-agent-skills):
+  adapted playbook authoring, review and templates.
+- [Han](https://github.com/testdouble/han): selected need, origin and validation
+  rules adapted into the playbook policy.
 - [Humanizer](https://github.com/blader/humanizer): adapted AI-writing
   patterns as drafting-time constraints for documentation.
 

@@ -49,6 +49,31 @@ resolve review findings before convergence. The shared policies favor cohesive
 slices and reuse unchanged evidence. Additional expensive runs or reviews need
 a concrete unresolved question and must respect user effort limits.
 
+## Include playbooks in engineering work
+
+> Build a new import service. Operators must recover interrupted imports and
+> restore backups before launch. The rollout also includes a staged cutover.
+
+`speckit-specify` records recovery playbooks as system deliverables even before
+an incident has occurred. `speckit-plan` separately assesses the cutover's
+need for a development playbook. The plan names owners, paths, dependencies and
+required validation. The existing executor invokes `playbook-authoring` and
+`playbook-review`; it arranges authorized rehearsal at the agreed level.
+The cutover waits for its playbook readiness, and delivery waits for the required
+system playbooks. OpenSpec applies the same decisions to a bounded change.
+
+> Review the cutover playbook. It claims validation on its creation date, but
+> has no rehearsal evidence and retries a non-idempotent import after a timeout.
+
+`playbook-review` reports the missing proof and unsafe retry assumptions without
+executing the procedure. It records content-review and rehearsal status
+separately. Corrections return to the owning executor; convergence and archival
+remain blocked while required evidence is missing or stale.
+
+A direct request to author a scenario-bound onboarding or recovery playbook
+uses `playbook-authoring`; a general tutorial or manual keeps its documentation
+route. A typo fix or simple reversible refactor does not require a playbook.
+
 ## Write one document
 
 > Write a how-to guide that shows an administrator how to rotate an API key.

@@ -52,3 +52,11 @@ route any appended fix slices back through the existing
 `orchestrated-implementation` executor before final verification.
 
 - [ ] T007 Run convergence, resolve every actionable finding, and capture fresh verification.
+
+## Playbook obligations
+
+For required playbooks add authoring, content review and agreed rehearsal tasks
+inside the owning slices. Development readiness blocks the operation; system
+readiness blocks delivery. Record artifact paths and validation evidence; a
+content review does not prove execution. Follow the
+[playbook policy](../../shared/policies/playbooks.md).

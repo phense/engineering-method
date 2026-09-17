@@ -22,49 +22,49 @@
           "source_path": "templates/spec-template.md",
           "destination_path": "templates/spec-kit/spec.md",
           "source_sha256": "3945437fc35cd30a5b2bf7beea680337c3516826d3efa5a6b92c4a7eca1ba28e",
-          "destination_sha256": "96d69608b9c13b2d349d0410f348141636618ae98c46ff09aca84c7bf08fd545",
+          "destination_sha256": "2f724b30e1fd65915b0396d379a5d7991dd94e3594300f1f08f152ae0293a3a8",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/plan-template.md",
           "destination_path": "templates/spec-kit/plan.md",
           "source_sha256": "dfba43da2b2a207ff8c177a0fba03af074fd45e261696b4b64172041fad2e992",
-          "destination_sha256": "d1ef93f8030259cde4e5c948c20901de38fdade9bf3a6aac487d9c517905ced8",
+          "destination_sha256": "ef703aa34222a201828627cf1cc87e97060aef8685f311d34c6e79af4aa43eb3",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/tasks-template.md",
           "destination_path": "templates/spec-kit/tasks.md",
           "source_sha256": "1e448e9153462e8c5b5a55231a54c756d870a82950d4dd9425a2bf5b7008a0d9",
-          "destination_sha256": "0948857732a43dc638f75432dbd8ed24709cbbb68f5d84210fa73596eb45845d",
+          "destination_sha256": "cc2052743e5ce2fb1495a3f5c2bdebb79d0e69e126a9cc9067e405b863a21e92",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/specify.md",
           "destination_path": "skills/speckit-specify/SKILL.md",
           "source_sha256": "07de3d938def8407ccd30bd9a2c433bab8f299c10915fe86199bd10438b295ec",
-          "destination_sha256": "e0dec8278a2f40b7505ea4c7e126bea5902bbc6c829450bb307967f74fc322f2",
+          "destination_sha256": "545e9e5be74567b03dca722e1944318576979293101b5d726a629e63d711b31a",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/plan.md",
           "destination_path": "skills/speckit-plan/SKILL.md",
           "source_sha256": "c77757f07025404647134ba32cfc126ddf145fe20155a787266156c9bca4ecb2",
-          "destination_sha256": "3bc1e7ef89fd50e98132f2f6c14b91e45aa5865dda0c5bf53bd626a27dc9af86",
+          "destination_sha256": "7c74af7aaba2b68ea9ccac119dc63a9c8220db92f807c8fc2f7cd09671f700ad",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/tasks.md",
           "destination_path": "skills/speckit-tasks/SKILL.md",
           "source_sha256": "19d3465fdffefb95117c8de493d7f13785dff3b4ad2b8c02d18a3ca5bbc572b5",
-          "destination_sha256": "5c5b6f44421a94cae3fc8004501ebe1d071ea5d282af2a77f324dbf0b0818afa",
+          "destination_sha256": "0d573dcf7a18e8ab9cdf50eeb62a822b0e5d42b1ad96e47b60b0fdc15495b0b8",
           "modification_status": "adapted"
         },
         {
           "source_path": "templates/commands/converge.md",
           "destination_path": "skills/speckit-converge/SKILL.md",
           "source_sha256": "a6dbe49b66ef34f421294e4148afce2af93ba02cb1b861bd80f72f753ee52eed",
-          "destination_sha256": "3527cca662f532e4d16cc05a1e981f52a0263b6e4e104b0d594b7d629823788e",
+          "destination_sha256": "531bcf3784a3cc17e19efbd70693e9b32123310de38fb850fcc4455e7011067b",
           "modification_status": "adapted"
         }
       ],
@@ -92,21 +92,21 @@
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "templates/openspec/proposal.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "5bbd7191de1e63d0d63f2e3c09069a87fc28e16e2399c15a169276689e0332c2",
+          "destination_sha256": "c0d79506273c9cddb4ec7b86ea2a67c71d803b1b0523e0e64b8bef3010a7ab94",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "templates/openspec/design.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "e2984d3dfb91547ae9b6c456fef6afe273aa3706f24dadce14c6e241cc06ee06",
+          "destination_sha256": "ed95163cb950c05cd5be65200f3e7c4aa783c27448cb05548af3effff9f99525",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "templates/openspec/tasks.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "ec638bceddd16421905d01a2a36cd27b7e71953e9c03d30bfa298dc1d4c1a6b4",
+          "destination_sha256": "28f1c5be7bc089d7cc120672f56ba7da1a3fb01086f9aadc63f076b391ca0c78",
           "modification_status": "adapted"
         },
         {
@@ -120,21 +120,21 @@
           "source_path": "skills/openspec-propose/SKILL.md",
           "destination_path": "skills/openspec-propose/SKILL.md",
           "source_sha256": "f4ef2689aa615105c3f6c3d95f7f92bb340953e419e702ecccabbabc82142c62",
-          "destination_sha256": "04a9746e92326930a0b23d0628ab748cba72ecd55b136f888251a438af32dbaf",
+          "destination_sha256": "7c5e9585c998b24b24637404523845af938080f28a62bc3a2500de4c6fd3768b",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-apply-change/SKILL.md",
           "destination_path": "skills/openspec-apply/SKILL.md",
           "source_sha256": "0cf1cb26935b55d83e240631500c8cee484a7b241c84a705387c0eeb88676ccf",
-          "destination_sha256": "3a3ca6b71905248412dfd391f39574da71dd195593b00b1f7a85107a577ee99b",
+          "destination_sha256": "94792e1544f32e6f50bde662c8b195112966196420ee42b33dbfe52078972c6d",
           "modification_status": "adapted"
         },
         {
           "source_path": "skills/openspec-archive-change/SKILL.md",
           "destination_path": "skills/openspec-archive/SKILL.md",
           "source_sha256": "3ad0def4d299469fdfd5b05e4842284d65558e6b28710b5962f7f214d6153855",
-          "destination_sha256": "5bc05e251656549a6126cbf490853d049d1ef109a58afa398483ac31e4eebaef",
+          "destination_sha256": "e3e949f6217d5266367c70341a72685b2184099116118ed4a51bcfc539a4389e",
           "modification_status": "adapted"
         }
       ],
@@ -225,7 +225,7 @@
           "source_path": "skills/subagent-driven-development/SKILL.md",
           "destination_path": "skills/orchestrated-implementation/SKILL.md",
           "source_sha256": "8dd1b8e698edec3700c6d89517dbe96febd3bacd3f6ea21c1a3569c62ea104b5",
-          "destination_sha256": "3cf8b882b02749b0ec1750b56a57c66457309e2680dbdb82f6d4e7b5490025a0",
+          "destination_sha256": "f39b8140ccac76fe30a861c7d6ca682d71c274c499158a067551c8f7a2482bfb",
           "modification_status": "adapted"
         },
         {
@@ -322,6 +322,83 @@
       ],
       "copyright": "Copyright (c) 2025 Siqi Chen",
       "modification_summary": "Reframed the after-the-fact rewrite procedure as drafting-time constraints for medium and large documentation, condensed the 25 patterns into constraint groups, removed pasted-text and voice-matching modes, and added the chunk check and documentation voice rules."
+    },
+    {
+      "id": "sre-runbook-agent-skills",
+      "project": "sre-runbook-agent-skills",
+      "repository": "https://github.com/medzin/sre-runbook-agent-skills.git",
+      "revision": "44ab3d87293788036013098868563f82a3369b81",
+      "license": {
+        "spdx": "MIT",
+        "source_path": "LICENSE",
+        "sha256": "f114aa5869612318e5c35fb10175e322e1feec5039bddf321a1822edf2737cf6"
+      },
+      "files": [
+        {
+          "source_path": "LICENSE",
+          "destination_path": "THIRD_PARTY_NOTICES.md",
+          "source_sha256": "f114aa5869612318e5c35fb10175e322e1feec5039bddf321a1822edf2737cf6",
+          "modification_status": "notice-only"
+        },
+        {
+          "source_path": "skills/sre-runbook-author/SKILL.md",
+          "destination_path": "skills/playbook-authoring/SKILL.md",
+          "source_sha256": "a7c06fd658dccc671cae685a4823b82a21e1575f85ec1e0f844c7b6b9458f25c",
+          "destination_sha256": "4e7fae598f7ea2fcf18692638577dedeb1fe54b816f284c2b6565a6f25c6ce02",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/sre-runbook-author/references/runbook-template.md",
+          "destination_path": "templates/playbooks/playbook.md",
+          "source_sha256": "b9ed541c36f1f0590f074c7238380c77959cec4ec7aed0207cf31f8539a69122",
+          "destination_sha256": "61c414cd9a6bc95fce20945c706e2db7cb2af0b9bd8afae139963cfb3df59ebb",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/sre-runbook-reviewer/SKILL.md",
+          "destination_path": "skills/playbook-review/SKILL.md",
+          "source_sha256": "7385abc84b1db7b8ba9fa90e65d820f6986d262893ad42773fd4ff5a25c717ca",
+          "destination_sha256": "532c142f7883342de3dc1dd236740ff6dba590fbac1d667a893de9bf0314b8e2",
+          "modification_status": "adapted"
+        },
+        {
+          "source_path": "skills/sre-runbook-reviewer/references/review-scorecard.md",
+          "destination_path": "templates/playbooks/review.md",
+          "source_sha256": "356c3135e482ad69e082e32571422e36408bcbfa430707eca60a2d4abcc70c52",
+          "destination_sha256": "55eac867e0d8014de46075b113f3b51ead2debadff02cf820bf93b54f7c541c9",
+          "modification_status": "adapted"
+        }
+      ],
+      "copyright": "Copyright (c) 2026 Adam Medzi\u0144ski",
+      "modification_summary": "Adapted selected playbook authoring/review and evidence rules for development and system deliverables, conditional lifecycle support and existing authority; removed incident-only and host-specific requirements."
+    },
+    {
+      "id": "han",
+      "project": "han",
+      "repository": "https://github.com/testdouble/han.git",
+      "revision": "19cb21bcb1154d29bf20d1f3c9ad4854a59580d2",
+      "license": {
+        "spdx": "MIT",
+        "source_path": "LICENSE",
+        "sha256": "9940ab927f654e997d00aedc6a8734be0600f9443377697419ee7ed4247f2d36"
+      },
+      "files": [
+        {
+          "source_path": "LICENSE",
+          "destination_path": "THIRD_PARTY_NOTICES.md",
+          "source_sha256": "9940ab927f654e997d00aedc6a8734be0600f9443377697419ee7ed4247f2d36",
+          "modification_status": "notice-only"
+        },
+        {
+          "source_path": "han-documentation/skills/runbook/SKILL.md",
+          "destination_path": "shared/policies/playbooks.md",
+          "source_sha256": "1fd29933594a19177a60c77c98ae7cf776220aa67b5f11ae70d2851fc63eee37",
+          "destination_sha256": "0dcfd4048834914dbc30b1352f8c27d215818cae2726a00de1bd70e671019681",
+          "modification_status": "adapted"
+        }
+      ],
+      "copyright": "Copyright 2026 Test Double, Inc.",
+      "modification_summary": "Adapted selected playbook authoring/review and evidence rules for development and system deliverables, conditional lifecycle support and existing authority; removed incident-only and host-specific requirements."
     }
   ],
   "original": {

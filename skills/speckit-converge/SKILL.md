@@ -131,3 +131,16 @@ and existing task content. Its only allowed write is appending missing work to
    in the existing artifact; preserve all existing IDs and content.
 6. If no actionable findings exist, do not modify any file and report the
    evidence checked.
+
+## Playbook obligations
+
+Apply the [playbook policy](../../shared/policies/playbooks.md): reconcile every
+required development and system playbook with spec/plan/tasks, current procedures,
+content review and agreed rehearsal evidence. A missing or affected content
+review becomes a `playbook-review` task for the existing executor; do not invoke
+a report-writing reviewer inside this read-only gate. A Ready review alone is
+not execution evidence.
+Missing or stale required proof is an actionable finding and prevents completion.
+Append fixes/rehearsals to the existing executor's slices; never author, execute
+or waive them inside convergence. Preserve system-delivery obligations when
+one canonical procedure also served development.

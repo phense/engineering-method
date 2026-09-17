@@ -120,3 +120,13 @@ tightly coupled cross-component scope, stop application-code edits. Write the
 formal escalation record with completed task IDs and root evidence, preserve the
 change path, mark `openspec-apply` inactive, and hand the traceable change to
 `speckit-specify`.
+
+## Playbook obligations
+
+Follow the [playbook policy](../../shared/policies/playbooks.md). Use
+`playbook-authoring` and `playbook-review` for the change's assigned procedures.
+Require current review and agreed rehearsal evidence before each dependent
+development operation; include system playbooks in completed delivery tasks.
+Coordinate only authorized rehearsals. Changed commands, interfaces or recovery
+assumptions invalidate affected evidence. Return corrections to the same task
+loop; do not treat generation or a content review as practical validation.

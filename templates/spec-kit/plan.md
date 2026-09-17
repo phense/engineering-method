@@ -66,3 +66,12 @@ Create only artifacts justified by current risk or uncertainty:
 ## Implementation structure
 
 <Concrete repository paths and component ownership.>
+
+## Playbook obligations
+
+Assess development operations independently of system playbooks in the spec.
+For each required or affected playbook record ID, class, scenario/trigger,
+origin, audience/owner, canonical path, dependent operation/delivery task,
+readiness deadline and required review/rehearsal level/environment. Record none
+with rationale if neither class applies. Follow the
+[playbook policy](../../shared/policies/playbooks.md).

@@ -32,3 +32,11 @@
 ## Risks and rollback
 
 - <risk, mitigation, and recovery path>
+
+## Playbook obligations
+
+Assess critical development operations and refine system-playbook needs. Record
+ID, class, trigger/origin, audience/owner, path, dependent task, deadline and
+required validation method/environment; or none/rationale. Preserve existing
+procedures and reassess stale evidence. See the
+[playbook policy](../../shared/policies/playbooks.md).

@@ -274,6 +274,11 @@ class LifecycleContractTests(unittest.TestCase):
                 "documentation-set",
                 "existing-documentation-plan",
                 "documentation-pdf",
+                "playbook-system-requirement",
+                "playbook-development-operation",
+                "playbook-authoring",
+                "playbook-review",
+                "playbook-small-edit",
             },
             {case["id"] for case in matrix},
         )
@@ -354,6 +359,52 @@ class LifecycleContractTests(unittest.TestCase):
                 ["native-focused-edit", "documentation-authoring", "documentation-planning", "systematic-debugging", "speckit-specify", "openspec-propose"],
             ),
         }
+        expected.update(
+            {'playbook-system-requirement': ('speckit-specify',
+                                             ['project-backlog', 'verification-before-completion'],
+                                             ['documentation-authoring',
+                                              'documentation-planning',
+                                              'native-focused-edit',
+                                              'openspec-propose',
+                                              'systematic-debugging',
+                                              'playbook-authoring',
+                                              'playbook-review']),
+             'playbook-development-operation': ('speckit-plan',
+                                                ['project-backlog'],
+                                                ['documentation-authoring',
+                                                 'documentation-planning',
+                                                 'native-focused-edit',
+                                                 'openspec-propose',
+                                                 'speckit-specify',
+                                                 'systematic-debugging',
+                                                 'playbook-authoring',
+                                                 'playbook-review']),
+             'playbook-authoring': ('playbook-authoring',
+                                    ['project-backlog'],
+                                    ['documentation-authoring',
+                                     'documentation-planning',
+                                     'native-focused-edit',
+                                     'openspec-propose',
+                                     'speckit-specify',
+                                     'systematic-debugging']),
+             'playbook-review': ('playbook-review',
+                                 ['project-backlog'],
+                                 ['documentation-authoring',
+                                  'documentation-planning',
+                                  'native-focused-edit',
+                                  'openspec-propose',
+                                  'speckit-specify',
+                                  'systematic-debugging']),
+             'playbook-small-edit': ('native-focused-edit',
+                                     ['project-backlog', 'verification-before-completion'],
+                                     ['documentation-authoring',
+                                      'documentation-planning',
+                                      'openspec-propose',
+                                      'speckit-specify',
+                                      'systematic-debugging',
+                                      'playbook-authoring',
+                                      'playbook-review'])}
+        )
         actual = {
             case["id"]: (case["primary"], case["supporting"], case["prohibited"])
             for case in matrix
@@ -404,6 +455,16 @@ class LifecycleContractTests(unittest.TestCase):
     def test_installed_resource_links_are_skill_relative_and_resolve(self) -> None:
         """An installed skill must not depend on the invoking working directory."""
         expected = {
+            "skills/playbook-authoring/SKILL.md": {
+                "../../shared/policies/playbooks.md",
+                "../../templates/playbooks/playbook.md",
+                "../../templates/playbooks/review.md",
+            },
+            "skills/playbook-review/SKILL.md": {
+                "../../shared/policies/playbooks.md",
+                "../../templates/playbooks/review.md",
+                "../requesting-code-review/SKILL.md",
+            },
             "skills/speckit-specify/SKILL.md": {"../../templates/spec-kit/spec.md"},
             "skills/speckit-plan/SKILL.md": {"../../templates/spec-kit/plan.md"},
             "skills/speckit-tasks/SKILL.md": {"../../templates/spec-kit/tasks.md"},

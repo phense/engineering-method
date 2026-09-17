@@ -40,3 +40,10 @@ delta to the existing capability.
 - Material architecture uncertainty: No
 
 If any answer becomes Yes, stop OpenSpec execution and create `escalation.md`.
+
+## Playbook obligations
+
+Identify required or affected system-deliverable playbooks in the delta
+requirements, with source scenario and acceptance criteria; otherwise record
+none/rationale. Planned use and preventive recovery are valid needs. See the
+[playbook policy](../../shared/policies/playbooks.md).

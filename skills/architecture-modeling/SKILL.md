@@ -199,3 +199,13 @@ Each `docs/uml/findings.md` entry contains:
 - the required task or, after implementation, difference disposition and
   rationale;
 - verification date and exact next action.
+
+## Playbook obligations
+
+Apply the [playbook policy](../../shared/policies/playbooks.md) within the
+existing architecture gate. At design time derive relevant playbook needs from
+critical operations, dependencies and failure/recovery paths; return scope
+changes to the spec/plan owner. During as-built reconciliation compare required
+playbooks with actual interfaces and recovery flows, flag changed assumptions
+and stale review/rehearsal evidence, and derive the required validation tasks.
+This support does not create an architecture gate for small work.

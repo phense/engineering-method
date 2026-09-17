@@ -122,3 +122,12 @@ user input.
 5. Fill the template with concrete content; remove unused example rows.
 6. Review every requirement for testability and every acceptance criterion for
    technology-neutral observability.
+
+## Playbook obligations
+
+Apply the [playbook policy](../../shared/policies/playbooks.md) to planned user,
+operating and recovery scenarios. Record required **system** playbooks as explicit
+system deliverables with stable IDs, audience, origin requirement and acceptance
+criteria; otherwise record a concise none/rationale. Preventive procedures need
+no prior incident. Leave development-operation assessment to planning; do not
+write procedures during specification.

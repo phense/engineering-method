@@ -124,3 +124,12 @@ decision, blocker, or authority boundary requires user input.
 5. Create only justified supporting artifacts and link rather than duplicate
    their detail.
 6. Verify the plan against the spec and applicable project gates.
+
+## Playbook obligations
+
+Apply the [playbook policy](../../shared/policies/playbooks.md). Assess critical
+**development** operations independently of the specified **system** deliverables.
+Record IDs, canonical paths, owners, operation/delivery dependencies, readiness
+deadlines and proportionate review/rehearsal criteria in the plan. Record none
+with rationale when appropriate. Feed new delivery scope back to the specification
+owner; do not silently add or drop requirements.
