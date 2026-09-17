@@ -10,9 +10,11 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-**[Version 0.1.1](https://github.com/phense/engineering-method/releases/tag/v0.1.1)
-adds native OpenCode integration.** See the [release notes](docs/releases/0.1.1.md)
-for its bounded acceptance. The historical 0.1.0 baseline has independently accepted
+**[Version 0.2.0](https://github.com/phense/engineering-method/releases/tag/v0.2.0)
+adds scale-aware documentation, Humanizer drafting, local PDF export, engineering
+playbooks and read-only state checks.** See the [release notes](docs/releases/0.2.0.md)
+for its bounded acceptance; [0.1.1](docs/releases/0.1.1.md) added native OpenCode
+integration. The historical 0.1.0 baseline has independently accepted
 [complete original gate coverage](docs/verification/EM-005-acceptance.md), with
 documented evidence reuse and corrections. Read the acceptance limits before
 relying on it for unattended work. The
@@ -22,12 +24,13 @@ intended scope.
 The earlier `v0.1.0-rc.1` pre-release remains available with its original, reduced
 acceptance scope.
 
-The default branch additionally includes scale-aware documentation, Humanizer
-rules applied during drafting, local Quarto/Typst PDF export, and read-only
-backlog status checks. These additions are separate from the fixed `v0.1.1`
-release. [Current verification](docs/verification/EM-013-prepublication.md)
-covers 319 local tests, five documentation routing cases on each of Codex and
-Claude, and two bounded native OpenCode probes.
+Release 0.2.0 bundles the scale-aware documentation, Humanizer drafting,
+local Quarto/Typst PDF export, playbook and read-only state-check work.
+[Its verification](docs/verification/EM-013-prepublication.md) covers 319
+local tests, five documentation routing cases on each of Codex and Claude, and
+two bounded native OpenCode probes; the
+[playbook record](docs/verification/EM-014-playbooks.md) adds no native
+routing evaluation.
 
 ## Installation
 
@@ -105,9 +108,8 @@ operation, convergence or archival.
 
 Default target-project paths are `docs/playbooks/development/` and
 `docs/playbooks/system/`, with separate review/rehearsal records. Existing
-project conventions take precedence. The current checkout adds these skills
-beyond fixed release 0.1.1; see the
-[bounded verification record](docs/verification/EM-014-playbooks.md).
+project conventions take precedence. These skills are new in release 0.2.0; see
+the [bounded verification record](docs/verification/EM-014-playbooks.md).
 
 ## Documentation and reader-oriented writing
 

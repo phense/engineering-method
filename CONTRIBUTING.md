@@ -76,8 +76,11 @@ alone do not prevent sensitive Git history from being published.
 
 ## Release policy
 
-`v0.1.1` adds OpenCode with [bounded integration evidence](docs/verification/EM-008-opencode.md).
-Its release notes must keep that scope separate from the historical `v0.1.0` baseline with
+`v0.2.0` adds documentation, PDF, playbook and state-check work with
+[routing evidence](docs/verification/EM-013-prepublication.md) and a
+[playbook record](docs/verification/EM-014-playbooks.md); `v0.1.1` added OpenCode
+with [bounded integration evidence](docs/verification/EM-008-opencode.md).
+Release notes must keep each scope separate from the historical `v0.1.0` baseline with
 [independently accepted original gate coverage](docs/verification/EM-005-acceptance.md).
 The historical `v0.1.0-rc.1` retains its reduced acceptance scope. Evidence reuse
 must identify unchanged inputs, revisions and limitations; corrections must
