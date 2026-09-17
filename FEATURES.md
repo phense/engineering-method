@@ -64,3 +64,10 @@ This inventory records implemented, changed, and historically removed capabiliti
 - Status: available
 - Summary: Optional documentation-pdf skill with a reusable Quarto/Typst template, centralized brand settings, ordered Markdown chapters, linked contents and current/total page numbers. Native macOS sample and long-table checks verified; PDF skill selection verified on Codex, Claude and OpenCode. Rendering remains local.
 - Related backlog: `EM-012`, `EM-013`
+
+<!-- engineering-method:feature {"schema_version":1,"id":"F-010","name":"Engineering playbook authoring and acceptance","summary":"Two supporting skills distinguish development-operation and system-deliverable playbooks, with phase-specific need assessment, authoring/review templates, interruption and rollback paths, and separate current review and rehearsal evidence. Local contracts, independent instruction scenarios and disposable Claude/Codex installation verified; no native-host routing or operational rehearsal claimed.","status":"available","related_backlog_ids":["EM-014"],"updated_at":"2026-09-17T07:16:38Z"} -->
+## `F-010` Engineering playbook authoring and acceptance
+
+- Status: available
+- Summary: Two supporting skills distinguish development-operation and system-deliverable playbooks, with phase-specific need assessment, authoring/review templates, interruption and rollback paths, and separate current review and rehearsal evidence. Local contracts, independent instruction scenarios and disposable Claude/Codex installation verified; no native-host routing or operational rehearsal claimed.
+- Related backlog: `EM-014`

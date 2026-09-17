@@ -16,4 +16,4 @@ EM-014; [specification](spec.md); [plan](plan.md).
 
 - [x] T004 Add routing cases and check discovery, links, lifecycle ownership and regression suite.
 - [x] T005 Independently review requirements and bounded behavior scenarios; resolve material findings.
-- [ ] T006 Update capability inventory, usage and verification evidence; commit locally after fresh checks.
+- [x] T006 Update capability inventory, usage and verification evidence; commit locally after fresh checks.

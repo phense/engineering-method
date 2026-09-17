@@ -56,7 +56,12 @@ routing evaluations, full authored-playbook trials or operational rehearsals.
 - Plugin validator, Claude strict validation, both skill quick validators,
   Python compilation, shell syntax and whitespace checks: passed.
 - Plugin source audit: passed for all six pinned upstream roots.
-- Packaging and disposable clean installation: pending committed-source check.
+- Reproducible package from implementation commit `3b241ab5359016e3796300d90d221498171d14b7`:
+  253 files; SHA-256 `0e4303e90a65b41506f0cb98f77fa0c5a29c18b650a927d3f0e2d4b793aa494f`.
+- Disposable Claude and Codex installation of that package: passed without
+  credentials or live model requests. Subsequent closure changes affect only
+  backlog, inventory, task completion and this evidence record; installed skill
+  and runtime bytes are unchanged.
 
 The first full implementation run exposed two expected integration gaps in the
 new provenance declarations: notice coverage and the fixed source inventory.
