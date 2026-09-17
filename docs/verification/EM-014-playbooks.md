@@ -88,3 +88,29 @@ No remote publication, persistent host installation, paid native model evaluatio
 or real system operation was performed. Fixed release 0.1.1 and its historical
 acceptance claims are unchanged. Review and rehearsal facts remain separate;
 this feature does not guarantee compliance by every host/model.
+
+## Main integration preflight
+
+The implementation was already fast-forwarded into local `main` at
+`622cd179205f75192d719b966ad93f326d0919e6`. A fresh `git fetch origin main`
+confirmed remote `main` at `bda1eac2caf0628872a4e17923d3a3a10a63a799`, with
+zero remote-only and two local-only commits before this documentation update.
+No additional merge or conflict resolution was needed.
+
+Fresh checks on that local main implementation:
+
+- `python3 -m unittest discover -s tests -t . -v`: 319 passed, 21.448 seconds.
+- Plugin validator and Claude strict validation: passed.
+- Python compilation, shell syntax and `git diff --check`: passed.
+- Provenance audit against all six pinned source roots: passed.
+- Reproducible package: 253 files, SHA-256
+  `9bd49f2e6e8806216489fb357eeaa9b405c2df0c88ae1a7ccfb5990a81502cd3`.
+- Disposable Claude and Codex installation of that package: passed without
+  credentials or live model requests.
+
+The existing independent review remains applicable: no skill, policy, template,
+runtime or test changed during this preflight. CONTRIBUTING now includes the two
+new source roots in its audit command. The remaining changes only record this
+fresh evidence. Packaging reads committed sources, so the checksum above names
+`622cd17`, not the subsequent documentation commit. No remote push or release was
+performed; native routing and operational-rehearsal limits above still apply.

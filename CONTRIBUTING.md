@@ -39,7 +39,9 @@ python3 scripts/audit-provenance \
   --source-root github-spec-kit=/path/to/pinned/spec-kit \
   --source-root openspec=/path/to/pinned/OpenSpec \
   --source-root superpowers=/path/to/pinned/superpowers \
-  --source-root humanizer=/path/to/pinned/humanizer
+  --source-root humanizer=/path/to/pinned/humanizer \
+  --source-root sre-runbook-agent-skills=/path/to/pinned/sre-runbook-agent-skills \
+  --source-root han=/path/to/pinned/han
 ```
 
 Preserve upstream MIT notices and source mappings. If intentionally adapting a
