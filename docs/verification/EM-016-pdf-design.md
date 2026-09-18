@@ -66,8 +66,7 @@ evidence, not a claim that arbitrary future content will fit without review.
 - `claude plugin validate --strict .`: passed.
 - Python compilation, shell syntax and `git diff --check`: passed.
 - Coordinator review of the bounded template, documentation and regression-test
-  diff found no unresolved template finding. Overall work remains in progress
-  only because the state-tracking incident below needs maintainer disposition.
+  diff found no unresolved template finding.
 
 ## Remaining limits
 
@@ -90,5 +89,14 @@ afterward.
 
 The local `BACKLOG.md` was restored to canonical local mode and the generated
 queue removed. Deleting or otherwise mutating the unintended remote Issues is
-pending explicit maintainer authorization. EM-016 remains in progress until
-that disposition is resolved.
+outside the publication authorization; they remain closed and were not deleted.
+
+## Published release
+
+The maintainer subsequently authorized the version bump and GitHub publication.
+Release `v0.2.1` was published from `49aa3c6aa7d57dbabea2e3edfe7d9cb083ea8dd6`
+as a stable, non-draft, non-prerelease Latest release. Its reproducible 256-file
+package has SHA-256
+`2a0d0b6d520d509276c7d04d80b83a43a5aada78132d1ae48461c03fe3c21693`.
+The downloaded release asset passed `shasum -a 256 -c SHA256SUMS`, and the tag,
+asset digest and remote commit were verified after publication.
