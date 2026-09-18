@@ -3,7 +3,8 @@
 Engineering Method exposes its shared skills through OpenCode's native skill
 tool. The recorded discovery evidence covers the 17 skills of version 0.1.1;
 version 0.2.0 adds twelve writing, PDF and playbook skills that load from the
-same directory. Later [native probes](verification/EM-013-prepublication.md) verify
+same directory, and 0.2.1 refines the PDF template. Earlier
+[native probes](verification/EM-013-prepublication.md) verify
 PDF selection and pre-draft authoring with Humanizer through the skill tool.
 A local plugin config hook adds the skill directory and
 [OpenCode adapter](../shared/platform/opencode.md) to effective configuration.
@@ -16,7 +17,7 @@ macOS. Use version 0.1.1 or newer; the earlier v0.1.0 release predates this
 integration. Clone a retained checkout and install from it:
 
 ```sh
-git clone --branch v0.2.0 --depth 1 https://github.com/phense/engineering-method.git
+git clone --branch v0.2.1 --depth 1 https://github.com/phense/engineering-method.git
 cd engineering-method
 ```
 

@@ -57,11 +57,14 @@ Keep generated output and `.quarto/` out of the source repository.
 Check the actual PDF, not only the renderer's exit code:
 
 - Every selected chapter appears once, in manifest order.
+- The cover is visually separate from the contents and has no running footer.
 - The table of contents is clickable and its page references match the chapters.
 - Page numbers and the total in the footer are correct, including the final page.
 - Cross-references and images resolve; long tables and code fit within margins.
 - Inspect representative rendered pages for clipping, isolated headings, broken
-  callouts, missing glyphs and usable contrast. Check each page in a short book.
+  callouts, missing glyphs, excessive line length and usable contrast. Confirm
+  that chapter rules use the configured dark accent. Check each page in a short
+  book.
 - Compare the source files before and after rendering; export must not change
   prose, facts or chunk metadata.
 

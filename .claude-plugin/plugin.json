@@ -1,7 +1,7 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
   "name": "engineering-method",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Risk-proportionate engineering workflows for Codex, Claude and OpenCode.",
   "author": {
     "name": "Peter Hense"

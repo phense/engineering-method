@@ -109,6 +109,14 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 - ✅ `EM-015` **P1** Publish documentation, PDF, playbook and state-check work as minor release 0.2.0
   - Depends on: `EM-013`, `EM-014`
   - Notes: Published v0.2.0 from a050f0e; 319 tests, validators and reproducible package passed. Downloaded GitHub asset matches 3549be2d733267397b868d1f2b2aa21cce758cd2baf31ade482f644fd12a5e2c.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-016","title":"Refine the documentation PDF template with professional A4 typography","status":"complete","priority":"P1","parent_id":null,"depends_on":["EM-012"],"notes":"Professional A4 template and native PDF checks pass. Authorized for publication in v0.2.1. A stale installed wrapper created closed GitHub Issues #82-134; they remain closed and were not deleted.","updated_at":"2026-09-18T16:29:51Z"} -->
+- ✅ `EM-016` **P1** Refine the documentation PDF template with professional A4 typography
+  - Depends on: `EM-012`
+  - Notes: Professional A4 template and native PDF checks pass. Authorized for publication in v0.2.1. A stale installed wrapper created closed GitHub Issues #82-134; they remain closed and were not deleted.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-017","title":"Publish the professional PDF template as patch release 0.2.1","status":"in_progress","priority":"P1","parent_id":null,"depends_on":["EM-016"],"notes":"Preparing version 0.2.1, committed-source package, publication and remote verification.","updated_at":"2026-09-18T16:28:54Z"} -->
+- 🔄 `EM-017` **P1** Publish the professional PDF template as patch release 0.2.1
+  - Depends on: `EM-016`
+  - Notes: Preparing version 0.2.1, committed-source package, publication and remote verification.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"complete","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"All nine original gate criteria accepted on 0784c79 with explicit same-package evidence reuse, Claude checkpoint supplement and independently verified ownership metadata correction. Failed reports preserved; see docs/verification/EM-005-acceptance.md. Accidental Issues #1-38 removed with approval; local backlog remains canonical.","updated_at":"2026-09-05T19:11:37Z"} -->
 - ✅ `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`

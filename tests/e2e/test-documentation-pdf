@@ -58,18 +58,24 @@ def check(quarto, root, language, stress=False):
     pages = text.rstrip('\f\n').split('\f')
     assert len(pages) == count
     assert 'A4' in info
-    for number, page in enumerate(pages, 1):
+    contents_title = 'Inhaltsverzeichnis' if language == 'de' else 'Table of contents'
+    cover_footer = f'Seite 1 von {count}' if language == 'de' else f'Page 1 of {count}'
+    assert 'A clear guide' in pages[0], 'Missing cover title'
+    assert contents_title not in pages[0], 'Contents must not crowd the cover'
+    assert cover_footer not in ' '.join(pages[0].split()), 'Cover must not show a running footer'
+    contents_page = pages[1]
+    assert contents_title in contents_page
+    for number, page in enumerate(pages[1:], 2):
         footer = f'Seite {number} von {count}' if language == 'de' else f'Page {number} of {count}'
         assert footer in ' '.join(page.split()), (number, footer)
-    assert ('Inhaltsverzeichnis' if language == 'de' else 'Table of contents') in pages[0]
     chapter_pages = {}
     for number, (anchor, title) in enumerate(expected, 1):
         matches = [i for i, page in enumerate(pages[1:], 2)
                    if re.search(r'^\s*' + str(number) + r'\s+' + re.escape(title) + r'\s*$', page, re.M)]
         assert len(matches) == 1, (title, 'Missing or duplicate chapter', matches)
         chapter_pages[anchor] = matches[0]
-        assert len(re.findall(re.escape(title), pages[0])) == 1, 'Duplicate contents entry'
-        toc = next(line for line in pages[0].splitlines() if title in line)
+        assert len(re.findall(re.escape(title), contents_page)) == 1, 'Duplicate contents entry'
+        toc = next(line for line in contents_page.splitlines() if title in line)
         assert re.search(r'\b' + str(matches[0]) + r'\s*$', toc), (title, toc)
     assert list(chapter_pages.values()) == sorted(chapter_pages.values())
     page_objects = {int(obj): int(page) for page, obj in re.findall(
@@ -85,6 +91,22 @@ def check(quarto, root, language, stress=False):
         assert '/Dest (' + anchor + ')' in links, (anchor, 'Missing clickable link')
     for anchor in re.findall(r'/Dest \(([^)]+)\)', links):
         assert anchor in destinations, ('Dangling PDF link', anchor)
+    first_chapter_svg = run(
+        'mutool', 'draw', '-F', 'svg', '-o', '-', str(pdf),
+        str(chapter_pages[expected[0][0]]))
+    assert 'stroke="#173a5e"' in first_chapter_svg, 'Missing dark-blue chapter rule'
+    layout_bbox = ET.fromstring(run('pdftotext', '-bbox-layout', str(pdf), '-'))
+    layout_pages = list(layout_bbox.iter('{http://www.w3.org/1999/xhtml}page'))
+    sample_task_page = layout_pages[chapter_pages['sec-start'] - 1]
+    body_lines = []
+    for line in sample_task_page.iter('{http://www.w3.org/1999/xhtml}line'):
+        words = [word.text or '' for word in line]
+        if ' '.join(words).startswith('Create one PDF'):
+            body_lines.append(line)
+    assert len(body_lines) == 1, 'Could not identify the sample body measure'
+    sample_line = body_lines[0].attrib
+    assert float(sample_line['xMin']) >= 79, 'Body measure is too wide for A4 reading'
+    assert float(sample_line['yMax']) - float(sample_line['yMin']) >= 13.9, 'Body type is too small'
     bbox = ET.fromstring(run('pdftotext', '-bbox', str(pdf), '-'))
     for page in bbox.iter('{http://www.w3.org/1999/xhtml}page'):
         width, height = float(page.attrib['width']), float(page.attrib['height'])

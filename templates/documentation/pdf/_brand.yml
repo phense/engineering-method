@@ -2,20 +2,20 @@ meta:
   name: Documentation
 color:
   palette:
-    petrol: "#007D8A"
-    ink: "#20262B"
-    muted: "#5C6873"
+    navy: "#173A5E"
+    ink: "#232A31"
+    muted: "#5B6670"
     paper: "#FFFFFF"
-  primary: petrol
+  primary: navy
   foreground: ink
   background: paper
 typography:
   base:
     family: "Helvetica Neue"
-    size: 11pt
+    size: 12pt
   headings:
     family: "Helvetica Neue"
     weight: 700
   monospace:
     family: "Menlo"
-    size: 9pt
+    size: 9.5pt

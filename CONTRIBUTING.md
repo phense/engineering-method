@@ -76,7 +76,9 @@ alone do not prevent sensitive Git history from being published.
 
 ## Release policy
 
-`v0.2.0` adds documentation, PDF, playbook and state-check work with
+`v0.2.1` refines the PDF template and rendered-output checks documented in
+[EM-016](docs/verification/EM-016-pdf-design.md). `v0.2.0` added documentation,
+PDF, playbook and state-check work with
 [routing evidence](docs/verification/EM-013-prepublication.md) and a
 [playbook record](docs/verification/EM-014-playbooks.md); `v0.1.1` added OpenCode
 with [bounded integration evidence](docs/verification/EM-008-opencode.md).

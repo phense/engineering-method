@@ -1,6 +1,6 @@
 [project]
 name = "engineering-method"
-version = "0.2.0"
+version = "0.2.1"
 description = "Risk-proportionate engineering workflows for Codex, Claude and OpenCode."
 requires-python = ">=3.11"
 license = { text = "MIT" }

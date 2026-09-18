@@ -21,9 +21,9 @@ format:
   em-manual-typst:
     papersize: a4
     margin:
-      x: 18mm
-      top: 20mm
-      bottom: 22mm
+      x: 28mm
+      top: 22mm
+      bottom: 24mm
     toc: true
     toc-depth: 2
     number-sections: true

@@ -10,11 +10,11 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-**[Version 0.2.0](https://github.com/phense/engineering-method/releases/tag/v0.2.0)
-adds scale-aware documentation, Humanizer drafting, local PDF export, engineering
-playbooks and read-only state checks.** See the [release notes](docs/releases/0.2.0.md)
-for its bounded acceptance; [0.1.1](docs/releases/0.1.1.md) added native OpenCode
-integration. The historical 0.1.0 baseline has independently accepted
+**[Version 0.2.1](https://github.com/phense/engineering-method/releases/tag/v0.2.1)
+refines local PDF export with professional A4 typography, a dark-navy hierarchy
+and stronger rendered-output checks.** See the [release notes](docs/releases/0.2.1.md)
+and the broader [0.2.0 scope](docs/releases/0.2.0.md); [0.1.1](docs/releases/0.1.1.md)
+added native OpenCode integration. The historical 0.1.0 baseline has independently accepted
 [complete original gate coverage](docs/verification/EM-005-acceptance.md), with
 documented evidence reuse and corrections. Read the acceptance limits before
 relying on it for unattended work. The
@@ -24,8 +24,8 @@ intended scope.
 The earlier `v0.1.0-rc.1` pre-release remains available with its original, reduced
 acceptance scope.
 
-Release 0.2.0 bundles the scale-aware documentation, Humanizer drafting,
-local Quarto/Typst PDF export, playbook and read-only state-check work.
+Release 0.2.1 retains the 0.2.0 scale-aware documentation, Humanizer drafting,
+playbook and read-only state-check work while refining the local Quarto/Typst PDF export.
 [Its verification](docs/verification/EM-013-prepublication.md) covers 319
 local tests, five documentation routing cases on each of Codex and Claude, and
 two bounded native OpenCode probes; the
@@ -140,7 +140,8 @@ For a requested PDF, `documentation-pdf` uses a reusable Quarto/Typst
 [manual template](templates/documentation/pdf/DESIGN.md). It combines Markdown
 chapters in the accepted order with central branding, a linked contents page
 and current/total page numbers. Quarto is an optional local export dependency;
-see the [native verification scope](docs/verification/EM-012-quarto-pdf.md).
+see the [native export verification](docs/verification/EM-012-quarto-pdf.md)
+and the [professional A4 design revision](docs/verification/EM-016-pdf-design.md).
 An accepted documentation plan continues directly with authoring. Planning is
 selected again only for changes to the set structure, readers or manifest.
 The [routing checks](docs/verification/EM-013-routing-results.json) include
