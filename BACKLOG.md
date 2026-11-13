@@ -117,6 +117,9 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 - ✅ `EM-017` **P1** Publish the professional PDF template as patch release 0.2.1
   - Depends on: `EM-016`
   - Notes: Published stable Latest v0.2.1 from 49aa3c6; 319 tests, native PDF checks, validators, reproducible 256-file package and clean installs passed. Downloaded asset matches 2a0d0b6d520d509276c7d04d80b83a43a5aada78132d1ae48461c03fe3c21693.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-018","title":"Split shared core, engineering and writing methods into three repositories","status":"in_progress","priority":"P1","parent_id":null,"depends_on":[],"notes":"Spec: docs/specs/EM-018-method-split/spec.md","updated_at":"2026-11-13T09:46:38Z"} -->
+- 🔄 `EM-018` **P1** Split shared core, engineering and writing methods into three repositories
+  - Notes: Spec: docs/specs/EM-018-method-split/spec.md
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"complete","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"All nine original gate criteria accepted on 0784c79 with explicit same-package evidence reuse, Claude checkpoint supplement and independently verified ownership metadata correction. Failed reports preserved; see docs/verification/EM-005-acceptance.md. Accidental Issues #1-38 removed with approval; local backlog remains canonical.","updated_at":"2026-09-05T19:11:37Z"} -->
 - ✅ `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`

@@ -24,13 +24,24 @@ intended scope.
 The earlier `v0.1.0-rc.1` pre-release remains available with its original, reduced
 acceptance scope.
 
-Release 0.2.1 retains the 0.2.0 scale-aware documentation, Humanizer drafting,
+The historical release 0.2.1 retained the 0.2.0 scale-aware documentation, Humanizer drafting,
 playbook and read-only state-check work while refining the local Quarto/Typst PDF export.
 [Its verification](docs/verification/EM-013-prepublication.md) covers 319
 local tests, five documentation routing cases on each of Codex and Claude, and
 two bounded native OpenCode probes; the
 [playbook record](docs/verification/EM-014-playbooks.md) adds no native
 routing evaluation.
+
+## Related methods and shared core
+
+This branch is the 0.3.0 source candidate. The previous stable release is 0.2.1; no 0.3.0 release tag is claimed.
+
+Version 0.3.0 separates writing into [Writing Method](https://github.com/phense/writing-method). [Method Core](https://github.com/phense/method-core) owns the bundled host adapters, state/continuity tools, verification/review/isolation support and generic playbooks. Each repository keeps its own Issues and pull requests; the common topic is `agent-methods`.
+
+Engineering owns Spec Kit, OpenSpec, architecture, debugging and TDD. Writing owns documentation planning, authoring, review, didactic guidance and PDF delivery. Each plugin runs independently. Both expose byte-identical shared support under their own namespaces; invoke the current method's copy, for example `engineering-method:playbook-authoring`, once. Core is bundled source, not a third plugin installation. Gemini adapter work remains deferred.
+
+Shared changes originate in Core. From this checkout run `python3 /absolute/path/to/method-core/scripts/sync-core --source-root /absolute/path/to/method-core --target-root .`, then `python3 scripts/sync-core --check` and the verification commands below. Commit copies and `method-core.lock.json` together. Sync refuses local drift and unowned conflicts; a failed transaction restores the previous files/modes/lock. To roll back, synchronize the previous full Core revision with `--revision`. Existing `engineering_method` imports, CLI wrapper names, project `.engineering-method/` state and work IDs remain unchanged. Reinstall copied host plugins and restart the session after updating.
+
 
 ## Installation
 
@@ -82,8 +93,6 @@ lifecycle rather than start competing plans.
 | Bounded intentional change to existing behavior | OpenSpec `propose` → `apply` → `archive` |
 | New subsystem, multi-component feature, architecture change or risky migration | Spec Kit `specify` → `plan` → architecture gate → `tasks` → orchestrated implementation → `converge` |
 | Existing Spec Kit or OpenSpec artifacts | Continue the recorded phase; preserve completed work |
-| One standalone reader-facing document | `documentation-authoring` in standalone mode with the didactic writing skills |
-| Documentation set: several chapters or readers sharing terms, structure and images | `documentation-planning` → `documentation-authoring` per chunk → `documentation-review` |
 
 Review, TDD, worktrees and parallel dispatch activate only when their own
 conditions apply. If a bounded change reveals architectural scope, its formal
@@ -113,40 +122,10 @@ the [bounded verification record](docs/verification/EM-014-playbooks.md).
 
 ## Documentation and reader-oriented writing
 
-Prose deliverables decide their scale first with the
-[writing-depth policy](shared/policies/writing-depth.md): a wording fix stays a
-focused edit, one document uses `documentation-authoring` directly, and a
-manual or handbook runs through planning, per-chunk authoring and set-wide
-review with checkpoints across sessions. Plans, glossaries, asset manifests and
-review reports live under `docs/writing/<doc-id>/`; chapters are one Markdown
-file per chunk with uniform frontmatter.
-
-Three didactic skills shape the text and, through the
-[reader-oriented output policy](shared/policies/reader-oriented-output.md),
-ordinary replies as well: `explaining-concepts` introduces each concept with
-an everyday analogy before the mechanism and removes undefined jargon;
-`writing-procedures` writes imperative single-action steps in blocks of three
-to five with exact locations, prerequisites and a check that it worked;
-`empathic-troubleshooting` starts from the symptom the reader sees. All three
-apply the shared curse-of-knowledge filter that writes out the steps and
-locations an expert would skip. Medium and large texts are drafted under
-`human-prose-drafting`, an adaptation of Humanizer's AI-writing patterns
-applied while writing, so finished documentation needs no separate
-humanizing pass. `terminology-guard` keeps one term per concept
-across hundreds of pages, and `visual-placeholders` inserts standardized
-screenshot and diagram callouts with alt text and capture instructions.
-
-For a requested PDF, `documentation-pdf` uses a reusable Quarto/Typst
-[manual template](templates/documentation/pdf/DESIGN.md). It combines Markdown
-chapters in the accepted order with central branding, a linked contents page
-and current/total page numbers. Quarto is an optional local export dependency;
-see the [native export verification](docs/verification/EM-012-quarto-pdf.md)
-and the [professional A4 design revision](docs/verification/EM-016-pdf-design.md).
-An accepted documentation plan continues directly with authoring. Planning is
-selected again only for changes to the set structure, readers or manifest.
-The [routing checks](docs/verification/EM-013-routing-results.json) include
-Humanizer preparation at medium and large scales and PDF export selection;
-they do not claim complete authored-document quality.
+Writing workflows and their local PDF template live in the optional
+[Writing Method](https://github.com/phense/writing-method) companion. Install
+it when documentation planning, drafting, didactic support or PDF delivery is
+needed. Engineering Method keeps engineering artifacts and its own work IDs.
 
 ## Architecture and review
 

@@ -474,10 +474,57 @@ def _validate_marketplaces(root: Path, name: object, errors: list[str]) -> None:
                 errors.append(_error(relative, "owner.name is required"))
 
 
+def _core_integrity(root: Path, errors: list[str]) -> None:
+    try:
+        from .method_core import check, contained, safe_name
+    except ImportError:
+        from method_core import check, contained, safe_name
+    if (root / "method-core.json").is_file():
+        try:
+            manifest = json.loads((root / "method-core.json").read_text())
+            names = manifest["exports"]
+            if manifest.get("schema_version") != 1 or manifest.get("name") != "method-core" or not isinstance(names,list) or not names or len(names) != len(set(names)):
+                raise ValueError("invalid core export inventory")
+            for name in names:
+                if not contained(root,safe_name(name)).is_file():
+                    raise ValueError(f"missing core export: {name}")
+        except (OSError,ValueError,TypeError,KeyError) as error:
+            errors.append(_error("method-core.json",str(error)))
+    if (root / "method.json").is_file():
+        try:
+            check(root)
+        except (OSError,ValueError,TypeError,KeyError) as error:
+            errors.append(_error("method-core.lock.json",str(error)))
+        try:
+            profile = json.loads((root / "method.json").read_text())
+            own = profile["method_skills"]
+            if not isinstance(own,list) or not own or len(own) != len(set(own)) or not all(isinstance(n,str) and SKILL_NAME.fullmatch(n) for n in own):
+                raise ValueError("invalid method skill inventory")
+            bundled = {p.parent.name for p in (root / "skills").glob("*/SKILL.md")}
+            locked = json.loads((root / "method-core.lock.json").read_text())
+            shared = {item["path"].split("/")[1] for item in locked["files"] if re.fullmatch(r"skills/[^/]+/SKILL.md",item["path"])}
+            if bundled != set(own) | shared or set(own) & shared:
+                raise ValueError("method skills disagree with owned and shared inventories")
+        except (OSError,ValueError,TypeError,KeyError) as error:
+            errors.append(_error("method.json",str(error)))
+
+
 def validate_repository(root: Path) -> list[str]:
     """Return sorted validation errors, or an empty list."""
     root = root.resolve()
     errors: list[str] = []
+    _core_integrity(root, errors)
+    if (root / "method-core.json").is_file() and not (root / "method.json").exists():
+        _validate_skill_frontmatter(root, errors)
+        _validate_project_backlog_contract(root, errors)
+        _validate_skill_resources(root, errors)
+        _validate_platform_boundary(root, errors)
+        if (root / "third-party/sources.lock.json").is_file():
+            lock = _load_json(root, "third-party/sources.lock.json", errors)
+            if lock is not None: _validate_locked_destinations(root,lock,errors)
+        else:
+            errors.append(_error("third-party/sources.lock.json","file is required"))
+        return sorted(errors)
     codex_relative = ".codex-plugin/plugin.json"
     claude_relative = ".claude-plugin/plugin.json"
     codex = _load_json(root, codex_relative, errors)
@@ -512,6 +559,10 @@ def validate_repository(root: Path) -> list[str]:
     _validate_platform_boundary(root, errors)
     if lock is not None:
         _validate_locked_destinations(root, lock, errors)
+    core_provenance = root / "third-party/core-sources.lock.json"
+    if core_provenance.is_file():
+        core_lock = _load_json(root,"third-party/core-sources.lock.json",errors)
+        if core_lock is not None: _validate_locked_destinations(root,core_lock,errors)
     _validate_unfinished_markers(root, errors)
     return sorted(errors)
 

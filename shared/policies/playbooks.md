@@ -1,8 +1,8 @@
-# Engineering Playbooks
+# Shared Playbooks
 
 A playbook is a scenario-bound procedure with decisions, observable outcomes and
 failure paths. A task list or design explanation alone is not a playbook.
-Playbooks support the current engineering lifecycle; they do not create another
+Playbooks support the current method lifecycle; they do not create another
 controller, executor or documentation work ID. Apply [proportionality](proportionality.md).
 
 ## Decide whether one is needed
@@ -12,8 +12,8 @@ operations and actual system evidence. A prior incident is not required.
 
 | Class | Create when | Deadline and lifetime |
 |---|---|---|
-| Development | A multi-step development operation affects live systems/data, crosses coordinated actors/environments, or needs nontrivial decisions, interruption recovery or rollback. Examples: cutover, staged migration, coordinated release. | Reviewed and rehearsed to the agreed risk level before the operation; retain evidence, then archive if no longer needed. |
-| System | Successful use, operation or recovery depends on a recurring or high-consequence procedure the delivered system does not fully perform itself. Examples: onboarding with decisions, import recovery, backup restoration. | Included in delivery acceptance; maintained with the system and its interfaces. |
+| Development | A multi-step development or publishing operation affects live systems/data, crosses coordinated actors/environments, or needs nontrivial decisions, interruption recovery or rollback. Examples: cutover, staged migration, coordinated release or coordinated publication. | Reviewed and rehearsed to the agreed risk level before the operation; retain evidence, then archive if no longer needed. |
+| System | Successful use, operation or recovery depends on a recurring or high-consequence procedure the delivered system or publication does not fully perform itself. Examples: onboarding with decisions, import recovery, backup restoration. | Included in delivery acceptance; maintained with the system and its interfaces. |
 
 A simple reversible edit, self-explanatory action, fully automated operation
 with adequate built-in handling, or ordinary task sequence does not by itself
@@ -36,31 +36,18 @@ Follow an existing repository convention. Otherwise use
 review and rehearsal evidence beside them as `<id>-review.md`. These are output
 paths in the target project, not files inside the plugin installation.
 
-## Lifecycle integration
+## Method integration
 
-- `speckit-specify`: identify system-deliverable playbooks from user and operating
-  scenarios, including preventive recovery. Record scope and acceptance criteria.
-- `speckit-plan` and design-time `architecture-modeling`: assess development
-  operations and refine system needs against dependencies and failure modes.
-  Material additions to delivery scope return to the specification owner.
-- `openspec-propose`: perform both assessments in proposal/delta and design;
-  include affected existing playbooks and their compatibility changes.
-- `speckit-tasks` or OpenSpec tasks: add authoring, review and required rehearsal
-  tasks with explicit dependencies. Development readiness blocks the operation;
-  system readiness blocks delivery. Ordinary task planning remains unchanged.
-- `orchestrated-implementation` and `openspec-apply`: invoke `playbook-authoring`
-  for assigned artifacts and `playbook-review` before use/acceptance. Track fixes
-  in the same work ID. Coordinate authorized rehearsals and preserve evidence.
-- As-built `architecture-modeling`: check playbook assumptions against actual
-  interfaces and relevant recovery flows; flag stale evidence for affected paths.
-- `speckit-converge` and `openspec-archive`: check every required playbook against
-  the need inventory, current artifact/system revision, review and required
-  rehearsal evidence. Missing or stale proof blocks completion. Return findings
-  to the existing executor; do not execute or repair procedures in the gate.
+The invoking method owns the need decision, tasks, review, rehearsal and
+acceptance. Engineering operations can include migrations, release or recovery;
+writing operations can include publication, PDF production or recovery from a
+failed export. Use the same scenario-bound template and evidence contract.
 
-Direct authoring/review requests use the supporting skill without creating an
-engineering lifecycle solely for a document. If the request changes system
-behavior, the appropriate engineering lifecycle owns that change.
+Method-specific phase hooks live in the consuming method's policies. They may
+require playbooks for a concrete risk; shared support never requires an absent
+engineering or writing lifecycle. Ordinary authoring, a simple export or a
+reversible edit does not justify a playbook by itself. Direct authoring/review
+requests use the supporting skill without inventing another lifecycle.
 
 ## Evidence and acceptance
 

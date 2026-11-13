@@ -19,9 +19,6 @@ LIFECYCLE_SKILLS = (
     "speckit-plan",
     "speckit-tasks",
     "speckit-converge",
-    "documentation-planning",
-    "documentation-authoring",
-    "documentation-review",
 )
 
 ENTRY_CONTROLLERS = frozenset(
@@ -128,18 +125,11 @@ class LifecycleContractTests(unittest.TestCase):
         self.assertEqual(
             {
                 ("speckit-converge", "orchestrated-implementation"),
-                ("documentation-review", "documentation-authoring"),
             },
             {(edge["from"], edge["to"]) for edge in retry},
         )
         convergence = next(edge for edge in retry if edge["from"] == "speckit-converge")
         self.assertEqual("actionable findings appended as new slices", convergence["condition"])
-        documentation = next(edge for edge in retry if edge["from"] == "documentation-review")
-        self.assertEqual("actionable findings returned for affected chunks", documentation["condition"])
-        self.assertTrue(documentation["preserves"])
-        review = next(edge for edge in graph["edges"] if edge["from"] == "documentation-review")
-        self.assertEqual("verification-before-completion", review["to"])
-        self.assertIn("no open Critical or Important findings", review.get("completion_guard", ""))
         execution = next(edge for edge in graph["edges"] if edge["from"] == "orchestrated-implementation")
         self.assertEqual("architecture-modeling:as-built", execution.get("required_gate"))
         completion = next(edge for edge in graph["edges"] if edge["from"] == "speckit-converge")
@@ -165,7 +155,6 @@ class LifecycleContractTests(unittest.TestCase):
                 "bugfix": "test-driven-development",
                 "openspec": "openspec-apply",
                 "speckit": "orchestrated-implementation",
-                "documentation": "documentation-authoring",
             },
             executors,
         )
@@ -270,10 +259,6 @@ class LifecycleContractTests(unittest.TestCase):
                 "received-review",
                 "independent-failures",
                 "completion-without-evidence",
-                "standalone-document",
-                "documentation-set",
-                "existing-documentation-plan",
-                "documentation-pdf",
                 "playbook-system-requirement",
                 "playbook-development-operation",
                 "playbook-authoring",
@@ -338,26 +323,6 @@ class LifecycleContractTests(unittest.TestCase):
                 ["project-backlog", "verification-before-completion"],
                 ["speckit-specify", "openspec-propose", "systematic-debugging", *DOCUMENTATION_ENTRIES],
             ),
-            "standalone-document": (
-                "documentation-authoring",
-                ["project-backlog", "writing-procedures", "human-prose-drafting", "terminology-guard", "verification-before-completion"],
-                ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
-            ),
-            "documentation-set": (
-                "documentation-planning",
-                ["project-backlog", "terminology-guard", "visual-placeholders", "verification-before-completion"],
-                ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-authoring"],
-            ),
-            "existing-documentation-plan": (
-                "documentation-authoring",
-                ["project-backlog", "explaining-concepts", "writing-procedures", "empathic-troubleshooting", "human-prose-drafting", "terminology-guard", "visual-placeholders"],
-                ["native-focused-edit", "systematic-debugging", "openspec-propose", "speckit-specify", "documentation-planning"],
-            ),
-            "documentation-pdf": (
-                "documentation-pdf",
-                ["verification-before-completion"],
-                ["native-focused-edit", "documentation-authoring", "documentation-planning", "systematic-debugging", "speckit-specify", "openspec-propose"],
-            ),
         }
         expected.update(
             {'playbook-system-requirement': ('speckit-specify',
@@ -409,6 +374,7 @@ class LifecycleContractTests(unittest.TestCase):
             case["id"]: (case["primary"], case["supporting"], case["prohibited"])
             for case in matrix
         }
+        expected = {key:value for key,value in expected.items() if not value[0].startswith("documentation-")}
         self.assertEqual(expected, actual)
 
         graph = fenced_json("shared/policies/lifecycle-handoffs.md")
@@ -416,7 +382,7 @@ class LifecycleContractTests(unittest.TestCase):
         known.update(path.parent.name for path in (ROOT / "skills").glob("*/SKILL.md"))
         for case in matrix:
             with self.subTest(case=case["id"]):
-                roles = [case["primary"], *case["supporting"], *case["prohibited"]]
+                roles = [case["primary"], *case["supporting"]]
                 self.assertEqual([], sorted(set(roles) - known))
                 self.assertNotIn(case["primary"], case["supporting"])
                 self.assertNotIn(case["primary"], case["prohibited"])
@@ -499,6 +465,8 @@ class LifecycleContractTests(unittest.TestCase):
             "skills/empathic-troubleshooting/SKILL.md": {"../../shared/writing/curse-of-knowledge-filter.md"},
         }
         for relative, required in expected.items():
+            if not (ROOT / relative).exists():
+                continue  # Companion-owned links are checked in writing-method.
             with self.subTest(skill=relative):
                 links = markdown_links(read(relative))
                 self.assertEqual(required, required & links)
@@ -1322,6 +1290,7 @@ class ProvenanceContractTests(unittest.TestCase):
     def test_locked_destination_hashes_and_source_metadata_are_complete(self) -> None:
         """Changing an adapted file without its lock metadata must fail provenance."""
         lock = json.loads(read("third-party/sources.lock.json"))
+        lock["sources"] += json.loads(read("third-party/core-sources.lock.json"))["sources"]
         destinations: set[str] = set()
         for source in lock["sources"]:
             for mapping in source["files"]:
@@ -1340,6 +1309,7 @@ class ProvenanceContractTests(unittest.TestCase):
     def test_delta_spec_uses_real_pinned_template_and_escalation_is_original(self) -> None:
         """Original escalation text must not be misattributed as an upstream adaptation."""
         lock = json.loads(read("third-party/sources.lock.json"))
+        lock["sources"] += json.loads(read("third-party/core-sources.lock.json"))["sources"]
         mappings = {
             mapping["destination_path"]: (source["id"], mapping)
             for source in lock["sources"]
@@ -1363,6 +1333,7 @@ class ProvenanceContractTests(unittest.TestCase):
         """The approved source list must cover every newly selected OpenSpec input."""
         plan = read("docs/plans/EM-003-curated-workflow-skills.md")
         lock = json.loads(read("third-party/sources.lock.json"))
+        lock["sources"] += json.loads(read("third-party/core-sources.lock.json"))["sources"]
         delta_mapping = next(
             mapping
             for source in lock["sources"]

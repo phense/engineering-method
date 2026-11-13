@@ -10,6 +10,16 @@ since 0.1.1. Its native discovery and bounded DeepSeek test were checked with
 OpenCode 1.18.30; see the [0.1.1 release scope](releases/0.1.1.md) and the
 [0.2.1 release notes](releases/0.2.1.md).
 
+## Split source candidate
+
+The EM-018 branch describes engineering-method 0.3.0, with writing-method 0.1.0
+as a separate optional plugin and shared support bundled from method-core.
+Tagged release commands below continue to refer to the previous stable 0.2.1
+until a new release is published. To inspect the split, clone/check out
+`em-018-method-split` and register that retained checkout using the local
+marketplace commands in the README. Existing project-state data remains usable.
+
+
 ## Install from GitHub
 
 The marketplace and plugin both use the name `engineering-method`.
@@ -136,3 +146,5 @@ host configuration can test installation without copying credentials. Loading
 a plugin is distinct from authenticated model execution. See the
 [Codex](../shared/platform/codex.md) and [Claude](../shared/platform/claude.md)
 adapters for capability and authentication boundaries.
+
+For an interrupted Core update, fix the reported write error and run `python3 scripts/sync-core --recover` before retrying. Durable backups remain until restoration succeeds. Sync and recovery use the same operating-system lock; leave `.method-core-sync.lock` in place during use.

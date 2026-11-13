@@ -1,6 +1,6 @@
 # Codex adapter
 
-Original Engineering Method host mapping. Shared skills keep semantic names;
+Shared Method Core host mapping. Shared skills keep semantic names;
 resolve those names against this adapter when executing in Codex. Both host
 manifests expose the same plugin-root `skills/` tree.
 
@@ -81,10 +81,13 @@ Verified locally with `codex exec --help`, `codex plugin marketplace add
 The following are command shapes, not claims of successful live evaluation.
 Variables denote absolute paths supplied by the caller.
 
+Set `method_name` to the installed consumer identity from
+`.codex-plugin/plugin.json` (`engineering-method` or `writing-method`).
+
 ```sh
 env CODEX_HOME="$em_codex_home" codex plugin marketplace add "$em_package" --json
-env CODEX_HOME="$em_codex_home" codex plugin add engineering-method@engineering-method --json
-env CODEX_HOME="$em_codex_home" codex plugin list --marketplace engineering-method --json
+env CODEX_HOME="$em_codex_home" codex plugin add "${method_name}@${method_name}" --json
+env CODEX_HOME="$em_codex_home" codex plugin list --marketplace "$method_name" --json
 env CODEX_HOME="$em_codex_home" codex exec -C "$em_fixture" --ephemeral --json --sandbox workspace-write -m gpt-6-astra -c 'model_reasoning_effort="medium"' -o "$em_output/final.txt" -
 ```
 
@@ -104,13 +107,12 @@ test. Never copy, read, or symlink credentials for isolation, and never mutate
 global plugin settings. A fully isolated live home needs human-controlled
 login. Preserve account authentication and never fall back to an API key.
 
-## Reader-oriented output
+## Method integration
 
-Explanations, instructions and troubleshooting help written for the user or
-for another reader follow the shared [reader-oriented output
-policy](../policies/reader-oriented-output.md) and its skills
-`explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`.
-Documentation work decides its scale with the [writing-depth
-policy](../policies/writing-depth.md) before selecting a writing lifecycle.
-The policy shapes wording and order only; verification and evidence rules are
-unchanged.
+Both consuming methods bundle this same adapter and shared support. The invoking
+method owns lifecycle selection and its method-specific policies. Read the
+consumer's `shared/policies/lifecycle-selection.md` when present. For shared
+support choose the invoking plugin's namespace; do not run duplicate copies or
+start another method merely because it is installed. Core support does not
+require either method's optional skills. Gemini-specific behavior is deferred
+until a separate adapter has been verified.

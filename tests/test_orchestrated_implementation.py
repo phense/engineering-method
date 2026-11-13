@@ -291,9 +291,11 @@ class OrchestrationProvenanceTests(unittest.TestCase):
     def test_all_pinned_superpowers_inputs_have_adapted_destination_mappings(self) -> None:
         """An adapted orchestration mechanism without its source mapping is unauditable."""
         lock = json.loads(read("third-party/sources.lock.json"))
-        source = next(item for item in lock["sources"] if item["id"] == "superpowers")
+        core_lock = json.loads(read("third-party/core-sources.lock.json"))
+        sources = [item for item in lock["sources"] + core_lock["sources"] if item["id"] == "superpowers"]
         mappings = [
-            mapping for mapping in source["files"] if mapping["modification_status"] == "adapted"
+            mapping for source in sources for mapping in source["files"]
+            if mapping["modification_status"] == "adapted"
         ]
         expected_sources = {
             "skills/subagent-driven-development/SKILL.md",
@@ -321,7 +323,7 @@ class OrchestrationProvenanceTests(unittest.TestCase):
             expected_destinations,
             expected_destinations & {item["destination_path"] for item in mappings},
         )
-        notices = read("THIRD_PARTY_NOTICES.md")
+        notices = read("THIRD_PARTY_NOTICES.md") + read("CORE_NOTICES.md")
         for destination in expected_destinations:
             self.assertIn(f"`{destination}`", notices)
 

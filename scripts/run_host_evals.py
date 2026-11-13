@@ -28,12 +28,16 @@ def private_transcript(path, text):
         stream.write(text)
     os.chmod(path, 0o600)
 
-def normalize_skill(name):
-    if isinstance(name, str) and name.startswith("engineering-method:"):
-        return name[len("engineering-method:"):]
+def normalize_skill(name, plugin=ROOT):
+    manifest = plugin / ".codex-plugin/plugin.json"
+    identity = json.loads(manifest.read_text())["name"] if manifest.is_file() else "engineering-method"
+    prefix = identity + ":"
+    if isinstance(name, str) and name.startswith(prefix):
+        return name[len(prefix):]
     if isinstance(name, str) and ":" in name:
         raise EvalFailure("unexpected_skill_namespace")
     return name
+
 
 def model_policy(host, plugin=ROOT):
     text = (plugin / f"shared/platform/{host}.md").read_text()
@@ -454,7 +458,7 @@ def _parse_transcript(host, text, plugin=ROOT):
                     if name == "Read" and block.get("content"):
                         skills.update(SKILL_PATH.findall(arguments.get("file_path", "")))
                     if name == "Skill" and block.get("content"):
-                        selected_skill = normalize_skill(arguments.get("skill", ""))
+                        selected_skill = normalize_skill(arguments.get("skill", ""), plugin)
                         skills.add(selected_skill)
                         invoked.add(selected_skill)
                     if name == "Bash" and block.get("content"):
@@ -475,9 +479,9 @@ def _parse_transcript(host, text, plugin=ROOT):
             raise ValueError("decision must be object")
     except (ValueError, TypeError) as exc:
         raise EvalFailure("malformed_decision") from exc
-    decision["primary"] = normalize_skill(decision.get("primary"))
+    decision["primary"] = normalize_skill(decision.get("primary"), plugin)
     if isinstance(decision.get("supporting"), list):
-        decision["supporting"] = [normalize_skill(name) for name in decision["supporting"]]
+        decision["supporting"] = [normalize_skill(name, plugin) for name in decision["supporting"]]
     return {"decision": decision, "skills": sorted(skills), "invoked_skills": sorted(invoked), "tools": tools, "reviewers": reviewers, "event_count": len(events)}
 
 def check_routing(transcript, expected, repo):
@@ -589,7 +593,7 @@ def host_command(host, repo, plugin, config, model, auth_home=None, prompt="", b
 
 SKILL_DISCOVERY_INSTRUCTION = """
 The shared skill files are linked directly at
-.agents/skills/<skill-name>/SKILL.md in this repository. The engineering-method:
+.agents/skills/<skill-name>/SKILL.md in this repository. The method-qualified
 invocation namespace is not an extra filesystem directory. Discover actual paths
 with `rg --files --hidden --follow .agents/skills -g SKILL.md`, then read the
 selected files. Ordinary searches without symlink following may miss these files;
@@ -605,7 +609,7 @@ before declaring a bundled resource unavailable.
 """
 
 ROUTING_INSTRUCTION = SKILL_DISCOVERY_INSTRUCTION + """
-Assess the request and current repository using the available engineering-method
+Assess the request and current repository using the available method
 skills. Perform the first safe assessment step only; do not implement the entire
 feature or launch subagents in this routing evaluation. Open the selected skill
 instructions through tools before applying them. The assessment includes that
@@ -687,8 +691,8 @@ def main(argv=None):
         parser.error("output must not overwrite fixture or plugin sources")
     output.mkdir(parents=True, exist_ok=True)
     os.chmod(output, 0o700)
-    expected = json.loads((ROOT / f"evals/{args.host}/expected.json").read_text())
-    cases = [json.loads(path.read_text()) for path in sorted((ROOT / "evals/shared/triggers").glob("*.json"))]
+    expected = json.loads((args.plugin_root / f"evals/{args.host}/expected.json").read_text())
+    cases = [json.loads(path.read_text()) for path in sorted((args.plugin_root / "evals/shared/triggers").glob("*.json"))]
     if args.case:
         cases = [case for case in cases if case["id"] == args.case]
     if not cases:
@@ -706,7 +710,7 @@ def main(argv=None):
         print(json.dumps(result), flush=True)
         if result["status"] != "passed":
             break
-    commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True)
+    commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=args.plugin_root, capture_output=True, text=True)
     summary = {"status": "passed" if len(results) == len(cases) and all(r["status"] == "passed" for r in results) else "failed",
                "host": args.host, "native_auth": args.native_auth, "source_commit": commit.stdout.strip(),
                "source_sha256": fingerprint(args.plugin_root), "completed_at": datetime.now(timezone.utc).isoformat(),

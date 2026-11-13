@@ -1,45 +1,28 @@
 # Third-Party Notices
 
-This plugin adapts only the files listed below from the pinned upstream revisions. Each
-`LICENSE -> THIRD_PARTY_NOTICES.md` mapping is `notice-only`; adapted mappings
-record both immutable source and current destination SHA-256 hashes in
-`third-party/sources.lock.json`.
+This plugin adapts only the files listed below; shared mappings are recorded in Core notices.
 
 ## Original implementation
 
-Copyright (c) 2026 Peter Hense. MIT licensed under the repository `LICENSE`.
-The Python project-state implementation, architecture-modeling and project-backlog
-skills, UML templates, host adapters, evaluation and packaging tooling, and tests
-are original. Shared orchestration policy is original except for the specific
-adapted role, report, recovery and helper mechanics mapped below. The source lock
-explicitly identifies original paths separately from adapted destinations.
+Copyright (c) 2026 Peter Hense. Original code is MIT licensed. Shared adapted files and their licenses are separately recorded in [Core notices](CORE_NOTICES.md) and `third-party/core-sources.lock.json`.
 
-Modifications replace upstream runtime dependencies with shared artifact
-contracts, exclusive lifecycle boundaries, risk-proportionate depth and tested
-continuity. EM-004 additionally hardens output containment, cohesive task handoffs
-and architecture evidence. No upstream CLI or full methodology is redistributed.
-
-EM-010 adds original documentation and reader-oriented writing skills, the
-writing-depth and reader-oriented-output policies, the shared curse-of-knowledge
-filter and the documentation templates. They were written from public style
-guides and framework descriptions cited in
-`docs/verification/EM-010-documentation-skills.md`; no third-party text was
-copied and no upstream mapping applies.
+`templates/openspec/escalation.md`: original when distributed.
 
 ## Spec Kit
 
-- Repository: https://github.com/github/spec-kit.git
-- Revision: `df6b3187022ce986759bd854467e8a4bb56bb0f4`
-- License: MIT (`LICENSE`)
-- License SHA-256: `2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7`
-- Copyright holder: GitHub, Inc.
-- `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+Source ID: `github-spec-kit`
 
-Adapted in EM-003:
+Repository: https://github.com/github/spec-kit.git
 
-Task 6 and its integration review further adapt the four
-`skills/speckit-*/SKILL.md` destinations below to add host-observed recovery and
-ordered project-state event/checkpoint handoffs.
+Revision: `df6b3187022ce986759bd854467e8a4bb56bb0f4`
+
+License SHA-256: `2510b446bc1f0cf9702453075d20cd88631e20e5642658edb7325d9c1eb534f7`
+
+`LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Copyright GitHub, Inc.
+
+Adapted specification, planning, task and convergence artifacts with exclusive lifecycles, host-neutral recovery, cohesive slices and append-only fix handoffs.
 
 - `templates/spec-template.md` -> `templates/spec-kit/spec.md`: adapted
 - `templates/plan-template.md` -> `templates/spec-kit/plan.md`: adapted
@@ -73,18 +56,19 @@ SOFTWARE.
 
 ## OpenSpec
 
-- Repository: https://github.com/Fission-AI/OpenSpec.git
-- Revision: `e062b9572be933564ba3899d059377dfa1393e32`
-- License: MIT (`LICENSE`)
-- License SHA-256: `c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64`
-- Copyright holder: 2024 OpenSpec Contributors
-- `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+Source ID: `openspec`
 
-Adapted in EM-003:
+Repository: https://github.com/Fission-AI/OpenSpec.git
 
-Task 6 and its integration review further adapt the three
-`skills/openspec-*/SKILL.md` destinations below to add host-observed recovery and
-ordered project-state event/checkpoint handoffs.
+Revision: `e062b9572be933564ba3899d059377dfa1393e32`
+
+License SHA-256: `c3c7235bea1214ab62df643473975c2e8b8848f528901a976693f7d069713e64`
+
+`LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Copyright (c) 2024 OpenSpec Contributors
+
+Adapted bounded-change proposal, delta specification, application and archival artifacts without upstream CLI dependencies; added explicit escalation and continuity.
 
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/proposal.md`: adapted
 - `skills/openspec-propose/SKILL.md` -> `templates/openspec/design.md`: adapted
@@ -93,10 +77,6 @@ ordered project-state event/checkpoint handoffs.
 - `skills/openspec-propose/SKILL.md` -> `skills/openspec-propose/SKILL.md`: adapted
 - `skills/openspec-apply-change/SKILL.md` -> `skills/openspec-apply/SKILL.md`: adapted
 - `skills/openspec-archive-change/SKILL.md` -> `skills/openspec-archive/SKILL.md`: adapted
-
-Original in EM-003:
-
-- `templates/openspec/escalation.md`: original; no upstream text was adapted
 
 MIT License
 
@@ -122,41 +102,28 @@ SOFTWARE.
 
 ## Superpowers
 
-- Repository: https://github.com/obra/superpowers.git
-- Revision: `b36e0829c6d0140e93cfef2ca599b1b07d4a7797`
-- License: MIT (`LICENSE`)
-- License SHA-256: `a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400`
-- Copyright holder: 2025 Jesse Vincent
-- `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+Source ID: `superpowers`
 
-Adapted in EM-003:
+Repository: https://github.com/obra/superpowers.git
 
-Task 6 and its integration review further adapt
-`skills/systematic-debugging/SKILL.md` to add host-observed recovery and ordered
-project-state event/checkpoint handoffs.
+Revision: `b36e0829c6d0140e93cfef2ca599b1b07d4a7797`
+
+License SHA-256: `a37e0e9697144819e1d965176ac4ae5bc3fa02d11e7812036bbcadf6dafe2400`
+
+`LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
+
+Copyright (c) 2025 Jesse Vincent
+
+Curated quality practices and adapted report, brief, review and recovery mechanics for cohesive slices, proportional review and protected project-state storage.
 
 - `skills/systematic-debugging/SKILL.md` -> `skills/systematic-debugging/SKILL.md`: adapted
 - `skills/test-driven-development/SKILL.md` -> `skills/test-driven-development/SKILL.md`: adapted
 - `skills/test-driven-development/writing-good-tests.md` -> `skills/test-driven-development/writing-good-tests.md`: adapted
-- `skills/verification-before-completion/SKILL.md` -> `skills/verification-before-completion/SKILL.md`: adapted
-- `skills/requesting-code-review/SKILL.md` -> `skills/requesting-code-review/SKILL.md`: adapted
-- `skills/requesting-code-review/code-reviewer.md` -> `skills/requesting-code-review/code-reviewer.md`: adapted
-- `skills/receiving-code-review/SKILL.md` -> `skills/receiving-code-review/SKILL.md`: adapted
-- `skills/using-git-worktrees/SKILL.md` -> `skills/using-git-worktrees/SKILL.md`: adapted
-- `skills/dispatching-parallel-agents/SKILL.md` -> `skills/dispatching-parallel-agents/SKILL.md`: adapted
-
-Adapted in EM-004 from the pinned subagent-driven-development sources:
-
-- `skills/subagent-driven-development/SKILL.md` -> `skills/orchestrated-implementation/SKILL.md`: adapted for cohesive slices, risk-proportionate review, and the EM-002 continuity seam
-- `skills/subagent-driven-development/implementer-prompt.md` -> `shared/agent-roles/implementer.md`: adapted into a host-neutral role contract
-- `skills/subagent-driven-development/implementer-prompt.md` -> `templates/orchestration/agent-report.md`: adapted into a durable report schema
-- `skills/subagent-driven-development/implementer-prompt.md` -> `templates/orchestration/slice-brief.md`: adapted into a cohesive-slice brief
-- `skills/subagent-driven-development/task-reviewer-prompt.md` -> `shared/agent-roles/reviewer.md`: adapted into a risk-proportionate reviewer role
-- `skills/subagent-driven-development/re-review-prompt.md` -> `templates/orchestration/review-report.md`: adapted into a scoped review/fix report
-- `skills/subagent-driven-development/scripts/task-brief` -> `scripts/task-brief`: adapted for Spec Kit slices and work-ID run paths
-- `skills/subagent-driven-development/scripts/review-package` -> `scripts/review-package`: adapted for complete commit ranges and work-ID run paths
-- `skills/subagent-driven-development/scripts/sdd-workspace` -> `shared/policies/continuity-contract.md`: adapted to consume the EM-002 run contract
-- `skills/subagent-driven-development/scripts/sdd-workspace` -> `templates/orchestration/resume.md`: adapted into a compaction-safe recovery brief
+- `skills/subagent-driven-development/SKILL.md` -> `skills/orchestrated-implementation/SKILL.md`: adapted
+- `skills/subagent-driven-development/implementer-prompt.md` -> `shared/agent-roles/implementer.md`: adapted
+- `skills/subagent-driven-development/implementer-prompt.md` -> `templates/orchestration/slice-brief.md`: adapted
+- `skills/subagent-driven-development/scripts/task-brief` -> `scripts/task-brief`: adapted
+- `skills/subagent-driven-development/scripts/review-package` -> `scripts/review-package`: adapted
 
 MIT License
 
@@ -179,108 +146,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
-## Humanizer
-
-- Repository: https://github.com/blader/humanizer.git
-- Revision: `9862685f575c65a8247f90369951df1b3416e3d6`
-- License: MIT (`LICENSE`)
-- License SHA-256: `4ac4810254ab36d45419141aeb8e69bf50652cfafe5b2dab947d06d44e5cbf96`
-- Copyright holder: 2025 Siqi Chen
-- `LICENSE -> THIRD_PARTY_NOTICES.md: notice-only`
-
-Adapted in EM-011:
-
-- `SKILL.md` -> `skills/human-prose-drafting/SKILL.md`: adapted
-
-The upstream skill rewrites finished AI-sounding text in a separate pass. The
-adaptation turns its 25 patterns into constraints applied while drafting
-medium and large documentation, condenses them into groups by strength,
-removes the pasted-text, file and voice-matching modes, and adds a per-chunk
-check and documentation voice rules. Upstream credits Wikipedia's "Signs of AI
-writing" (WikiProject AI Cleanup) as the pattern source.
-
-MIT License
-
-Copyright (c) 2025 Siqi Chen
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
-## medzin/sre-runbook-agent-skills
-
-Source: https://github.com/medzin/sre-runbook-agent-skills.git
-
-License: MIT (`LICENSE`); SHA-256: `f114aa5869612318e5c35fb10175e322e1feec5039bddf321a1822edf2737cf6`.
-
-Pinned revision: `44ab3d87293788036013098868563f82a3369b81`. Selected authoring, review and validation mechanics
-are adapted for the Engineering Method playbook support; see the source lock
-for file mappings and modification details.
-
-- `LICENSE` -> `THIRD_PARTY_NOTICES.md`: notice-only
-- `skills/sre-runbook-author/SKILL.md` -> `skills/playbook-authoring/SKILL.md`: adapted
-- `skills/sre-runbook-author/references/runbook-template.md` -> `templates/playbooks/playbook.md`: adapted
-- `skills/sre-runbook-reviewer/SKILL.md` -> `skills/playbook-review/SKILL.md`: adapted
-- `skills/sre-runbook-reviewer/references/review-scorecard.md` -> `templates/playbooks/review.md`: adapted
-
-```text
-MIT License
-
-Copyright (c) 2026 Adam Medziński
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-```
-
-## testdouble/han
-
-Source: https://github.com/testdouble/han.git
-
-License: MIT (`LICENSE`); SHA-256: `9940ab927f654e997d00aedc6a8734be0600f9443377697419ee7ed4247f2d36`.
-
-Pinned revision: `19cb21bcb1154d29bf20d1f3c9ad4854a59580d2`. Selected authoring, review and validation mechanics
-are adapted for the Engineering Method playbook support; see the source lock
-for file mappings and modification details.
-
-- `LICENSE` -> `THIRD_PARTY_NOTICES.md`: notice-only
-- `han-documentation/skills/runbook/SKILL.md` -> `shared/policies/playbooks.md`: adapted
-
-```text
-Copyright 2026 Test Double, Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-```

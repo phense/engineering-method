@@ -1,0 +1,138 @@
+#!/usr/bin/env python3
+"""Verify immutable archives through isolated use, interruption and recovery."""
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import zipfile
+
+
+def run(command, cwd, *, expected=0):
+    result = subprocess.run([str(x) for x in command], cwd=cwd, capture_output=True, text=True, timeout=60)
+    if result.returncode != expected:
+        raise RuntimeError(f'{command[0]} exited {result.returncode}, expected {expected}: {result.stdout}{result.stderr}')
+    return result.stdout.strip()
+
+
+def extract(archive, parent):
+    with zipfile.ZipFile(archive) as z:
+        names = {Path(x.filename).parts[0] for x in z.infolist()}
+        if len(names) != 1: raise ValueError('archive must have one root')
+        for member in z.infolist():
+            path = Path(member.filename)
+            if path.is_absolute() or '..' in path.parts or member.external_attr >> 16 & 0o170000 == 0o120000:
+                raise ValueError('unsafe archive member')
+        z.extractall(parent)
+        for member in z.infolist():
+            if not member.is_dir(): (parent / member.filename).chmod(member.external_attr >> 16 & 0o777)
+    return parent / names.pop()
+
+
+def initialize_git(root):
+    run(['git', 'init', '-q', '-b', 'main'], root)
+    run(['git', 'config', 'user.name', 'Integration Test'], root)
+    run(['git', 'config', 'user.email', 'integration@example.invalid'], root)
+
+
+def commit(root):
+    run(['git', 'add', '.'], root)
+    run(['git', 'commit', '-qm', 'integration fixture'], root)
+    return run(['git', 'rev-parse', 'HEAD'], root)
+
+
+def snapshot(root):
+    return {p.relative_to(root).as_posix(): (hashlib.sha256(p.read_bytes()).hexdigest(), p.stat().st_mode & 0o777)
+            for p in root.rglob('*') if p.is_file() and not {'.git', '__pycache__'}.intersection(p.relative_to(root).parts)}
+
+
+CRASH = '''
+import importlib.util, os, sys
+from pathlib import Path
+spec=importlib.util.spec_from_file_location('sync_crash',sys.argv[1])
+m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+replace=m.os.replace
+def crash(src,dst):
+    replace(src,dst)
+    if Path(dst).as_posix().endswith('shared/platform/claude.md'): os._exit(23)
+m.os.replace=crash
+m.synchronize(Path(sys.argv[2]),Path(sys.argv[3]))
+'''
+
+
+def verify(core_zip, engineering_zip, writing_zip):
+    with tempfile.TemporaryDirectory(prefix='method-split-e2e-') as temporary:
+        base = Path(temporary)
+        core = extract(core_zip, base / 'source')
+        initialize_git(core)
+        first = commit(core)
+        methods = [extract(engineering_zip, base / 'isolated-a'), extract(writing_zip, base / 'isolated-b')]
+        reports = []
+        for index, method in enumerate(methods):
+            target = base / f'project-{index}'; target.mkdir(); initialize_git(target)
+            sync = [sys.executable, method / 'scripts/sync-core', '--target-root', method]
+            state = [sys.executable, method / 'scripts/project-state']
+            run(sync + ['--source-root', core], target)
+            run(sync + ['--check'], target)
+            run([sys.executable, method / 'scripts/validate-plugin'], target)
+            plugin_before = snapshot(method)
+            run(state + ['backlog', 'init'], target)
+            run(state + ['backlog', 'add', '--id', 'TEST-001', '--title', 'Retain target state', '--priority', 'P1'], target)
+            run(state + ['backlog', 'start', '--id', 'TEST-001'], target)
+            (target / '.gitignore').write_text('.engineering-method/\n')
+            head = commit(target)
+            # Construct the input with the actual extracted runtime's schema.
+            payload = run([sys.executable, '-c',
+                'import sys,json;from dataclasses import asdict;sys.path.insert(0,sys.argv[1]);'
+                'from engineering_method.continuity import RunState;'
+                'print(json.dumps(asdict(RunState(work_id="TEST-001",backlog_id="TEST-001",'
+                'lifecycle="integration",phase="verification",next_action="Continue retained work",'
+                'base_commit=sys.argv[2],last_observed_head=sys.argv[2],coordination_mode="coordinator-only"))))',
+                method, head], target)
+            (target / 'state-input.json').write_text(payload)
+            (target / 'resume-input.md').write_text('Continue TEST-001 in this target project.\n')
+            run(state + ['continuity-state', 'init', 'TEST-001', '--file', 'state-input.json', '--resume-file', 'resume-input.md'], target)
+            run(state + ['continuity-state', 'recover', 'TEST-001', '--coordinator-only'], target)
+            retained = snapshot(target)
+            if plugin_before != snapshot(method): raise AssertionError('project state leaked into the plugin')
+            reports.append({'method': method.name, 'work_id': 'TEST-001', 'target_files': len(retained)})
+        # Change two real exported adapters, then interrupt after the first changed one.
+        for name in ('shared/platform/claude.md', 'shared/platform/codex.md'):
+            path = core / name; path.write_bytes(path.read_bytes() + b'\nIntegration revision marker.\n')
+        second = commit(core)
+        for method in methods:
+            target = base / f'project-{methods.index(method)}'
+            retained = snapshot(target)
+            before = snapshot(method)
+            run([sys.executable, '-c', CRASH, method / 'scripts/method_core.py', core, method], target, expected=23)
+            sync = [sys.executable, method / 'scripts/sync-core', '--target-root', method]
+            run(sync + ['--check'], target, expected=1)
+            run(sync + ['--recover'], target)
+            if before != snapshot(method): raise AssertionError('recovery changed the previous plugin snapshot')
+            run(sync + ['--check'], target)
+            run(sync + ['--source-root', core], target)
+            run(sync + ['--check'], target)
+            run([sys.executable, method / 'scripts/project-state', 'continuity-state', 'recover', 'TEST-001', '--coordinator-only'], target)
+            if retained != snapshot(target): raise AssertionError('Core update changed target project state')
+        locks = [json.loads((method / 'method-core.lock.json').read_text()) for method in methods]
+        if locks[0] != locks[1] or locks[0]['revision'] != second: raise AssertionError('consumer Core locks differ')
+        return {'status': 'passed', 'methods': reports, 'core_exports': len(locks[0]['files']),
+                'isolated_archive_runtime': True, 'abrupt_exit': 23, 'recovered_original_bytes_and_modes': True,
+                'target_state_preserved': True, 'archive_sha256': {p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in (core_zip, engineering_zip, writing_zip)}, 'core_fixture_revisions': [first, second], 'live_model_requests': False}
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ('core', 'engineering', 'writing'): parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    result = verify(args.core.resolve(), args.engineering.resolve(), args.writing.resolve())
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(result, indent=2) + '\n')
+    print(json.dumps(result))
+
+
+if __name__ == '__main__': main()

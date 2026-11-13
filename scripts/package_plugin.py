@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import re
 from pathlib import Path, PurePosixPath
 import subprocess
 import tempfile
@@ -34,9 +35,19 @@ def included(name: str) -> bool:
 
 def build_package(root: Path, output: Path, *, commit: str | None = None) -> dict:
     commit = commit or source_commit(root)
+    tree = git(root, "ls-tree", "--name-only", commit).decode().splitlines()
+    if ".codex-plugin" in tree:
+        name = json.loads(git(root, "show", commit + ":.codex-plugin/plugin.json"))["name"]
+    elif "method-core.json" in tree:
+        name = "method-core"
+    else:
+        name = "engineering-method"
+    if not isinstance(name, str) or not re.fullmatch(r"[a-z][a-z0-9-]*", name):
+        raise ValueError("invalid committed package identity")
     entries = git(root, "ls-tree", "-rz", "--full-tree", commit).split(b"\0")
     output.parent.mkdir(parents=True, exist_ok=True)
     count = 0
+    package_prefix = name + "/"
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_STORED) as archive:
         for entry in sorted(item for item in entries if item):
             metadata, raw_name = entry.split(b"\t", 1)
@@ -49,7 +60,7 @@ def build_package(root: Path, output: Path, *, commit: str | None = None) -> dic
             path = PurePosixPath(name)
             if path.is_absolute() or ".." in path.parts:
                 raise ValueError("unsafe Git package path")
-            info = zipfile.ZipInfo("engineering-method/" + name, date_time=(1980, 1, 1, 0, 0, 0))
+            info = zipfile.ZipInfo(package_prefix + name, date_time=(1980, 1, 1, 0, 0, 0))
             info.create_system = 3
             info.external_attr = int(mode, 8) << 16
             archive.writestr(info, git(root, "cat-file", "blob", object_id))

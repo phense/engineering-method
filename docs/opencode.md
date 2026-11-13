@@ -1,11 +1,10 @@
 # OpenCode integration
 
-Engineering Method exposes its shared skills through OpenCode's native skill
-tool. The recorded discovery evidence covers the 17 skills of version 0.1.1;
-version 0.2.0 adds twelve writing, PDF and playbook skills that load from the
-same directory, and 0.2.1 refines the PDF template. Earlier
-[native probes](verification/EM-013-prepublication.md) verify
-PDF selection and pre-draft authoring with Humanizer through the skill tool.
+The 0.3.0 source candidate bundles 19 engineering/shared skills. Writing Method
+bundles its own 18 writing/shared skills and a distinct `writing-method.js`
+loader. Both use the same adapter from Method Core. Earlier release evidence
+under `docs/verification/` describes the combined historical packages and is not
+fresh discovery evidence for this split.
 A local plugin config hook adds the skill directory and
 [OpenCode adapter](../shared/platform/opencode.md) to effective configuration.
 It leaves existing model, permissions, provider and MCP settings untouched.
