@@ -10,10 +10,11 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-**[Version 0.2.1](https://github.com/phense/engineering-method/releases/tag/v0.2.1)
-refines local PDF export with professional A4 typography, a dark-navy hierarchy
-and stronger rendered-output checks.** See the [release notes](docs/releases/0.2.1.md)
-and the broader [0.2.0 scope](docs/releases/0.2.0.md); [0.1.1](docs/releases/0.1.1.md)
+**[Version 0.3.0](https://github.com/phense/engineering-method/releases/tag/v0.3.0)
+separates writing into its own plugin and bundles shared support from a pinned
+Method Core.** See the [release notes](docs/releases/0.3.0.md). Earlier scopes:
+[0.2.1](docs/releases/0.2.1.md) refined local PDF export, [0.2.0](docs/releases/0.2.0.md)
+added documentation and playbook work, and [0.1.1](docs/releases/0.1.1.md)
 added native OpenCode integration. The historical 0.1.0 baseline has independently accepted
 [complete original gate coverage](docs/verification/EM-005-acceptance.md), with
 documented evidence reuse and corrections. Read the acceptance limits before
@@ -34,7 +35,7 @@ routing evaluation.
 
 ## Related methods and shared core
 
-This branch is the 0.3.0 source candidate. The previous stable release is 0.2.1; no 0.3.0 release tag is claimed.
+Version 0.3.0 is the current stable release; 0.2.1 was the last release that bundled the writing skills.
 
 Version 0.3.0 separates writing into [Writing Method](https://github.com/phense/writing-method). [Method Core](https://github.com/phense/method-core) owns the bundled host adapters, state/continuity tools, verification/review/isolation support and generic playbooks. Each repository keeps its own Issues and pull requests; the common topic is `agent-methods`.
 
@@ -49,7 +50,7 @@ Requires Python 3.11+, Git, and Codex CLI, Claude Code or OpenCode.
 OpenCode uses the separate source-linked installation described below.
 GitHub task synchronization additionally requires authenticated `gh` and repository
 permissions. No upstream Spec Kit, OpenSpec or Superpowers installation is needed.
-The 0.3.0 candidate's local package installation and coexistence were checked with Codex CLI 0.169.0 and
+Version 0.3.0's local package installation and coexistence were checked with Codex CLI 0.169.0 and
 Claude Code 2.1.323;
 other host versions and operating systems are not covered by that evidence.
 

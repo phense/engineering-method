@@ -8,16 +8,17 @@ installation success does not establish live model behavior on every host.
 For OpenCode, follow [the source-linked installation](opencode.md), available
 since 0.1.1. Its native discovery and bounded DeepSeek test were checked with
 OpenCode 1.18.30; see the [0.1.1 release scope](releases/0.1.1.md) and the
-[0.2.1 release notes](releases/0.2.1.md).
+[0.3.0 release notes](releases/0.3.0.md).
 
-## Split source candidate
+## Split into three repositories
 
-The EM-018 branch describes engineering-method 0.3.0, with writing-method 0.1.0
-as a separate optional plugin and shared support bundled from method-core.
-Tagged release commands below continue to refer to the previous stable 0.2.1
-until a new release is published. To inspect the split, clone/check out
-`em-018-method-split` and register that retained checkout using the local
-marketplace commands in the README. Existing project-state data remains usable.
+Since 0.3.0 this plugin contains the engineering lifecycles only. Documentation
+and writing skills live in the separate, optional
+[Writing Method](https://github.com/phense/writing-method) plugin; shared support
+is bundled from [Method Core](https://github.com/phense/method-core) and needs no
+installation of its own. After updating from 0.2.1 or older, install Writing
+Method if you use the documentation skills; they are then invoked as
+`writing-method:<skill>`. Existing project-state data remains usable.
 
 
 ## Install from GitHub
@@ -37,11 +38,11 @@ claude plugin install engineering-method@engineering-method
 claude plugin list --json
 ```
 
-For stable version 0.2.1 on either host, clone the release tag and register the
+For stable version 0.3.0 on either host, clone the release tag and register the
 absolute checkout path instead of the GitHub shorthand:
 
 ```sh
-git clone --branch v0.2.1 --depth 1 https://github.com/phense/engineering-method.git
+git clone --branch v0.3.0 --depth 1 https://github.com/phense/engineering-method.git
 cd engineering-method
 em_plugin="$(pwd)"
 codex plugin marketplace add "$em_plugin"
@@ -54,11 +55,11 @@ Choose one source per marketplace name. If switching an existing local
 marketplace to GitHub, uninstall this plugin and remove its marketplace using
 the commands below, then register the new source. Preserve your project files.
 
-Alternatively, download `engineering-method-0.2.1.zip` and
-`SHA256SUMS` from the [0.2.1 release](https://github.com/phense/engineering-method/releases/tag/v0.2.1).
+Alternatively, download `engineering-method-0.3.0.zip` and
+`SHA256SUMS` from the [0.3.0 release](https://github.com/phense/engineering-method/releases/tag/v0.3.0).
 In the download directory, run `shasum -a 256 -c SHA256SUMS`, extract the archive,
 and register the extracted `engineering-method` directory as above.
-The plugin manifests and stable Git tag identify version `0.2.1`. The older
+The plugin manifests and stable Git tag identify version `0.3.0`. The older
 `v0.1.0-rc.1` pre-release remains available for historical reference.
 
 Claude also supports a session-only load:

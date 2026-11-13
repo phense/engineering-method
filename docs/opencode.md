@@ -1,6 +1,6 @@
 # OpenCode integration
 
-The 0.3.0 source candidate bundles 19 engineering/shared skills. Writing Method
+Version 0.3.0 bundles 19 engineering/shared skills. Writing Method
 bundles its own 18 writing/shared skills and a distinct `writing-method.js`
 loader. Both use the same adapter from Method Core. Earlier release evidence
 under `docs/verification/` describes the combined historical packages and is not
@@ -16,7 +16,7 @@ macOS. Use version 0.1.1 or newer; the earlier v0.1.0 release predates this
 integration. Clone a retained checkout and install from it:
 
 ```sh
-git clone --branch v0.2.1 --depth 1 https://github.com/phense/engineering-method.git
+git clone --branch v0.3.0 --depth 1 https://github.com/phense/engineering-method.git
 cd engineering-method
 ```
 

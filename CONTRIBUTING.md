@@ -76,6 +76,8 @@ alone do not prevent sensitive Git history from being published.
 
 ## Release policy
 
+`v0.3.0` separates writing into Writing Method and bundles shared support from
+Method Core, with [split evidence](docs/verification/EM-018-method-split.md).
 `v0.2.1` refines the PDF template and rendered-output checks documented in
 [EM-016](docs/verification/EM-016-pdf-design.md). `v0.2.0` added documentation,
 PDF, playbook and state-check work with
