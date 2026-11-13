@@ -32,7 +32,7 @@ Preserve the baseline green runtime contracts. Verify a failing sync behavior te
 ### Slice S4: Convergence and handoff
 
 - [x] T009 Run speckit-converge, retain exact evidence and only then complete EM-018. Depends on T005,T008.
-- [ ] T010 Publish new source repositories and the engineering change branch for review; preserve existing installed profiles and original default branch until explicit integration. Depends on T009.
+- [x] T010 Publish new source repositories and the engineering change branch for review; preserve existing installed profiles and original default branch until explicit integration. Depends on T009.
 
 ## Dependencies
 
