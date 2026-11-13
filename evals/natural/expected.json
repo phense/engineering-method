@@ -1,0 +1,24 @@
+{
+  "failing-test": {
+    "any": [
+      "systematic-debugging"
+    ],
+    "prohibited": [
+      "speckit-specify",
+      "openspec-propose"
+    ]
+  },
+  "cross-module-feature": {
+    "any": [
+      "speckit-specify",
+      "openspec-propose"
+    ],
+    "prohibited": [
+      "systematic-debugging"
+    ]
+  },
+  "typo-fix": {
+    "any": [],
+    "prohibited": []
+  }
+}

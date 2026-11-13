@@ -1,0 +1,9 @@
+{
+  "id": "failing-test",
+  "prompt": "Der Test in test_cart.py schlägt fehl und ich verstehe nicht warum. Kannst du dir das ansehen?",
+  "files": {
+    "README.md": "# Cart\n\nSmall pricing library.\n",
+    "cart.py": "def total(items, discount=0):\n    subtotal = sum(i['price'] * i['qty'] for i in items)\n    return round(subtotal * (1 - discount / 10), 2)\n",
+    "test_cart.py": "from cart import total\n\ndef test_total_with_discount():\n    assert total([{'price': 10.0, 'qty': 2}], discount=10) == 18.0\n"
+  }
+}
