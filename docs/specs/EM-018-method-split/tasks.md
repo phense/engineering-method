@@ -41,3 +41,9 @@ T001 precedes T002/T003; these precede T004; T004 precedes T005/T006; T006 prece
 ## Playbook obligations
 
 Spec/plan assessed none for new operational procedures. Delivered generic playbook support is covered by T003/T004 and its independent content review and behavior-boundary checks.
+
+## Convergence 1: GitHub runner dependency
+
+### Slice S5: Reproducible GitHub verification
+
+- [ ] T011 [AC-008] Install the test's explicit `ripgrep` dependency in the Engineering GitHub workflow and require a fresh full GitHub run. The observed failure was `FileNotFoundError: rg` in `test_prompt_discovery_command_follows_actual_skill_links`; local source suites remained green. Own `.github/workflows/verify.yml` and verification evidence. Depends on T010. Mechanical CI-only correction; coordinator review suffices.
