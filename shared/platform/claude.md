@@ -1,6 +1,6 @@
 # Claude adapter
 
-Original Engineering Method host mapping. Shared skills keep semantic names;
+Shared Method Core host mapping. Shared skills keep semantic names;
 resolve them against this adapter in Claude Code. The conventional plugin-root
 `skills/` directory is the same tree exposed by the Codex manifest.
 
@@ -82,10 +82,13 @@ Verified with `claude --help`, `claude plugin validate --help`, `claude plugin
 marketplace add --help`, and `claude plugin install --help` at the stated
 version. Commands describe interfaces, not completed live validation.
 
+Set `method_name` to the installed consumer identity from
+`.codex-plugin/plugin.json` (`engineering-method` or `writing-method`).
+
 ```sh
 env CLAUDE_CONFIG_DIR="$em_claude_home" claude plugin validate "$em_package" --strict --json
 env CLAUDE_CONFIG_DIR="$em_claude_home" claude plugin marketplace add "$em_package"
-env CLAUDE_CONFIG_DIR="$em_claude_home" claude plugin install engineering-method@engineering-method
+env CLAUDE_CONFIG_DIR="$em_claude_home" claude plugin install "${method_name}@${method_name}"
 env CLAUDE_CONFIG_DIR="$em_claude_home" claude -p --plugin-dir "$em_package" --output-format stream-json --verbose --no-session-persistence --setting-sources "" --strict-mcp-config --permission-mode dontAsk --permission-prompts none --model fable --effort medium --max-budget-usd 1
 ```
 
@@ -118,13 +121,12 @@ Do not use `--safe-mode`: it disables plugins and skills. If using the separate
 otherwise be enabled by default. The custom stream driver above does not use
 that feature.
 
-## Reader-oriented output
+## Method integration
 
-Explanations, instructions and troubleshooting help written for the user or
-for another reader follow the shared [reader-oriented output
-policy](../policies/reader-oriented-output.md) and its skills
-`explaining-concepts`, `writing-procedures` and `empathic-troubleshooting`.
-Documentation work decides its scale with the [writing-depth
-policy](../policies/writing-depth.md) before selecting a writing lifecycle.
-The policy shapes wording and order only; verification and evidence rules are
-unchanged.
+Both consuming methods bundle this same adapter and shared support. The invoking
+method owns lifecycle selection and its method-specific policies. Read the
+consumer's `shared/policies/lifecycle-selection.md` when present. For shared
+support choose the invoking plugin's namespace; do not run duplicate copies or
+start another method merely because it is installed. Core support does not
+require either method's optional skills. Gemini-specific behavior is deferred
+until a separate adapter has been verified.

@@ -117,6 +117,9 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 - ✅ `EM-017` **P1** Publish the professional PDF template as patch release 0.2.1
   - Depends on: `EM-016`
   - Notes: Published stable Latest v0.2.1 from 49aa3c6; 319 tests, native PDF checks, validators, reproducible 256-file package and clean installs passed. Downloaded asset matches 2a0d0b6d520d509276c7d04d80b83a43a5aada78132d1ae48461c03fe3c21693.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-018","title":"Split shared core, engineering and writing methods into three repositories","status":"complete","priority":"P1","parent_id":null,"depends_on":[],"notes":"Split published: phense/method-core 255026b, phense/writing-method e9eab64; integration PR #135. Suites 159/335/163, isolated package recovery and native coexistence passed. Both fresh GitHub checks passed on bf0571f after the explicit ripgrep dependency fix. User authorized merge. Evidence: docs/verification/EM-018-method-split.md. Global profiles remain unchanged.","updated_at":"2026-11-13T10:48:02Z"} -->
+- ✅ `EM-018` **P1** Split shared core, engineering and writing methods into three repositories
+  - Notes: Split published: phense/method-core 255026b, phense/writing-method e9eab64; integration PR #135. Suites 159/335/163, isolated package recovery and native coexistence passed. Both fresh GitHub checks passed on bf0571f after the explicit ripgrep dependency fix. User authorized merge. Evidence: docs/verification/EM-018-method-split.md. Global profiles remain unchanged.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-005","title":"Validate, document, and package the complete plugin","status":"complete","priority":"P2","parent_id":null,"depends_on":["EM-001","EM-004"],"notes":"All nine original gate criteria accepted on 0784c79 with explicit same-package evidence reuse, Claude checkpoint supplement and independently verified ownership metadata correction. Failed reports preserved; see docs/verification/EM-005-acceptance.md. Accidental Issues #1-38 removed with approval; local backlog remains canonical.","updated_at":"2026-09-05T19:11:37Z"} -->
 - ✅ `EM-005` **P2** Validate, document, and package the complete plugin
   - Depends on: `EM-001`, `EM-004`
@@ -150,3 +153,6 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 - ✅ `EM-007` **P2** Publish stable version 0.1.0 and update public documentation
   - Depends on: `EM-005`
   - Notes: Published v0.1.0 at e9f5130 as stable Latest with checked ZIP and SHA256SUMS. 308 tests, validators, provenance, reproducible packaging, both clean installs, downloaded bytes and GitHub/main plus fixed-tag installs verified. Prior rc.1 unchanged; no issue migration.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-019","title":"Verify a Gemini host adapter in Method Core","status":"open","priority":"P3","parent_id":null,"depends_on":[],"notes":"Deferred from EM-018; shared adapter ownership is phense/method-core. No Gemini support claimed until fresh native discovery and behavior checks pass.","updated_at":"2026-11-13T10:39:43Z"} -->
+- ⭕ `EM-019` **P3** Verify a Gemini host adapter in Method Core
+  - Notes: Deferred from EM-018; shared adapter ownership is phense/method-core. No Gemini support claimed until fresh native discovery and behavior checks pass.

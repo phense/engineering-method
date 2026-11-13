@@ -217,9 +217,12 @@ class ValidatePluginTests(unittest.TestCase):
         lock = json.loads(lock_path.read_text(encoding="utf-8"))
 
         self.assertEqual(1, lock["schema_version"])
-        sources = lock["sources"]
-        self.assertEqual([source["id"] for source in PROVENANCE_SOURCES], [source["id"] for source in sources])
-        for expected, actual in zip(PROVENANCE_SOURCES, sources, strict=True):
+        sources = lock["sources"] + json.loads((root / "third-party/core-sources.lock.json").read_text())["sources"]
+        sources = list({source["id"]: source for source in sources}.values())
+        expected_sources = [source for source in PROVENANCE_SOURCES if source["id"] != "humanizer"]
+        sources.sort(key=lambda source: [item["id"] for item in expected_sources].index(source["id"]))
+        self.assertEqual([source["id"] for source in expected_sources], [source["id"] for source in sources])
+        for expected, actual in zip(expected_sources, sources, strict=True):
             self.assertEqual(expected["project"], actual["project"])
             self.assertEqual(expected["repository"], actual["repository"])
             self.assertEqual(expected["revision"], actual["revision"])
@@ -230,7 +233,7 @@ class ValidatePluginTests(unittest.TestCase):
             self.assertEqual(
                 {
                     "source_path": "LICENSE",
-                    "destination_path": "THIRD_PARTY_NOTICES.md",
+                    "destination_path": actual["files"][0]["destination_path"],
                     "source_sha256": expected["license_sha256"],
                     "modification_status": "notice-only",
                 },
@@ -249,13 +252,15 @@ class ValidatePluginTests(unittest.TestCase):
         self.assertTrue(notice_path.is_file(), "THIRD_PARTY_NOTICES.md must exist")
         if not notice_path.is_file():
             return
-        notices = notice_path.read_text(encoding="utf-8")
+        notices = notice_path.read_text(encoding="utf-8") + (root / "CORE_NOTICES.md").read_text()
 
         self.assertIn("This plugin adapts only the files listed below", notices)
         self.assertIn("## Original implementation", notices)
-        for source in PROVENANCE_SOURCES:
+        distributed = json.loads((root / "third-party/sources.lock.json").read_text())["sources"] + json.loads((root / "third-party/core-sources.lock.json").read_text())["sources"]
+        revisions = {source["revision"] for source in distributed}
+        for source in (entry for entry in PROVENANCE_SOURCES if entry["revision"] in revisions):
             for value in (
-                source["project"],
+                source["id"],
                 source["repository"],
                 source["revision"],
                 source["license_sha256"],

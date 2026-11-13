@@ -29,6 +29,7 @@ class PublicReleaseContracts(unittest.TestCase):
     def test_every_distributed_skill_is_attributed_or_explicitly_original(self):
         """Adding a derived skill without a mapping must not silently claim provenance."""
         lock = json.loads((ROOT / "third-party/sources.lock.json").read_text())
+        lock["sources"] += json.loads((ROOT / "third-party/core-sources.lock.json").read_text())["sources"]
         derived = {m["destination_path"] for s in lock["sources"] for m in s["files"]
                    if m["modification_status"] == "adapted"}
         original = lock.get("original", {})
@@ -43,8 +44,9 @@ class PublicReleaseContracts(unittest.TestCase):
 
     def test_notices_cover_every_pinned_mapping_and_full_mit_permissions(self):
         """Removing a source notice, copyright or modification disclosure must fail."""
-        notices = (ROOT / "THIRD_PARTY_NOTICES.md").read_text()
+        notices = (ROOT / "THIRD_PARTY_NOTICES.md").read_text() + (ROOT / "CORE_NOTICES.md").read_text()
         lock = json.loads((ROOT / "third-party/sources.lock.json").read_text())
+        lock["sources"] += json.loads((ROOT / "third-party/core-sources.lock.json").read_text())["sources"]
         for source in lock["sources"]:
             self.assertIn(source["repository"], notices)
             self.assertIn(source["revision"], notices)

@@ -1,17 +1,17 @@
 ---
 name: playbook-authoring
-description: "Create or update a scenario-bound engineering playbook for a development operation or as a system deliverable, after its need is identified or on direct request. Use for decision paths, actions, recovery and verification. Not for generic documentation, task planning, playbook review, or executing the procedure."
+description: "Create or update a scenario-bound playbook for a development or publishing operation, or as a recurring-use deliverable, after its need is identified or on direct request. Use for decision paths, actions, recovery and verification. Not for generic documentation, task planning, playbook review, or executing the procedure."
 ---
 
 # Playbook Authoring
 
 Apply [proportionality](../../shared/policies/proportionality.md) and the
 [playbook policy](../../shared/policies/playbooks.md). Support the existing
-engineering owner; do not start a competing lifecycle.
+method owner; do not start a competing lifecycle.
 
 ## Trigger
 
-A required development or system playbook has an authoring task, an existing
+A required operation or delivered playbook has an authoring task, an existing
 procedure changed, review findings require corrections, or the user directly
 requests a playbook. A planned operation or accepted future usage requirement
 is sufficient origin evidence; do not wait for an incident.

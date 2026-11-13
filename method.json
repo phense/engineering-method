@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "name": "engineering-method",
+  "version": "0.3.0",
+  "method_skills": [
+    "architecture-modeling",
+    "openspec-apply",
+    "openspec-archive",
+    "openspec-propose",
+    "orchestrated-implementation",
+    "speckit-converge",
+    "speckit-plan",
+    "speckit-specify",
+    "speckit-tasks",
+    "systematic-debugging",
+    "test-driven-development"
+  ]
+}

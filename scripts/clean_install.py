@@ -5,6 +5,7 @@ import argparse
 import hashlib
 import json
 import os
+import re
 from pathlib import Path, PurePosixPath
 import subprocess
 import tempfile
@@ -41,29 +42,35 @@ def run_native(command, cwd, env, timeout):
 
 def extract_package(package: Path, destination: Path) -> Path:
     with zipfile.ZipFile(package) as archive:
+        roots = {PurePosixPath(m.filename).parts[0] for m in archive.infolist() if m.filename}
+        if len(roots) != 1:
+            raise ValueError("package must contain one root")
+        name = roots.pop()
+        if not re.fullmatch(r"[a-z][a-z0-9-]*",name):
+            raise ValueError("invalid package root")
         for member in archive.infolist():
             path = PurePosixPath(member.filename)
             mode = member.external_attr >> 16
-            if path.is_absolute() or ".." in path.parts or path.parts[0] != "engineering-method" or mode & 0o170000 == 0o120000:
+            if path.is_absolute() or ".." in path.parts or path.parts[0] != name or mode & 0o170000 == 0o120000:
                 raise ValueError("unsafe archive member")
         archive.extractall(destination)
         for member in archive.infolist():
             if not member.is_dir():
                 (destination / member.filename).chmod((member.external_attr >> 16) & 0o777 or 0o644)
-    return destination / "engineering-method"
+    return destination / name
 
 
-def assert_installed(payload: str, host: str) -> None:
+def assert_installed(payload: str, host: str, name: str = "engineering-method") -> None:
     try:
         parsed = json.loads(payload)
     except json.JSONDecodeError as error:
         raise ValueError(f"{host} returned malformed plugin inventory") from error
-    identity = "engineering-method@engineering-method"
+    identity = name + "@" + name
     if host == "Codex":
         entries = parsed.get("installed") if isinstance(parsed, dict) else None
         valid = isinstance(entries, list) and any(
             isinstance(entry, dict) and entry.get("pluginId") == identity
-            and entry.get("name") == "engineering-method" and entry.get("marketplaceName") == "engineering-method"
+            and entry.get("name") == name and entry.get("marketplaceName") == name
             and entry.get("installed") is True and entry.get("enabled") is True
             for entry in entries)
     elif host == "Claude":
@@ -84,6 +91,8 @@ def clean_install(package: Path, timeout: int = 60) -> dict:
     with tempfile.TemporaryDirectory(prefix="em-clean-install-") as directory:
         temporary = Path(directory)
         root = extract_package(package, temporary / "package")
+        name = json.loads((root / ".codex-plugin/plugin.json").read_text())["name"]
+        identity = name + "@" + name
         env = isolated_environment(temporary / "configuration")
         commands = []
         def run(command):
@@ -92,14 +101,14 @@ def clean_install(package: Path, timeout: int = 60) -> dict:
             return output
         run(["claude", "plugin", "validate", "--strict", str(root)])
         run(["claude", "plugin", "marketplace", "add", str(root)])
-        run(["claude", "plugin", "install", "engineering-method@engineering-method"])
-        assert_installed(run(["claude", "plugin", "list", "--json"]), "Claude")
-        details = run(["claude", "plugin", "details", "engineering-method@engineering-method"])
-        if "engineering-method" not in details:
+        run(["claude", "plugin", "install", identity])
+        assert_installed(run(["claude", "plugin", "list", "--json"]), "Claude", name)
+        details = run(["claude", "plugin", "details", identity])
+        if name not in details:
             raise ValueError("Claude did not load the plugin inventory")
         run(["codex", "plugin", "marketplace", "add", str(root), "--json"])
-        run(["codex", "plugin", "add", "engineering-method@engineering-method", "--json"])
-        assert_installed(run(["codex", "plugin", "list", "--marketplace", "engineering-method", "--json"]), "Codex")
+        run(["codex", "plugin", "add", identity, "--json"])
+        assert_installed(run(["codex", "plugin", "list", "--marketplace", name, "--json"]), "Codex", name)
         return {"status": "passed", "package_sha256": hashlib.sha256(package.read_bytes()).hexdigest(),
                 "commands": commands, "credentials_used": False, "live_model_requests": False}
 

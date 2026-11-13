@@ -82,36 +82,12 @@ agentic-rag remains separate. An existing read-only MCP server can be used when
 needed and permitted, but this plugin neither configures it nor grants write
 access. Never read or copy credential files to another host or provider.
 
-## Reader-oriented output
+## Method integration
 
-Because this file is loaded as an OpenCode instruction, the shared
-[reader-oriented output policy](../policies/reader-oriented-output.md) applies
-to ordinary replies here: explanations lead with an everyday analogy and avoid
-undefined jargon (`explaining-concepts`), instructions are numbered imperative
-steps with exact locations and a visible result (`writing-procedures`), and
-help with failures starts from the symptom the user sees
-(`empathic-troubleshooting`). Documentation requests decide their scale with
-the [writing-depth policy](../policies/writing-depth.md) before loading
-`documentation-authoring` or `documentation-planning`. Evidence and
-verification rules are unchanged.
-
-## Verification interfaces and limits
-
-- opencode debug skill: native skill inventory. Write stdout directly to a file;
-  version 1.18.30 can truncate large piped JSON on exit.
-- opencode run --model <provider/model> --format json: bounded behavioral probe
-  in a disposable fixture with explicitly scoped permissions.
-- In T3, refresh provider status after installation. If the helper remains cached,
-  allow it to become idle for at least 30 seconds before refreshing, or finish
-  active work and restart the helper. Start a new thread for fresh instructions.
-
-Discovery and bounded skill-use tests do not constitute full workflow,
-multi-agent, architecture or compaction acceptance.
-
-Sources checked 2026-09-11:
-- https://opencode.ai/docs/skills/
-- https://opencode.ai/docs/plugins/
-- https://opencode.ai/docs/agents/
-- https://opencode.ai/docs/config/
-- https://github.com/anomalyco/opencode/blob/v1.18.30/packages/plugin/src/index.ts
-- https://github.com/pingdotgg/t3code/blob/v0.0.40/docs/user/providers-opencode.md
+Both consuming methods bundle this same adapter and shared support. The invoking
+method owns lifecycle selection and its method-specific policies. Read the
+consumer's `shared/policies/lifecycle-selection.md` when present. For shared
+support choose the invoking plugin's namespace; do not run duplicate copies or
+start another method merely because it is installed. Core support does not
+require either method's optional skills. Gemini-specific behavior is deferred
+until a separate adapter has been verified.

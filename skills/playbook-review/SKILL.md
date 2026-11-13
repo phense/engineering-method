@@ -1,6 +1,6 @@
 ---
 name: playbook-review
-description: "Review a drafted or changed engineering playbook for a development operation or system deliverable against its scenario and acceptance requirements. Check decisions, executable steps, failure paths and evidence freshness without hidden context. Not for authoring fixes, general code review, or executing the procedure."
+description: "Review a drafted or changed playbook for a development or publishing operation, or a recurring-use deliverable against its scenario and acceptance requirements. Check decisions, executable steps, failure paths and evidence freshness without hidden context. Not for authoring fixes, general code review, or executing the procedure."
 ---
 
 # Playbook Review
@@ -19,7 +19,7 @@ authorized read-only inspection; do not invent operational facts or execute step
 ## Review checks
 
 - Is the scenario applicable, with clear use/exclusion conditions and a bounded
-  target? Is the development-operation or system-delivery obligation satisfied?
+  target? Is the operation-readiness or delivery obligation satisfied?
 - Can the intended reader verify prerequisites, obtain inputs and identify the
   correct environment with the documented access and tools?
 - Does each decision name an observable condition and an explicit next action?
