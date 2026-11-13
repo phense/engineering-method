@@ -76,6 +76,7 @@ alone do not prevent sensitive Git history from being published.
 
 ## Release policy
 
+`v0.3.2` adds the unscripted evaluation runner from Method Core `91e35da`.
 `v0.3.1` adds the skill authoring limits test from Method Core `4300085`.
 `v0.3.0` separates writing into Writing Method and bundles shared support from
 Method Core, with [split evidence](docs/verification/EM-018-method-split.md).

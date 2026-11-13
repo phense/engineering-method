@@ -113,7 +113,12 @@
     {
       "mode": "100644",
       "path": "scripts/run_host_evals.py",
-      "sha256": "b9e06b1ae7b562521d57b04b1d530e14b98ac1f3f6484c8e4ca21fe40a0cb161"
+      "sha256": "a2d814af5c2091f39a486e72825fd42a6ced071efc3dca1ed15e3ff7c97af9b4"
+    },
+    {
+      "mode": "100644",
+      "path": "scripts/run_natural_evals.py",
+      "sha256": "85eac53c236601a6aa22a0c039d1e8a1e8eb9a9c245289676d6db3fef7afc174"
     },
     {
       "mode": "100755",
@@ -327,6 +332,11 @@
     },
     {
       "mode": "100644",
+      "path": "tests/test_natural_evals.py",
+      "sha256": "231e8d4698e1adfae7b2a4a35ded6965dced6563b47df2506254cd1e2995fd69"
+    },
+    {
+      "mode": "100644",
       "path": "tests/test_opencode_integration.py",
       "sha256": "afa5a621a643c20ff2294b6460575ec82bd1c389caee5565329820b939f3b717"
     },
@@ -352,7 +362,7 @@
     }
   ],
   "repository": "https://github.com/phense/method-core.git",
-  "revision": "4300085b164686cc359a98cf7b3ee965cbd886b0",
+  "revision": "64d9a02272590630288c04eba3a76c7bdb05919f",
   "schema_version": 1,
   "version": "0.1.0"
 }

@@ -1,0 +1,10 @@
+{
+  "id": "cross-module-feature",
+  "prompt": "Ich brauche in dieser App einen Export der Rechnungen als CSV und PDF. Der soll die Rollen aus accounts beachten und auch in den Reports auftauchen.",
+  "files": {
+    "README.md": "# Ledger\n\nInvoicing app with modules billing, accounts and reports.\n",
+    "billing/invoice.py": "class Invoice:\n    pass\n",
+    "accounts/roles.py": "ROLES = ['admin', 'clerk']\n",
+    "reports/summary.py": "def summary():\n    return {}\n"
+  }
+}

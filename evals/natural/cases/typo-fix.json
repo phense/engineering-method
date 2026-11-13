@@ -1,0 +1,7 @@
+{
+  "id": "typo-fix",
+  "prompt": "In der README ist ein Tippfehler bei accounts. Korrigier den bitte.",
+  "files": {
+    "README.md": "# Ledger\n\nInvoicing app with modules billing, acounts and reports.\n"
+  }
+}
