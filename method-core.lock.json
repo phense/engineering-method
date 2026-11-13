@@ -83,7 +83,7 @@
     {
       "mode": "100644",
       "path": "scripts/method_core.py",
-      "sha256": "72ed9894391ee836611d1dde1c89db8c00ac7c7b68fae648253be84add3a552f"
+      "sha256": "70a0532c5179916e6433edc47f504d77ce82b2d4573ad41686f3bcf3a23a80be"
     },
     {
       "mode": "100644",
@@ -288,7 +288,7 @@
     {
       "mode": "100644",
       "path": "tests/test_core_sync.py",
-      "sha256": "7ba34142488b9fb812e34196f6a272fdabaab0b72077f9bcdc8abcd6c7a9a6d4"
+      "sha256": "aec5541e99ad09524a533a2e81a5a70f6c1582c1881c4a6a812ac764b31405ea"
     },
     {
       "mode": "100644",
@@ -347,7 +347,7 @@
     }
   ],
   "repository": "https://github.com/phense/method-core.git",
-  "revision": "b202d7af3626e95f92e93255d62b79718e0198b1",
+  "revision": "ca9f5d16aeb54bc0081f6b33b809c3aab64c8861",
   "schema_version": 1,
   "version": "0.1.0"
 }
