@@ -138,12 +138,12 @@
     {
       "mode": "100644",
       "path": "shared/platform/claude.md",
-      "sha256": "6534484a16e086ee7328ecfec82a747363cd857661319ce9bc65d2932633925a"
+      "sha256": "be35b70b8fc0990da7975b3df4bd7007ca590d6288c2a2f98d46ef1deb88d4ad"
     },
     {
       "mode": "100644",
       "path": "shared/platform/codex.md",
-      "sha256": "b9b2f32eff905f183cfb1f685ddf126363e52847e46bdb160f0f24ead9008e2a"
+      "sha256": "be2002849b7e7dc20da86e9574a8fc0150208f1dfa61de27eb9034b822ebcaee"
     },
     {
       "mode": "100644",
@@ -342,12 +342,17 @@
     },
     {
       "mode": "100644",
+      "path": "tests/test_skill_authoring.py",
+      "sha256": "f0b6f864491cd226840ea36580f6873f43bc1d2c675517714f0090255493bc6b"
+    },
+    {
+      "mode": "100644",
       "path": "third-party/core-sources.lock.json",
       "sha256": "91a39dfde56856e141cc29795bea8e151dd49a6bd3efcdc042d523dc01df2db8"
     }
   ],
   "repository": "https://github.com/phense/method-core.git",
-  "revision": "087476ccedf03342604e110768d9b528b5ae00ba",
+  "revision": "4300085b164686cc359a98cf7b3ee965cbd886b0",
   "schema_version": 1,
   "version": "0.1.0"
 }

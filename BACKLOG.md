@@ -157,6 +157,9 @@ Keep stable IDs unchanged. Order groups unblocker-first, then priority and depen
 - ✅ `EM-007` **P2** Publish stable version 0.1.0 and update public documentation
   - Depends on: `EM-005`
   - Notes: Published v0.1.0 at e9f5130 as stable Latest with checked ZIP and SHA256SUMS. 308 tests, validators, provenance, reproducible packaging, both clean installs, downloaded bytes and GitHub/main plus fixed-tag installs verified. Prior rc.1 unchanged; no issue migration.
+<!-- engineering-method:backlog {"schema_version":1,"id":"EM-021","title":"Hold every skill to the published skill authoring limits (release 0.3.1)","status":"open","priority":"P2","parent_id":null,"depends_on":[],"notes":"Core 4300085 adds tests/test_skill_authoring.py; contents list in lifecycle-handoffs.md. Release 0.3.1 in preparation.","updated_at":"2026-11-13T18:08:00Z"} -->
+- ⭕ `EM-021` **P2** Hold every skill to the published skill authoring limits (release 0.3.1)
+  - Notes: Core 4300085 adds tests/test_skill_authoring.py; contents list in lifecycle-handoffs.md. Release 0.3.1 in preparation.
 <!-- engineering-method:backlog {"schema_version":1,"id":"EM-019","title":"Verify a Gemini host adapter in Method Core","status":"open","priority":"P3","parent_id":null,"depends_on":[],"notes":"Deferred from EM-018; shared adapter ownership is phense/method-core. No Gemini support claimed until fresh native discovery and behavior checks pass.","updated_at":"2026-11-13T10:39:43Z"} -->
 - ⭕ `EM-019` **P3** Verify a Gemini host adapter in Method Core
   - Notes: Deferred from EM-018; shared adapter ownership is phense/method-core. No Gemini support claimed until fresh native discovery and behavior checks pass.

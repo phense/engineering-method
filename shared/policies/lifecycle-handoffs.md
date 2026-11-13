@@ -2,6 +2,15 @@
 
 Every phase consumes current artifacts from disk and names one next phase.
 
+## Contents
+
+One JSON block with these keys:
+
+- `nodes`
+- `executors`
+- `edges`
+- `retry_transitions`
+
 ```json
 {
   "nodes": [

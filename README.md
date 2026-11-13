@@ -10,9 +10,11 @@ local checks first, reuse unaffected evidence, focused review of fixes, and an
 effort brake before testing or delegation grows beyond the task. Subscription
 limits and model-effort permissions remain binding across quota resets.
 
-**[Version 0.3.0](https://github.com/phense/engineering-method/releases/tag/v0.3.0)
-separates writing into its own plugin and bundles shared support from a pinned
-Method Core.** See the [release notes](docs/releases/0.3.0.md). Earlier scopes:
+**[Version 0.3.1](https://github.com/phense/engineering-method/releases/tag/v0.3.1)
+adds a test that holds every skill to the published skill authoring limits.**
+See the [release notes](docs/releases/0.3.1.md). Earlier scopes:
+[0.3.0](docs/releases/0.3.0.md) separated writing into its own plugin and
+bundled shared support from a pinned Method Core,
 [0.2.1](docs/releases/0.2.1.md) refined local PDF export, [0.2.0](docs/releases/0.2.0.md)
 added documentation and playbook work, and [0.1.1](docs/releases/0.1.1.md)
 added native OpenCode integration. The historical 0.1.0 baseline has independently accepted
@@ -35,7 +37,7 @@ routing evaluation.
 
 ## Related methods and shared core
 
-Version 0.3.0 is the current stable release; 0.2.1 was the last release that bundled the writing skills.
+Version 0.3.1 is the current stable release; 0.2.1 was the last release that bundled the writing skills.
 
 Version 0.3.0 separates writing into [Writing Method](https://github.com/phense/writing-method). [Method Core](https://github.com/phense/method-core) owns the bundled host adapters, state/continuity tools, verification/review/isolation support and generic playbooks. Each repository keeps its own Issues and pull requests; the common topic is `agent-methods`.
 
