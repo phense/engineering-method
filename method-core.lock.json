@@ -43,7 +43,7 @@
     {
       "mode": "100644",
       "path": "engineering_method/issues.py",
-      "sha256": "a27a9e8422741221d3c5dfef0165159765465481ff3040b348853fab43ecfc01"
+      "sha256": "20efa7265042c1a233657c508bf669b2fe03fcc1bb9edb4fd3dfb6736d63ba47"
     },
     {
       "mode": "100644",
@@ -308,7 +308,7 @@
     {
       "mode": "100644",
       "path": "tests/test_issues_regressions.py",
-      "sha256": "c52456a5dee788f58b0fd8601635ad0ff622676157457818ddcf8bcf8b6fa05b"
+      "sha256": "f130cbc7080d86cc11415b804b8ba9a49587ff89f1bf9bdae199b5a5cfec1d6f"
     },
     {
       "mode": "100644",
@@ -318,7 +318,7 @@
     {
       "mode": "100644",
       "path": "tests/test_method_identity.py",
-      "sha256": "7014c14fc8871ef6bd1c1c984a6eb56a0a15c9706fb0d2b24d2d4d4deb2ed729"
+      "sha256": "a0d8e1558577d283c9d7828275bc8040e3b5ad8ba7c26d6446e247096927d0c1"
     },
     {
       "mode": "100644",
@@ -347,7 +347,7 @@
     }
   ],
   "repository": "https://github.com/phense/method-core.git",
-  "revision": "255026bf88469e904514e093d06153f643ba0adb",
+  "revision": "b202d7af3626e95f92e93255d62b79718e0198b1",
   "schema_version": 1,
   "version": "0.1.0"
 }
