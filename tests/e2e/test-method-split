@@ -77,11 +77,11 @@ def verify(core_zip, engineering_zip, writing_zip):
             state = [sys.executable, method / 'scripts/project-state']
             run(sync + ['--source-root', core], target)
             run(sync + ['--check'], target)
-            run([sys.executable, method / 'scripts/validate-plugin'], target)
+            run([sys.executable, method / 'scripts/validate-plugin', method], target)
             plugin_before = snapshot(method)
-            run(state + ['backlog', 'init'], target)
+            run(state + ['backlog', 'init', '--project-key', 'TEST'], target)
             run(state + ['backlog', 'add', '--id', 'TEST-001', '--title', 'Retain target state', '--priority', 'P1'], target)
-            run(state + ['backlog', 'start', '--id', 'TEST-001'], target)
+            run(state + ['backlog', 'start', 'TEST-001'], target)
             (target / '.gitignore').write_text('.engineering-method/\n')
             head = commit(target)
             # Construct the input with the actual extracted runtime's schema.

@@ -40,7 +40,7 @@ Version 0.3.0 separates writing into [Writing Method](https://github.com/phense/
 
 Engineering owns Spec Kit, OpenSpec, architecture, debugging and TDD. Writing owns documentation planning, authoring, review, didactic guidance and PDF delivery. Each plugin runs independently. Both expose byte-identical shared support under their own namespaces; invoke the current method's copy, for example `engineering-method:playbook-authoring`, once. Core is bundled source, not a third plugin installation. Gemini adapter work remains deferred.
 
-Shared changes originate in Core. From this checkout run `python3 /absolute/path/to/method-core/scripts/sync-core --source-root /absolute/path/to/method-core --target-root .`, then `python3 scripts/sync-core --check` and the verification commands below. Commit copies and `method-core.lock.json` together. Sync refuses local drift and unowned conflicts; a failed transaction restores the previous files/modes/lock. To roll back, synchronize the previous full Core revision with `--revision`. Existing `engineering_method` imports, CLI wrapper names, project `.engineering-method/` state and work IDs remain unchanged. Reinstall copied host plugins and restart the session after updating.
+Shared changes originate in Core. From this checkout run `python3 /absolute/path/to/method-core/scripts/sync-core --source-root /absolute/path/to/method-core --target-root .`, then `python3 scripts/sync-core --check` and the verification commands below. Commit copies and `method-core.lock.json` together. Sync refuses local drift and unowned conflicts; write failures attempt restoration of the previous files/modes/lock. After a process abort or incomplete rollback, fix the reported disk/permission error and run `python3 scripts/sync-core --recover` before retrying; original backups remain until recovery succeeds. To roll back, synchronize the previous full Core revision with `--revision`. Existing `engineering_method` imports, CLI wrapper names, project `.engineering-method/` state and work IDs remain unchanged. Reinstall copied host plugins and restart the session after updating.
 
 
 ## Installation
@@ -49,8 +49,8 @@ Requires Python 3.11+, Git, and Codex CLI, Claude Code or OpenCode.
 OpenCode uses the separate source-linked installation described below.
 GitHub task synchronization additionally requires authenticated `gh` and repository
 permissions. No upstream Spec Kit, OpenSpec or Superpowers installation is needed.
-Current local package installation was checked with Codex CLI 0.154.0 and
-Claude Code 2.1.272;
+The 0.3.0 candidate's local package installation and coexistence were checked with Codex CLI 0.169.0 and
+Claude Code 2.1.323;
 other host versions and operating systems are not covered by that evidence.
 
 Install from [phense/engineering-method](https://github.com/phense/engineering-method):

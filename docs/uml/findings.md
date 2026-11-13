@@ -1,7 +1,7 @@
 # EM-018 architecture findings
 
-- AF-018-001 — Open. Ownership/cycle risk, FR-004/FR-005. Existing `shared/platform/*.md` links to writing policies and common playbook policy enumerates engineering phases. Move method-specific routing into each method; keep core adapter/policy usable without either consumer. Evidence: EM-018 component view and plan ownership table. Task T003.
-- AF-018-002 — Open. Data-integrity/recovery risk, IC-001. Sharing via copies permits drift and accidental overwrite. Immutable blob export, explicit ownership, path/mode validation and transactional rollback must be exercised with actual files. Task T002.
-- AF-018-003 — Open. Interface risk, IC-003/AC-006. Existing `scripts/install-opencode` owns one fixed filename. Derive distinct method loader identities and execute both hooks to prove coexistence without configuration loss. Task T004.
+- AF-018-001 — Resolved. Core adapters and generic playbooks no longer require an absent writing or engineering lifecycle. Engineering retains its phase hooks; Writing's review/debugging companions are optional. Both independent package validators and resource/contract tests pass. Tasks T003/T004.
+- AF-018-002 — Resolved. Committed export inventory, revision/hash/mode locks, ownership and drift checks protect managed files. Durable backups, explicit recovery, retained failed-restore data, stable OS serialization and journal identity checks cover interruption and concurrent recovery. Thirteen sync regressions and the complete archive/target-state recovery flow pass. Task T002.
+- AF-018-003 — Resolved. Plugin manifests and archive/OpenCode identities derive from the consumer. Both native methods coexist in disposable Claude/Codex homes; real OpenCode hook tests preserve user configuration and separate loaders. Task T004.
 
-Verified 2026-11-13 against baseline d458f6a. No ownership cycle is permitted. As-built disposition and exact test evidence are required before convergence.
+Reconciled 2026-11-13 against Core `255026b`, Engineering candidate `206fbe5` and Writing `e9eab64`. No ownership cycle or sibling runtime dependency remains. Exact evidence and limits: [EM-018 verification](../verification/EM-018-method-split.md).
