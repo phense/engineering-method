@@ -46,4 +46,4 @@ Spec/plan assessed none for new operational procedures. Delivered generic playbo
 
 ### Slice S5: Reproducible GitHub verification
 
-- [ ] T011 [AC-008] Install the test's explicit `ripgrep` dependency in the Engineering GitHub workflow and require a fresh full GitHub run. The observed failure was `FileNotFoundError: rg` in `test_prompt_discovery_command_follows_actual_skill_links`; local source suites remained green. Own `.github/workflows/verify.yml` and verification evidence. Depends on T010. Mechanical CI-only correction; coordinator review suffices.
+- [x] T011 [AC-008] Install the test's explicit `ripgrep` dependency in the Engineering GitHub workflow and require a fresh full GitHub run. The observed failure was `FileNotFoundError: rg` in `test_prompt_discovery_command_follows_actual_skill_links`; local source suites remained green. Own `.github/workflows/verify.yml` and verification evidence. Depends on T010. Mechanical CI-only correction; coordinator review suffices.
