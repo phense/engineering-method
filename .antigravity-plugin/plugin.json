@@ -1,0 +1,25 @@
+{
+  "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+  "name": "engineering-method",
+  "displayName": "Peter's Engineering Method",
+  "version": "0.3.2",
+  "description": "Risk-proportionate engineering workflows for Codex, Claude, OpenCode and Antigravity.",
+  "author": {
+    "name": "Peter Hense"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/phense/engineering-method",
+  "repository": "https://github.com/phense/engineering-method",
+  "keywords": [
+    "engineering",
+    "workflow",
+    "specification",
+    "testing",
+    "review"
+  ],
+  "suggestedPrompts": [
+    "Plan a new multi-component feature.",
+    "Diagnose and fix this reproducible regression.",
+    "Propose a bounded change to existing behavior."
+  ]
+}

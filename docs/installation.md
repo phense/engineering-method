@@ -10,6 +10,9 @@ since 0.1.1. Its native discovery and bounded DeepSeek test were checked with
 OpenCode 1.18.30; see the [0.1.1 release scope](releases/0.1.1.md) and the
 [0.3.2 release notes](releases/0.3.2.md).
 
+For Google Antigravity (CLI, App, IDE, and ACP hosts such as T3 Code), follow
+[the Antigravity integration guide](antigravity.md).
+
 ## Split into three repositories
 
 Since 0.3.0 this plugin contains the engineering lifecycles only. Documentation
@@ -36,6 +39,11 @@ codex plugin list --json
 claude plugin marketplace add phense/engineering-method
 claude plugin install engineering-method@engineering-method
 claude plugin list --json
+```
+
+```sh
+agy plugin install https://github.com/phense/engineering-method
+agy plugin list --json
 ```
 
 For stable version 0.3.2 on either host, clone the release tag and register the

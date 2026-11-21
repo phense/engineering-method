@@ -1,6 +1,6 @@
 # Engineering Method
 
-Risk-proportionate engineering workflows for Codex, Claude and OpenCode. One shared plugin
+Risk-proportionate engineering workflows for Codex, Claude, OpenCode and Antigravity. One shared plugin
 combines selected Spec Kit, OpenSpec and Superpowers practices with durable
 project state, cohesive implementation slices and architecture verification.
 Small edits stay small; complex changes receive the evidence they need.
@@ -43,14 +43,14 @@ Version 0.3.2 is the current stable release; 0.2.1 was the last release that bun
 
 Version 0.3.0 separates writing into [Writing Method](https://github.com/phense/writing-method). [Method Core](https://github.com/phense/method-core) owns the bundled host adapters, state/continuity tools, verification/review/isolation support and generic playbooks. Each repository keeps its own Issues and pull requests; the common topic is `agent-methods`.
 
-Engineering owns Spec Kit, OpenSpec, architecture, debugging and TDD. Writing owns documentation planning, authoring, review, didactic guidance and PDF delivery. Each plugin runs independently. Both expose byte-identical shared support under their own namespaces; invoke the current method's copy, for example `engineering-method:playbook-authoring`, once. Core is bundled source, not a third plugin installation. Gemini adapter work remains deferred.
+Engineering owns Spec Kit, OpenSpec, architecture, debugging and TDD. Writing owns documentation planning, authoring, review, didactic guidance and PDF delivery. Each plugin runs independently. Both expose byte-identical shared support under their own namespaces; invoke the current method's copy, for example `engineering-method:playbook-authoring`, once. Core is bundled source, not a third plugin installation. Antigravity is supported natively via `.antigravity-plugin/plugin.json` and `shared/platform/antigravity.md`; standalone Gemini CLI extensions remain separate and unverified.
 
 Shared changes originate in Core. From this checkout run `python3 /absolute/path/to/method-core/scripts/sync-core --source-root /absolute/path/to/method-core --target-root .`, then `python3 scripts/sync-core --check` and the verification commands below. Commit copies and `method-core.lock.json` together. Sync refuses local drift and unowned conflicts; write failures attempt restoration of the previous files/modes/lock. After a process abort or incomplete rollback, fix the reported disk/permission error and run `python3 scripts/sync-core --recover` before retrying; original backups remain until recovery succeeds. To roll back, synchronize the previous full Core revision with `--revision`. Existing `engineering_method` imports, CLI wrapper names, project `.engineering-method/` state and work IDs remain unchanged. Reinstall copied host plugins and restart the session after updating.
 
 
 ## Installation
 
-Requires Python 3.11+, Git, and Codex CLI, Claude Code or OpenCode.
+Requires Python 3.11+, Git, and Codex CLI, Claude Code, OpenCode or Antigravity.
 OpenCode uses the separate source-linked installation described below.
 GitHub task synchronization additionally requires authenticated `gh` and repository
 permissions. No upstream Spec Kit, OpenSpec or Superpowers installation is needed.
@@ -68,7 +68,13 @@ codex plugin add engineering-method@engineering-method
 # Claude Code
 claude plugin marketplace add phense/engineering-method
 claude plugin install engineering-method@engineering-method
+
+# Antigravity (CLI / App / IDE)
+agy plugin install https://github.com/phense/engineering-method
 ```
+
+For Antigravity custom config directories or ACP hosts (such as T3 Code), use
+`scripts/install-antigravity`; see [Antigravity integration](docs/antigravity.md).
 
 Start a new host session in your target project, then describe the change you
 want. These commands follow the repository's default branch. For the fixed
@@ -220,6 +226,7 @@ Run the inexpensive local checks from the checkout root:
 python3 -m unittest discover -s tests -t . -v
 python3 scripts/validate-plugin
 claude plugin validate --strict .
+agy plugin validate --strict .
 ```
 
 [Contributing](CONTRIBUTING.md) covers provenance, committed-source reproducible
