@@ -68,12 +68,17 @@
     {
       "mode": "100644",
       "path": "scripts/clean_install.py",
-      "sha256": "6a6ce13578e679325529b02f56d9196f1fc15bb924d8cdfebd43a8877fc39f9c"
+      "sha256": "3b8adf366f263a5b067151477f975882230404d07c52aa722bc1520ec3d56452"
     },
     {
       "mode": "100755",
       "path": "scripts/continuity-state",
       "sha256": "ebade22663b4b35729e37c37d35a5c0d969c9708e46b470f53e0500f9446c147"
+    },
+    {
+      "mode": "100755",
+      "path": "scripts/install-antigravity",
+      "sha256": "903939369ff10a412b0300e14fa6f0bae6dad02afae6d9785ff3da34813a36b2"
     },
     {
       "mode": "100755",
@@ -133,7 +138,7 @@
     {
       "mode": "100644",
       "path": "scripts/validate_plugin.py",
-      "sha256": "2f3ad25cec0dca4127daa2fcc64f08e15d47a2084b3d5936c8b26ed6bc3ccc9c"
+      "sha256": "8120aba61ee113a3d75399e6d8ccdfcfd1d1349c310bb8f164d790928d2d2092"
     },
     {
       "mode": "100644",
@@ -142,18 +147,23 @@
     },
     {
       "mode": "100644",
+      "path": "shared/platform/antigravity.md",
+      "sha256": "988eff93ce9811feae80b5d6bf1a5df78e02a704ce2fe93b32cd00c24f204a11"
+    },
+    {
+      "mode": "100644",
       "path": "shared/platform/claude.md",
-      "sha256": "be35b70b8fc0990da7975b3df4bd7007ca590d6288c2a2f98d46ef1deb88d4ad"
+      "sha256": "a6c5528fdb7296bb40cff1f96401ab433e99218f5c3bbf32ae4b4e8e400f4957"
     },
     {
       "mode": "100644",
       "path": "shared/platform/codex.md",
-      "sha256": "be2002849b7e7dc20da86e9574a8fc0150208f1dfa61de27eb9034b822ebcaee"
+      "sha256": "0498b5698898a2419db3d483099263c0b8a037fe61b420b020a80acac498c4ed"
     },
     {
       "mode": "100644",
       "path": "shared/platform/opencode.md",
-      "sha256": "3da881555315a55da168aef5c6c26b69f8b2abc35e76e7969c85a054eb377e29"
+      "sha256": "9e70edfa43b90516bc0247458674e4fdf44c4d854d5d49e8140f65fd266bc5e1"
     },
     {
       "mode": "100644",
@@ -272,13 +282,18 @@
     },
     {
       "mode": "100644",
+      "path": "tests/test_antigravity_integration.py",
+      "sha256": "74a3f90eef399f7d836dd480c476b5ec918de85fb683fcc4ad5c2acc5af9007d"
+    },
+    {
+      "mode": "100644",
       "path": "tests/test_backlog.py",
       "sha256": "010927d338a76c0c6902b013bd9729dd7c7cd446e9d909f996c751624611253f"
     },
     {
       "mode": "100644",
       "path": "tests/test_clean_install.py",
-      "sha256": "6337cdc751f5659b1d35bdc4265fda1404ed4ab200867977845eca33734cb848"
+      "sha256": "7f036c7e6bb918b73796569cd996e17fac531248edee306458b63f7d3a9cf8ab"
     },
     {
       "mode": "100644",
@@ -348,7 +363,7 @@
     {
       "mode": "100644",
       "path": "tests/test_platform_adapters.py",
-      "sha256": "0e2970719f66384db7fd33db57959ce2c44770801eca86e0721f688dcd922dd9"
+      "sha256": "c548fb7b0520a98b5c27ca5f5badfb3931a22d30dd897041d7ed2a486bcdcac1"
     },
     {
       "mode": "100644",
@@ -362,7 +377,7 @@
     }
   ],
   "repository": "https://github.com/phense/method-core.git",
-  "revision": "64d9a02272590630288c04eba3a76c7bdb05919f",
+  "revision": "fce8cd5b99afd7a65b36053cdb9480fb9554d791",
   "schema_version": 1,
   "version": "0.1.0"
 }

@@ -79,8 +79,15 @@ class ValidatePluginTests(unittest.TestCase):
             "$schema": "https://json.schemastore.org/claude-code-plugin-manifest.json",
             "displayName": "Peter's Engineering Method",
         }
+        antigravity = {
+            **IDENTITY,
+            "$schema": "https://antigravity.google/schemas/v1/plugin.json",
+            "displayName": "Peter's Engineering Method",
+            "suggestedPrompts": ["Plan a new multi-component feature."],
+        }
         self.write_json(root / ".codex-plugin/plugin.json", codex)
         self.write_json(root / ".claude-plugin/plugin.json", claude)
+        self.write_json(root / ".antigravity-plugin/plugin.json", antigravity)
         self.write_json(root / ".agents/plugins/marketplace.json", {
             "name": "engineering-method", "plugins": [{
                 "name": "engineering-method", "source": {"source": "local", "path": "./"},
@@ -625,6 +632,33 @@ class ValidatePluginTests(unittest.TestCase):
             errors = validate_repository(root)
 
         self.assertEqual([], errors)
+
+    def test_validates_antigravity_manifest_identity_and_schema(self) -> None:
+        """Antigravity manifests must stay aligned with identity and schema rules."""
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.make_repository(root)
+            agy_path = root / ".antigravity-plugin/plugin.json"
+            agy = json.loads(agy_path.read_text(encoding="utf-8"))
+            agy["version"] = "9.9.9"
+            agy["unexpectedField"] = True
+            agy["suggestedPrompts"] = ["One", "Two", "Three", "Four"]
+            self.write_json(agy_path, agy)
+
+            errors = validate_repository(root)
+
+        self.assertIn(
+            "ERROR .antigravity-plugin/plugin.json: version must match .codex-plugin/plugin.json",
+            errors,
+        )
+        self.assertIn(
+            "ERROR .antigravity-plugin/plugin.json: unexpectedField is not permitted by the Antigravity manifest schema",
+            errors,
+        )
+        self.assertIn(
+            "ERROR .antigravity-plugin/plugin.json: suggestedPrompts must be 1 to 3 non-empty strings",
+            errors,
+        )
 
 
 if __name__ == "__main__":
